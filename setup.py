@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
   name='gbj_pythonlib_sw',
-  version='1.0.0',
+  version='1.0.1',
   description='Python libraries for software support.',
   long_description='Modules suitable for whatever python console application.',
   classifiers=[

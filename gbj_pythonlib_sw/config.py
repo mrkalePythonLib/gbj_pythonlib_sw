@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Module for managing a configuration file."""
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __status__ = "Development"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018, " + __author__
@@ -20,15 +20,21 @@ from ConfigParser import SafeConfigParser
 # Classes
 ###############################################################################
 class Config(object):
-    """Creating a configuration manager object."""
+    """Create a manager for a configuration INI file.
+    
+    A single class instance object manages just one configuration file.
+    If more configuration files are needed to manage, separate instance should
+    be created.
+
+    Parameters
+    ----------
+    file : string, pointer
+        Full path to a configuration file or file pointer already opened
+        file.
+    """
 
     def __init__(self, file):
-        """Initialize class instance.
-
-        Positional arguments:
-        ---------------------
-        parameter file (string, pointer): full path to a configuration file.
-        """
+        """Constructor"""
         self._logger = logging.getLogger(" ".join([__name__, __version__]))
         self._logger.debug("Instance of %s created", self.__class__.__name__)
         self._parser = SafeConfigParser()
@@ -51,16 +57,20 @@ class Config(object):
     def option(self, option, section, default=None):
         """Read configuration option's value.
 
-        Positional arguments:
-        ---------------------
-        option -- configuration file option to be read.
-        section -- configuration file section to be read from.
-        default -- default option value, if configuration file has neither
-                   the option nor the section.
+        Parameters
+        ----------
+        option : str
+            Configuration file option to be read.
+        section : str
+            Configuration file section to be read from.
+        default : str
+            Default option value, if configuration file has neither
+            the option nor the section.
 
-        Returns:
-        --------
-        Configuration option value or default one.
+        Returns
+        -------
+        str
+            Configuration option value or default one.
 
         """
         if not self._parser.has_option(section, option):
@@ -105,7 +115,18 @@ class Config(object):
         return result
 
     def options(self, section):
-        """Read list of configuration options in a section."""
+        """Read list of options in a section.
+
+        Parameters
+        ----------
+        section : str
+            Configuration section to be read from.
+
+        Returns
+        -------
+        list of str
+            List with configuration option names.
+        """
         options = []
         for config_key in self._parser.options(section):
             if config_key in self._parser.defaults():
@@ -117,7 +138,16 @@ class Config(object):
     # Getters
     # -------------------------------------------------------------------------
     def get_content(self):
-        """Create string with configuration parameters in form of INI file."""
+        """Create string with configuration parameters in form of INI file.
+        
+        All section and options are listed including from DEFAULT section.
+
+        Returns
+        -------
+        str
+            Concent of configuration file without comments.
+
+        """
         pattern = "\n\n---CONGIGURATION - {}---"
         content = pattern.format("BOF")
         for section in self._parser.sections():

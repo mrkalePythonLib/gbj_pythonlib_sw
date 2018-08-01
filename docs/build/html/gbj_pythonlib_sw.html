@@ -1,0 +1,750 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>gbj_pythonlib_sw package &#8212; gbj_pythonlib_sw 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="gbj-pythonlib-sw-package">
+<h1>gbj_pythonlib_sw package<a class="headerlink" href="#gbj-pythonlib-sw-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-gbj_pythonlib_sw.config">
+<span id="gbj-pythonlib-sw-config-module"></span><h2>gbj_pythonlib_sw.config module<a class="headerlink" href="#module-gbj_pythonlib_sw.config" title="Permalink to this headline">¶</a></h2>
+<p>Module for managing a configuration file.</p>
+<dl class="class">
+<dt id="gbj_pythonlib_sw.config.Config">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.config.</code><code class="descname">Config</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Create a manager for a configuration INI file.</p>
+<p>A single class instance object manages just one configuration file.
+If more configuration files are needed to manage, separate instance should
+be created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>string</em><em>, </em><em>pointer</em>) – Full path to a configuration file or file pointer already opened
+file.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.config.Config.get_content">
+<code class="descname">get_content</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config.get_content"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config.get_content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create string with configuration parameters in form of INI file.</p>
+<p>All section and options are listed including from DEFAULT section.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Concent of configuration file without comments.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.config.Config.option">
+<code class="descname">option</code><span class="sig-paren">(</span><em>option</em>, <em>section</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config.option"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config.option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read configuration option’s value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>option</strong> (<em>str</em>) – Configuration file option to be read.</li>
+<li><strong>section</strong> (<em>str</em>) – Configuration file section to be read from.</li>
+<li><strong>default</strong> (<em>str</em>) – Default option value, if configuration file has neither
+the option nor the section.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Configuration option value or default one.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.config.Config.option_split">
+<code class="descname">option_split</code><span class="sig-paren">(</span><em>option</em>, <em>section</em>, <em>appendix=[]</em>, <em>separator='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config.option_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config.option_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read configuration option and append and split its value to tuple.</p>
+<p>option – configuration file option to be read.
+section – configuration file section to be read from.
+appendix – list of additonal option value parts that should be added.
+separator – string for separating appendix list members and split</p>
+<blockquote>
+<div>the entire option value</div></blockquote>
+<p>List with configuration option parts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.config.Config.options">
+<code class="descname">options</code><span class="sig-paren">(</span><em>section</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config.options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config.options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read list of options in a section.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>section</strong> (<em>str</em>) – Configuration section to be read from.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List with configuration option names.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gbj_pythonlib_sw.mqtt">
+<span id="gbj-pythonlib-sw-mqtt-module"></span><h2>gbj_pythonlib_sw.mqtt module<a class="headerlink" href="#module-gbj_pythonlib_sw.mqtt" title="Permalink to this headline">¶</a></h2>
+<p>Module for communicating with MQTT brokers.</p>
+<dl class="class">
+<dt id="gbj_pythonlib_sw.mqtt.MQTT">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MQTT</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MQTT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MQTT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Common MQTT management.</p>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MQTT.get_connected">
+<code class="descname">get_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MQTT.get_connected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MQTT.get_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return boolena connection flag.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MqttBroker</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MQTT" title="gbj_pythonlib_sw.mqtt.MQTT"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.mqtt.MQTT</span></code></a></p>
+<p>Create MQTT client connecting to usually local MQTT broker.</p>
+<ul class="simple">
+<li>The client utilizes MQTT topics and filter definitions from
+a configuration file.</li>
+</ul>
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER">
+<code class="descname">GROUP_BROKER</code><em class="property"> = 'MQTTbroker'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_FILTERS">
+<code class="descname">GROUP_FILTERS</code><em class="property"> = 'MQTTfilters'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_FILTERS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_TOPICS">
+<code class="descname">GROUP_TOPICS</code><em class="property"> = 'MQTTtopics'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_TOPICS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.callback_filters">
+<code class="descname">callback_filters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.callback_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.callback_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register callback functions for particular MQTT topic groups.</p>
+<dl class="docutils">
+<dt>key – the key of the argument dictionary is a configuration option</dt>
+<dd>defining a topic, to which a topic filter is related.</dd>
+<dt>value – the value of the argument dictionary is a tuple with callback</dt>
+<dd>and section defining MQTT topic filter, if it is not
+GROUP_FILTERS, or just a callback, e.g.</dd>
+</dl>
+<p>server_test=mqtt_on_message_test
+server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)</p>
+<ul class="simple">
+<li>The method should be used before subscribing to respective filtered
+topics. The best place is in the on_connect callback.</li>
+<li>The method can be called multiple times. For configuration option
+used at a previous call the filter callback is just updated. If the
+callback is None, the filter for correscponding topic is removed.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to MQTT broker and set callback functions and credentials.</p>
+<p>All key for callback function are root words from MQTT client callbacks
+without prefix “<a href="#id1"><span class="problematic" id="id2">on_</span></a>”.</p>
+<p>connect – callback launched after connection to MQTT broker
+disconnect – callback launched after disconnection from MQTT broker
+subscribe – callback launched after subscription to MQTT topics
+message – callback launched after receiving message from MQTT topics
+username – loging name of the registered user at MQTT broker
+password – password of the registered user at MQTT broker</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect from MQTT broker.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.publish">
+<code class="descname">publish</code><span class="sig-paren">(</span><em>message</em>, <em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.publish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.publish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Publish to a MQTT topic determined by configuration option.</p>
+<p>message – data to be published
+option – configuration file option to be read
+section – configuration file section to be read from</p>
+<p>General exception with error message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_filters">
+<code class="descname">subscribe_filters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.subscribe_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subscribe to all MQTT topic filters.</p>
+<p>General exception with error code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_topic">
+<code class="descname">subscribe_topic</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.subscribe_topic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_topic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subscribe to a MQTT topic determined by configuration option.</p>
+<p>option – configuration file option to be read
+section – configuration file section to be read from</p>
+<p>General exception with error code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_def">
+<code class="descname">topic_def</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_def"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return topic definition as a ‘topic,qos’ tuple.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_name">
+<code class="descname">topic_name</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return topic name from configuration MQTT topic definition.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_qos">
+<code class="descname">topic_qos</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_qos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_qos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return topic QoS from configuration MQTT topic definition.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">ThingSpeak</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#ThingSpeak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MQTT" title="gbj_pythonlib_sw.mqtt.MQTT"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.mqtt.MQTT</span></code></a></p>
+<p>Connect and publish to ThingSpeak MQTT broker.</p>
+<ul class="simple">
+<li>The client utilizes MQTT topics and filter definitions from
+a configuration file.</li>
+<li>The class only provides single publishing to ThingSpeak, so that
+connecting and disconnecting to the ThingSpeak broker is automatic.</li>
+</ul>
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.GROUP_BROKER">
+<code class="descname">GROUP_BROKER</code><em class="property"> = 'ThingSpeak'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.GROUP_BROKER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_CHANNEL_ID">
+<code class="descname">OPTION_CHANNEL_ID</code><em class="property"> = 'channel_id'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_CHANNEL_ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_MQTT_API_KEY">
+<code class="descname">OPTION_MQTT_API_KEY</code><em class="property"> = 'mqtt_api_key'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_MQTT_API_KEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_PUBLISH_DELAY">
+<code class="descname">OPTION_PUBLISH_DELAY</code><em class="property"> = 'publish_delay'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_PUBLISH_DELAY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_WRITE_API_KEY">
+<code class="descname">OPTION_WRITE_API_KEY</code><em class="property"> = 'write_api_key'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_WRITE_API_KEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.get_publish_delay">
+<code class="descname">get_publish_delay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#ThingSpeak.get_publish_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.get_publish_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return current publish delay limit in seconds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.publish">
+<code class="descname">publish</code><span class="sig-paren">(</span><em>fields={}</em>, <em>status=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#ThingSpeak.publish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.publish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Publish single message to the ThingSpeak MQTT broker.</p>
+<dl class="docutils">
+<dt>fields – dictionary with ThingSpeak channel field numbers and values</dt>
+<dd>for publishing, e.g., {1: 23.4, 2: 1}</dd>
+</dl>
+<p>status – text to be published in the ThingSpeak channel as a status</p>
+<ul class="simple">
+<li>If a field number is outside the range 1 ~ 8, this field is ignored.</li>
+<li>If a value is undefined or empty, the corresponding field or status
+is ignored.</li>
+</ul>
+<p>Boolean flag about real publishing to ThingSpeak
+General exception with error message from ThingSpeak</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gbj_pythonlib_sw.statfilter">
+<span id="gbj-pythonlib-sw-statfilter-module"></span><h2>gbj_pythonlib_sw.statfilter module<a class="headerlink" href="#module-gbj_pythonlib_sw.statfilter" title="Permalink to this headline">¶</a></h2>
+<p>Module for statistical filtering.</p>
+<dl class="class">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">StatFilter</code><span class="sig-paren">(</span><em>value_max=None</em>, <em>value_min=None</em>, <em>buffer_len=5</em>, <em>decimals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creating a scuffolding for statistical filtering.</p>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter value against acceptable value range.</p>
+<dl class="docutils">
+<dt>value – value to be filtered. If outside the value range, None is</dt>
+<dd>returned.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_buffer_len">
+<code class="descname">get_buffer_len</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_buffer_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_buffer_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return real length of the data buffer.</p>
+<ul class="simple">
+<li>Usually the returned value is the same as length put to the
+constructor.</li>
+<li>If class has adjusted or limited the input buffer length, the
+method returns the actual length.</li>
+<li>The method is useful, if the length has been put to the constructor
+as a numeric literal and there is no variable of the length to use
+it in other statements.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_readings">
+<code class="descname">get_readings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_readings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_readings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return current number of values in data buffer.</p>
+<ul class="simple">
+<li>The statistical calculation can be provided beforeregistering
+the full data buffer. In that case the method returns the values,
+which a statistic is calculated from.</li>
+<li>Usually the returned value should be the same as length of the data
+buffer at the end of a measurement cycle.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_value_max">
+<code class="descname">get_value_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_value_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_value_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return maximal acceptable value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_value_min">
+<code class="descname">get_value_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_value_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_value_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return minimal acceptable value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset instance object to initial state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.result">
+<code class="descname">result</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return rounded value if needed and possible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.set_buffer">
+<code class="descname">set_buffer</code><span class="sig-paren">(</span><em>buffer_len=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.set_buffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.set_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust data buffer for staticital filtering.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilter.set_filter">
+<code class="descname">set_filter</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.set_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.set_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set acceptable value range.</p>
+<dl class="docutils">
+<dt>value_max – maximal measuring value acceptable for filtering.</dt>
+<dd>Default from constructor.</dd>
+<dt>value_min – minimal measuring value acceptable for filtering.</dt>
+<dd>Default from constructor.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterExponential">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">StatFilterExponential</code><span class="sig-paren">(</span><em>factor=0.5</em>, <em>value_max=None</em>, <em>value_min=None</em>, <em>decimals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterExponential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterExponential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.statfilter.StatFilter" title="gbj_pythonlib_sw.statfilter.StatFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.statfilter.StatFilter</span></code></a></p>
+<p>Exponential statistical filtering.</p>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterExponential.get_factor">
+<code class="descname">get_factor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterExponential.get_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterExponential.get_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return smoothing factor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterExponential.result">
+<code class="descname">result</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterExponential.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterExponential.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and return statistically smoothed value.</p>
+<dl class="docutils">
+<dt>value – sample value to be filtered. If None, recent filtered result</dt>
+<dd>provided.</dd>
+</dl>
+<ul class="simple">
+<li>The method calculates a new filtered value from the input value,
+previous stored filtered value, and stored smoothing factor in the
+class instance object.</li>
+<li>The very first input value is considered as a previous filtered value
+or starting value.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">StatFilterRunning</code><span class="sig-paren">(</span><em>stat_type=0</em>, <em>value_max=None</em>, <em>value_min=None</em>, <em>buffer_len=5</em>, <em>decimals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.statfilter.StatFilter" title="gbj_pythonlib_sw.statfilter.StatFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.statfilter.StatFilter</span></code></a></p>
+<p>Running statistics filtering.</p>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.get_stat_type">
+<code class="descname">get_stat_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.get_stat_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.get_stat_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return defaulting running statistics type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result">
+<code class="descname">result</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register new value and calculate default running statistic.</p>
+<dl class="docutils">
+<dt>value – new sample value. If None, statistic is calculated from</dt>
+<dd>current content of the data buffer.</dd>
+</dl>
+<ul class="simple">
+<li>The method calculates a new filtered value from the input value and
+previous stored sample values in the class instance object.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_avg">
+<code class="descname">result_avg</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_avg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_avg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register new value and calculate running average.</p>
+<dl class="docutils">
+<dt>value – new sample value. If None, statistic is calculated from</dt>
+<dd>current content of the data buffer.</dd>
+</dl>
+<ul class="simple">
+<li>The method calculates new statistic from the input value and
+previous stored sample values in the class instance object.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_max">
+<code class="descname">result_max</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register new value and calculate running maximum.</p>
+<dl class="docutils">
+<dt>value – new sample value. If None, statistic is calculated from</dt>
+<dd>current content of the data buffer.</dd>
+</dl>
+<ul class="simple">
+<li>The method calculates new statistic from the input value and
+previous stored sample values in the class instance object.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_med">
+<code class="descname">result_med</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_med"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_med" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register new value and calculate running median.</p>
+<dl class="docutils">
+<dt>value – new sample value. If None, statistic is calculated from</dt>
+<dd>current content of the data buffer.</dd>
+</dl>
+<ul class="simple">
+<li>The method calculates new statistic from the input value and
+previous stored sample values in the class instance object.</li>
+<li>Until the data buffer is full, the method calculates median high at
+even readings in the buffer.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_min">
+<code class="descname">result_min</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register new value and calculate running minimum.</p>
+<dl class="docutils">
+<dt>value – new sample value. If None, statistic is calculated from</dt>
+<dd>current content of the data buffer.</dd>
+</dl>
+<ul class="simple">
+<li>The method calculates new statistic from the input value and
+previous stored sample values in the class instance object.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.set_stat_type">
+<code class="descname">set_stat_type</code><span class="sig-paren">(</span><em>stat_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.set_stat_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.set_stat_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set running statistics type as a default for resulting.</p>
+<dl class="docutils">
+<dt>stat_type – type of a statistic calculated from registered running</dt>
+<dd>values by default in the method ‘result’. If not from
+allowed enumeration, nothing changes.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gbj_pythonlib_sw.timer">
+<span id="gbj-pythonlib-sw-timer-module"></span><h2>gbj_pythonlib_sw.timer module<a class="headerlink" href="#module-gbj_pythonlib_sw.timer" title="Permalink to this headline">¶</a></h2>
+<p>Module for creating a timer and its prescalers.</p>
+<dl class="class">
+<dt id="gbj_pythonlib_sw.timer.Timer">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">Timer</code><span class="sig-paren">(</span><em>period=1</em>, <em>callback=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creating a timer.</p>
+<ul class="simple">
+<li>If it is created without defined count of shots, it is a periodic timer
+marked with “R” (repeating) in the string instance representation.</li>
+<li>If it is created with count greater than 1, it is a countdown timer
+marked with “C” (countdown) in the string instance representation.</li>
+<li>If it is created with count equal 1, it is an one-shot timer
+marked with “O” (oneshot) in the string instance representation.</li>
+</ul>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.timer.Timer.get_prescalers">
+<code class="descname">get_prescalers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.get_prescalers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.get_prescalers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of prescalers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.timer.Timer.prescaler">
+<code class="descname">prescaler</code><span class="sig-paren">(</span><em>factor</em>, <em>callback</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.prescaler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.prescaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a callback function called at each factor tickself.</p>
+<dl class="docutils">
+<dt>factor – integer divider of the initial timer period. It is truncated</dt>
+<dd>to integer and ignored if less than 2.</dd>
+<dt>callback – function or tuple of them calling by the timer</dt>
+<dd>at each factor-th period</dd>
+</dl>
+<p>args – additional positional arguments passed to the callback</p>
+<p>kwargs – additional keyworded arguments passed to the callback.</p>
+<ul class="simple">
+<li>The prescaler method enables launching a specific callback
+at multiple timer period and acts as a frequency divider.</li>
+<li>Prescale factor equal 1 is useless, because it is equivalent to basic
+timer callback. In this case it is ignored.</li>
+<li>The prescaler method can be called multiple times. For the same
+factor the corresponding callback is updated including its arguments.
+If None, the prescaler is removed.</li>
+<li>None of prescalers is launched if basic timer callback is defined or
+timer is one-timer one.</li>
+<li>All prescalers are called at random order, but usually in order of
+their registration.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.timer.Timer.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create timer thread object and store it in the instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.timer.Timer.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop timer.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gbj_pythonlib_sw.timer.register_timer">
+<code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">register_timer</code><span class="sig-paren">(</span><em>name</em>, <em>timer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#register_timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.register_timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store a timer object in the dictionary.</p>
+<p>name – key name of a timer
+timer – value object of a timer. If name already exists in the dictionary,</p>
+<blockquote>
+<div>the timer is update. If none and name already exists, the timer
+is stopped and removed from the dictionary.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="gbj_pythonlib_sw.timer.start_timers">
+<code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">start_timers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#start_timers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.start_timers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start all registered timers.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gbj_pythonlib_sw.timer.stop_timers">
+<code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">stop_timers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#stop_timers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.stop_timers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop all registered timers.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gbj_pythonlib_sw.trigger">
+<span id="gbj-pythonlib-sw-trigger-module"></span><h2>gbj_pythonlib_sw.trigger module<a class="headerlink" href="#module-gbj_pythonlib_sw.trigger" title="Permalink to this headline">¶</a></h2>
+<p>Module for managing and executing triggers - value dependend callbacks.</p>
+<dl class="class">
+<dt id="gbj_pythonlib_sw.trigger.Trigger">
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.trigger.</code><code class="descname">Trigger</code><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creating a trigger manager.</p>
+<dl class="method">
+<dt id="gbj_pythonlib_sw.trigger.Trigger.del_triggers">
+<code class="descname">del_triggers</code><span class="sig-paren">(</span><em>ids=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.del_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.del_triggers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all or listed triggers.</p>
+<p>ids – list of trigger identifiers that should be Removed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.trigger.Trigger.exec_triggers">
+<code class="descname">exec_triggers</code><span class="sig-paren">(</span><em>value</em>, <em>ids=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.exec_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.exec_triggers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate and execute all or listed triggers.</p>
+<p>value – comparison value
+ids – list of trigger identifiers that should be evaluated</p>
+<p>value – comparison value
+threshold – threshold value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.trigger.Trigger.get_triggers">
+<code class="descname">get_triggers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.get_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.get_triggers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of triggers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.trigger.Trigger.set_trigger">
+<code class="descname">set_trigger</code><span class="sig-paren">(</span><em>id</em>, <em>mode=None</em>, <em>value=None</em>, <em>callback=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.set_trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.set_trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create or update trigger.</p>
+<p>id – unique identifier of a trigger in the list of them of any type
+mode – processing mode of the trigger [UPPER, LOWER]
+value – threshold value
+callback – function or tuple of them calling at threshold value.
+args – additional positional arguments passed to the callback after</p>
+<blockquote>
+<div>forced arguments by this class.</div></blockquote>
+<p>kwargs – additional keyworded arguments passed to the callback.</p>
+<p>Exception NameError - if identifier is not provided
+Exception TypeError - if mode is not from the allowed enumeration</p>
+<ul class="simple">
+<li>The trigger method can be called multiple times. For the same
+trigger value corresponding callback is updated including its
+arguments. If None, the trigger is removed.</li>
+<li>For a particular threshold value only one trigger can be defined,
+either upper or lower, but not both.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gbj_pythonlib_sw">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-gbj_pythonlib_sw" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gbj_pythonlib_sw</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Libor Gabaj.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/gbj_pythonlib_sw.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
