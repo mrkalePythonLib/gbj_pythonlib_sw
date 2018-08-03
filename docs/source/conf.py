@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Configuration file for the Sphinx documentation builder.
+"""Configuration file for the Sphinx documentation builder."""
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
@@ -14,12 +14,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../gbj_pythonlib_sw'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = u'gbj_pythonlib_sw'
+project = u'gbj_phytonlib_sw'
 copyright = u'2018, Libor Gabaj'
 author = u'Libor Gabaj'
 
@@ -41,7 +41,7 @@ release = u'1.0.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -77,7 +77,8 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -104,7 +105,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'gbj_pythonlib_swdoc'
+htmlhelp_basename = 'gbj_phytonlib_swdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -131,7 +132,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'gbj_pythonlib_sw.tex', u'gbj\\_pythonlib\\_sw Documentation',
+    (master_doc, 'gbj_phytonlib_sw.tex', u'gbj\\_phytonlib\\_sw Documentation',
      u'Libor Gabaj', 'manual'),
 ]
 
@@ -141,7 +142,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'gbj_pythonlib_sw', u'gbj_pythonlib_sw Documentation',
+    (master_doc, 'gbj_phytonlib_sw', u'gbj_phytonlib_sw Documentation',
      [author], 1)
 ]
 
@@ -152,10 +153,25 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'gbj_pythonlib_sw', u'gbj_pythonlib_sw Documentation',
-     author, 'gbj_pythonlib_sw', 'One line description of project.',
+    (master_doc, 'gbj_phytonlib_sw', u'gbj_phytonlib_sw Documentation',
+     author, 'gbj_phytonlib_sw', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 
 # -- Extension configuration -------------------------------------------------
+
+
+# -- Options for Napoleon extension -------------------------------------------
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = True
+napoleon_include_special_with_doc = False
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_use_keyword = True

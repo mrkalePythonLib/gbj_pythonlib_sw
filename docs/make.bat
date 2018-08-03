@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=gbj_pythonlib_sw
+set SPHINXPROJ=gbj_phytonlib_sw
 
 if "%1" == "" goto help
 

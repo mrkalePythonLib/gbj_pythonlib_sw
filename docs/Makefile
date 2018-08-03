@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = gbj_pythonlib_sw
+SPHINXPROJ    = gbj_phytonlib_sw
 SOURCEDIR     = source
 BUILDDIR      = build
 

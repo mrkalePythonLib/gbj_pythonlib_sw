@@ -194,10 +194,10 @@ class MqttBroker(MQTT):
     def connect(self, **kwargs):
         """Connect to MQTT broker and set callback functions and credentials.
 
-        Keyworded arguments:
-        --------------------
+        Keyword arguments
+        -----------------
         All key for callback function are root words from MQTT client callbacks
-        without prefix "on_".
+        without prefix ``on_``.
 
         connect -- callback launched after connection to MQTT broker
         disconnect -- callback launched after disconnection from MQTT broker

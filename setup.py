@@ -1,8 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Setup function for the package."""
+
 from setuptools import setup
 
 setup(
   name='gbj_pythonlib_sw',
-  version='1.0.1',
+  version='1.0.0',
   description='Python libraries for software support.',
   long_description='Modules suitable for whatever python console application.',
   classifiers=[

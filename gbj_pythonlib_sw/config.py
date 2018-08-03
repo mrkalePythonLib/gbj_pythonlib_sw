@@ -21,20 +21,21 @@ from ConfigParser import SafeConfigParser
 ###############################################################################
 class Config(object):
     """Create a manager for a configuration INI file.
-    
+
     A single class instance object manages just one configuration file.
     If more configuration files are needed to manage, separate instance should
     be created.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     file : string, pointer
         Full path to a configuration file or file pointer already opened
         file.
+
     """
 
     def __init__(self, file):
-        """Constructor"""
+        """Create class instance."""
         self._logger = logging.getLogger(" ".join([__name__, __version__]))
         self._logger.debug("Instance of %s created", self.__class__.__name__)
         self._parser = SafeConfigParser()
@@ -57,8 +58,8 @@ class Config(object):
     def option(self, option, section, default=None):
         """Read configuration option's value.
 
-        Parameters
-        ----------
+        Arguments
+        ---------
         option : str
             Configuration file option to be read.
         section : str
@@ -80,16 +81,16 @@ class Config(object):
     def option_split(self, option, section, appendix=[], separator=","):
         """Read configuration option and append and split its value to tuple.
 
-        Positional arguments:
-        ---------------------
+        Arguments
+        ---------
         option -- configuration file option to be read.
         section -- configuration file section to be read from.
         appendix -- list of additonal option value parts that should be added.
         separator -- string for separating appendix list members and split
                      the entire option value
 
-        Returns:
-        --------
+        Returns
+        -------
         List with configuration option parts.
 
         """
@@ -117,8 +118,8 @@ class Config(object):
     def options(self, section):
         """Read list of options in a section.
 
-        Parameters
-        ----------
+        Arguments
+        ---------
         section : str
             Configuration section to be read from.
 
@@ -126,6 +127,7 @@ class Config(object):
         -------
         list of str
             List with configuration option names.
+
         """
         options = []
         for config_key in self._parser.options(section):
@@ -139,7 +141,7 @@ class Config(object):
     # -------------------------------------------------------------------------
     def get_content(self):
         """Create string with configuration parameters in form of INI file.
-        
+
         All section and options are listed including from DEFAULT section.
 
         Returns
