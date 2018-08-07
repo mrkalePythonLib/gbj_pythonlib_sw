@@ -145,9 +145,9 @@
   <h1>Source code for gbj_pythonlib_sw.statfilter</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python2</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Module for statistical filtering.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;Module for statistical filtering and smoothing.&quot;&quot;&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Testing&quot;</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Libor Gabaj&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2018, &quot;</span> <span class="o">+</span> <span class="n">__author__</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">[]</span>
@@ -163,9 +163,17 @@
 <span class="c1"># Constants</span>
 <span class="c1">###############################################################################</span>
 <span class="n">AVERAGE</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="sd">&quot;&quot;&quot;int: Enumeration for statistical type ``average``.&quot;&quot;&quot;</span>
+
 <span class="n">MEDIAN</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="sd">&quot;&quot;&quot;int: Enumeration for statistical type ``median``.&quot;&quot;&quot;</span>
+
 <span class="n">MINIMUM</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="sd">&quot;&quot;&quot;int: Enumeration for statistical type ``minimum``.&quot;&quot;&quot;</span>
+
 <span class="n">MAXIMUM</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="sd">&quot;&quot;&quot;int: Enumeration for statistical type ``maximum``.&quot;&quot;&quot;</span>
+
 <span class="n">STAT_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Average&#39;</span><span class="p">,</span> <span class="s1">&#39;Median&#39;</span><span class="p">,</span> <span class="s1">&#39;Minimum&#39;</span><span class="p">,</span> <span class="s1">&#39;Maximum&#39;</span><span class="p">]</span>
 
 
@@ -173,22 +181,33 @@
 <span class="c1"># Classes</span>
 <span class="c1">###############################################################################</span>
 <div class="viewcode-block" id="StatFilter"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter">[docs]</a><span class="k">class</span> <span class="nc">StatFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Creating a scuffolding for statistical filtering.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Common statistical filtering and smoothing management.</span>
 
-<div class="viewcode-block" id="StatFilter.__init__"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    value_max : float</span>
+<span class="sd">        Maximal measuring value acceptable for filtering.</span>
+<span class="sd">    value_min : float</span>
+<span class="sd">        Minimal measuring value acceptable for filtering.</span>
+<span class="sd">    buffer_len : int</span>
+<span class="sd">        Positive integer number of values held in the data buffer used for</span>
+<span class="sd">        statistical smoothing. It should be an odd number, otherwise it is</span>
+<span class="sd">        extended to the nearest odd one.</span>
+<span class="sd">    decimals : int</span>
+<span class="sd">        Positive integer number of decimal places for rounding statistical</span>
+<span class="sd">        results. If None is provided, no rounding occures.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This class should not be instanciated. It servers as a abstract class and</span>
+<span class="sd">    a parent class for operational classes with corresponding statictical and</span>
+<span class="sd">    smoothing methods.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                  <span class="n">decimals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize instance object with common parameters.</span>
-
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value_max -- maximal measuring value acceptable for filtering.</span>
-<span class="sd">        value_min -- minimal measuring value acceptable for filtering.</span>
-<span class="sd">        buffer_len -- number of values held in the data buffer used for</span>
-<span class="sd">                      statistical filtering. It should be an odd number,</span>
-<span class="sd">                      otherwise it is extended to the nearest odd one.</span>
-<span class="sd">        decimals -- number of decimal places for rounding filtering results.</span>
-<span class="sd">                    If None, no rounding occures.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Create the class instance - constructor.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">__version__</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_max</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_min</span> <span class="o">=</span> <span class="kc">None</span>
@@ -199,10 +218,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="n">value_max</span><span class="o">=</span><span class="n">value_max</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="n">value_min</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_buffer</span><span class="p">(</span><span class="n">buffer_len</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
-
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Cleansing at instance object destroying - destructor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Represent instance object as a string.&quot;&quot;&quot;</span>
@@ -217,10 +233,18 @@
 <div class="viewcode-block" id="StatFilter.filter"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Filter value against acceptable value range.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- value to be filtered. If outside the value range, None is</span>
-<span class="sd">                 returned.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Value to be filtered.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            If the input value is outside of the acceptable value range, None</span>
+<span class="sd">            is returned, otherwise that value.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -235,7 +259,21 @@
         <span class="k">return</span> <span class="n">value</span></div>
 
 <div class="viewcode-block" id="StatFilter.result"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.result">[docs]</a>    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return rounded value if needed and possible.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Round value if needed and possible.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Value to be processed.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Rouded value, if number of decimal places is defined, otherwise the</span>
+<span class="sd">            input value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decimals</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -250,12 +288,18 @@
 <div class="viewcode-block" id="StatFilter.set_filter"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.set_filter">[docs]</a>    <span class="k">def</span> <span class="nf">set_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set acceptable value range.</span>
 
-<span class="sd">        Keyworded arguments:</span>
-<span class="sd">        --------------------</span>
-<span class="sd">        value_max -- maximal measuring value acceptable for filtering.</span>
-<span class="sd">                     Default from constructor.</span>
-<span class="sd">        value_min -- minimal measuring value acceptable for filtering.</span>
-<span class="sd">                     Default from constructor.</span>
+<span class="sd">        Keyword arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        value_max : float</span>
+<span class="sd">            Maximal measuring value acceptable for filtering.</span>
+<span class="sd">        value_min : float</span>
+<span class="sd">            Minimal measuring value acceptable for filtering.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Initial (default) values are defined by the constructor.</span>
+<span class="sd">        - Use just that argument, which you need to changing.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_max</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;value_max&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_max</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_min</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;value_min&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_min</span><span class="p">)</span>
@@ -269,8 +313,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_value_min</span> <span class="o">=</span> <span class="n">t</span></div>
 
 <div class="viewcode-block" id="StatFilter.set_buffer"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.set_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">set_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Adjust data buffer for staticital filtering.&quot;&quot;&quot;</span>
-        <span class="n">buffer_len</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">buffer_len</span><span class="p">)</span> <span class="o">|</span> <span class="mi">1</span>    <span class="c1"># Make odd number and minimum 1</span>
+        <span class="sd">&quot;&quot;&quot;Adjust data buffer length for staticital smoothing.&quot;&quot;&quot;</span>
+        <span class="n">buffer_len</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">buffer_len</span><span class="p">))</span> <span class="o">|</span> <span class="mi">1</span>  <span class="c1"># Make odd number and minimum 1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buffer_len</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">buffer_len</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">buffer_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buffer_len</span><span class="p">()):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
@@ -284,6 +328,13 @@
 <div class="viewcode-block" id="StatFilter.get_buffer_len"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.get_buffer_len">[docs]</a>    <span class="k">def</span> <span class="nf">get_buffer_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return real length of the data buffer.</span>
 
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            Real utilized data buffer length.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        - Usually the returned value is the same as length put to the</span>
 <span class="sd">          constructor.</span>
 <span class="sd">        - If class has adjusted or limited the input buffer length, the</span>
@@ -291,25 +342,48 @@
 <span class="sd">        - The method is useful, if the length has been put to the constructor</span>
 <span class="sd">          as a numeric literal and there is no variable of the length to use</span>
 <span class="sd">          it in other statements.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatFilter.get_value_min"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.get_value_min">[docs]</a>    <span class="k">def</span> <span class="nf">get_value_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return minimal acceptable value.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return minimal acceptable value.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Current acceptable minimal value for statistical smoothing.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_min</span></div>
 
 <div class="viewcode-block" id="StatFilter.get_value_max"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.get_value_max">[docs]</a>    <span class="k">def</span> <span class="nf">get_value_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return maximal acceptable value.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return maximal acceptable value.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Current acceptable maximal value for statistical smoothing.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_max</span></div>
 
 <div class="viewcode-block" id="StatFilter.get_readings"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilter.get_readings">[docs]</a>    <span class="k">def</span> <span class="nf">get_readings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return current number of values in data buffer.</span>
 
-<span class="sd">        - The statistical calculation can be provided beforeregistering</span>
-<span class="sd">          the full data buffer. In that case the method returns the values,</span>
-<span class="sd">          which a statistic is calculated from.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            Number of values acctually present in the data buffer.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The statistical calculation can be provided before filling</span>
+<span class="sd">          the entire data buffer. In that case the method returns the values</span>
+<span class="sd">          count, which a statistic is calculated from.</span>
 <span class="sd">        - Usually the returned value should be the same as length of the data</span>
 <span class="sd">          buffer at the end of a measurement cycle.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -321,23 +395,32 @@
 <span class="c1"># Exponential filtering</span>
 <span class="c1"># -----------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="StatFilterExponential"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterExponential">[docs]</a><span class="k">class</span> <span class="nc">StatFilterExponential</span><span class="p">(</span><span class="n">StatFilter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Exponential statistical filtering.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Exponential statistical smoothing.</span>
 
-<div class="viewcode-block" id="StatFilterExponential.__init__"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterExponential.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">value_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    factor : float</span>
+<span class="sd">        Positive smoothing factor for exponential filtering.</span>
+<span class="sd">        It is converted to absolute value provided.</span>
+
+<span class="sd">        - Default value ``0.5`` means ``runnig average``.</span>
+<span class="sd">        - Acceptable value range is ``0.0 ~ 1.0`` and input value is limited</span>
+<span class="sd">          to it.</span>
+
+<span class="sd">    value_max : float</span>
+<span class="sd">        Maximal measuring value acceptable for filtering.</span>
+<span class="sd">    value_min : float</span>
+<span class="sd">        Minimal measuring value acceptable for filtering.</span>
+<span class="sd">    decimals : int</span>
+<span class="sd">        Positive integer number of decimal places for rounding statistical</span>
+<span class="sd">        results. If None is provided, no rounding occures.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">value_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">decimals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize instance object with common parameters.</span>
-
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        factor -- smoothing factor for exponential filtering.</span>
-<span class="sd">                  Default for running average.</span>
-<span class="sd">                  Value range 0.0 ~ 1.0.</span>
-<span class="sd">        value_max -- maximal measuring value acceptable for filtering.</span>
-<span class="sd">        value_min -- minimal measuring value acceptable for filtering.</span>
-<span class="sd">        decimals -- number of decimal places for rounding filtering results.</span>
-<span class="sd">                    If None, no rounding occures.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Create the class instance - constructor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">factor</span> <span class="ow">or</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_factor</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_factor</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -347,21 +430,30 @@
             <span class="n">decimals</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instance of </span><span class="si">%s</span><span class="s2"> created&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Smoothing factor </span><span class="si">%.2f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Smoothing factor </span><span class="si">%.2f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span><span class="p">)</span>
 
 <div class="viewcode-block" id="StatFilterExponential.result"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterExponential.result">[docs]</a>    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate and return statistically smoothed value.</span>
+        <span class="sd">&quot;&quot;&quot;Calculate statistically smoothed value.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- sample value to be filtered. If None, recent filtered result</span>
-<span class="sd">                 provided.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Sample value to be filtered.</span>
 
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            If None input value is provided, recent result is returned,</span>
+<span class="sd">            otherwise the new smoothed value is.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        - The method calculates a new filtered value from the input value,</span>
 <span class="sd">          previous stored filtered value, and stored smoothing factor in the</span>
 <span class="sd">          class instance object.</span>
 <span class="sd">        - The very first input value is considered as a previous filtered value</span>
 <span class="sd">          or starting value.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -380,55 +472,76 @@
     <span class="c1"># Getters</span>
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="StatFilterExponential.get_factor"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterExponential.get_factor">[docs]</a>    <span class="k">def</span> <span class="nf">get_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return smoothing factor.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_factor&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span></div></div>
+        <span class="sd">&quot;&quot;&quot;Return current smoothing factor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Current smoothing factor utilized for statistical smoothing.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span></div></div>
 
 
 <span class="c1"># -----------------------------------------------------------------------------</span>
 <span class="c1"># Running statistics filtering</span>
 <span class="c1"># -----------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="StatFilterRunning"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning">[docs]</a><span class="k">class</span> <span class="nc">StatFilterRunning</span><span class="p">(</span><span class="n">StatFilter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Running statistics filtering.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Running statistical smoothing.</span>
 
-<div class="viewcode-block" id="StatFilterRunning.__init__"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat_type</span><span class="o">=</span><span class="n">AVERAGE</span><span class="p">,</span> <span class="n">value_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    stat_type : enum</span>
+<span class="sd">        Enumerated type of a statistic calculated from registered running</span>
+<span class="sd">        values. The argument is defined by one of module&#39;s constants</span>
+<span class="sd">        ``AVERAGE``, ``MEDIAN``, ``MINIMUM``, ``MAXIMUM``.</span>
+<span class="sd">        Statistical type enables dynamically change statistical method for</span>
+<span class="sd">        smoothing input values without changing program code when just</span>
+<span class="sd">        one smoothing method is used.</span>
+<span class="sd">    value_max : float</span>
+<span class="sd">        Maximal measuring value acceptable for filtering.</span>
+<span class="sd">    value_min : float</span>
+<span class="sd">        Minimal measuring value acceptable for filtering.</span>
+<span class="sd">    buffer_len : int</span>
+<span class="sd">        Positive integer number of values held in the data buffer used for</span>
+<span class="sd">        statistical smoothing. It should be an odd number, otherwise it is</span>
+<span class="sd">        extended to the nearest odd one.</span>
+<span class="sd">    decimals : int</span>
+<span class="sd">        Positive integer number of decimal places for rounding statistical</span>
+<span class="sd">        results. If None is provided, no rounding occures.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat_type</span><span class="o">=</span><span class="n">AVERAGE</span><span class="p">,</span> <span class="n">value_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">buffer_len</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize instance object with common parameters.</span>
-
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        stat_type -- type of statistic calculated from registered running</span>
-<span class="sd">                     values.</span>
-<span class="sd">        value_max -- maximal measuring value acceptable for filtering.</span>
-<span class="sd">        value_min -- minimal measuring value acceptable for filtering.</span>
-<span class="sd">        buffer_len -- number of values held in the data buffer used for</span>
-<span class="sd">                      statistical filtering. It should be an odd number,</span>
-<span class="sd">                      otherwise it is extended to the nearest odd one.</span>
-<span class="sd">        decimals -- number of decimal places for rounding filtering results.</span>
-<span class="sd">                    If None, no rounding occurs.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_stat_type</span><span class="p">(</span><span class="n">stat_type</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Create the class instance - constructor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_stat_type</span><span class="p">(</span><span class="n">stat_type</span> <span class="ow">or</span> <span class="n">AVERAGE</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">value_max</span><span class="p">,</span>
             <span class="n">value_min</span><span class="p">,</span>
             <span class="n">buffer_len</span><span class="p">,</span>
             <span class="n">decimals</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instance of </span><span class="si">%s</span><span class="s2"> created&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instance of </span><span class="si">%s</span><span class="s2"> created&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="StatFilterRunning._register_value"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning._register_value">[docs]</a>    <span class="k">def</span> <span class="nf">_register_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_register_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Filter and register new value to the data buffer.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- sample value to be filtered.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Sample value to be registered in the data buffer and use for</span>
+<span class="sd">            statistical smoothing if succesfully filtered.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
 
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - If new value does not fit to the filter range, it is ignored.</span>
 <span class="sd">        - The most recent (fresh) sample value is always in the 0 index of the</span>
 <span class="sd">          data buffer.</span>
-<span class="sd">        - If new value does not fit to the filter range, it is ignored.</span>
 <span class="sd">        - Sample values are shifted to the right in the data buffer (to higher</span>
-<span class="sd">          indices), so that the most recent value is lost. The new value is</span>
-<span class="sd">          stored in the zero index of  the buffer.</span>
+<span class="sd">          indices), so that the most recent value is lost.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -438,18 +551,22 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
             <span class="c1"># Storing just real value</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span></div>
+        <span class="k">return</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="StatFilterRunning.result_avg"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_avg">[docs]</a>    <span class="k">def</span> <span class="nf">result_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Register new value and calculate running average.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- new sample value. If None, statistic is calculated from</span>
-<span class="sd">                 current content of the data buffer.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            New sample value. If None is provided, statistic is calculated from</span>
+<span class="sd">            current content of the data buffer.</span>
 
-<span class="sd">        - The method calculates new statistic from the input value and</span>
-<span class="sd">          previous stored sample values in the class instance object.</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The method calculates new statistic from the input value and previously</span>
+<span class="sd">        stored sample values in the class instance object.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">statistic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_register_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="n">readings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_readings</span><span class="p">()</span>
@@ -463,15 +580,19 @@
 <div class="viewcode-block" id="StatFilterRunning.result_med"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_med">[docs]</a>    <span class="k">def</span> <span class="nf">result_med</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Register new value and calculate running median.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- new sample value. If None, statistic is calculated from</span>
-<span class="sd">                 current content of the data buffer.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            New sample value. If None is provided, statistic is calculated from</span>
+<span class="sd">            current content of the data buffer.</span>
 
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        - The method calculates new statistic from the input value and</span>
-<span class="sd">          previous stored sample values in the class instance object.</span>
-<span class="sd">        - Until the data buffer is full, the method calculates median high at</span>
-<span class="sd">          even readings in the buffer.</span>
+<span class="sd">          previously stored sample values in the class instance object.</span>
+<span class="sd">        - Until the data buffer is full, the method calculates high median</span>
+<span class="sd">          at even readings in the buffer.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">statistic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_register_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="n">readings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_readings</span><span class="p">()</span>
@@ -482,13 +603,17 @@
 <div class="viewcode-block" id="StatFilterRunning.result_min"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_min">[docs]</a>    <span class="k">def</span> <span class="nf">result_min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Register new value and calculate running minimum.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- new sample value. If None, statistic is calculated from</span>
-<span class="sd">                 current content of the data buffer.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            New sample value. If None is provided, statistic is calculated from</span>
+<span class="sd">            current content of the data buffer.</span>
 
-<span class="sd">        - The method calculates new statistic from the input value and</span>
-<span class="sd">          previous stored sample values in the class instance object.</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The method calculates new statistic from the input value and previously</span>
+<span class="sd">        stored sample values in the class instance object.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">statistic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_register_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="n">readings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_readings</span><span class="p">()</span>
@@ -501,13 +626,17 @@
 <div class="viewcode-block" id="StatFilterRunning.result_max"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_max">[docs]</a>    <span class="k">def</span> <span class="nf">result_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Register new value and calculate running maximum.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- new sample value. If None, statistic is calculated from</span>
-<span class="sd">                 current content of the data buffer.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            New sample value. If None is provided, statistic is calculated from</span>
+<span class="sd">            current content of the data buffer.</span>
 
-<span class="sd">        - The method calculates new statistic from the input value and</span>
-<span class="sd">          previous stored sample values in the class instance object.</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The method calculates new statistic from the input value and previously</span>
+<span class="sd">        stored sample values in the class instance object.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">statistic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_register_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="n">readings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_readings</span><span class="p">()</span>
@@ -520,13 +649,22 @@
 <div class="viewcode-block" id="StatFilterRunning.result"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.result">[docs]</a>    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Register new value and calculate default running statistic.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- new sample value. If None, statistic is calculated from</span>
-<span class="sd">                 current content of the data buffer.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Sample value to be filtered.</span>
 
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            If None input value is provided, the statistic is calculated from</span>
+<span class="sd">            current content of the data buffer.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        - The method calculates a new filtered value from the input value and</span>
-<span class="sd">          previous stored sample values in the class instance object.</span>
+<span class="sd">          previously stored sample values in the class instance object.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Default statistic: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
                            <span class="n">STAT_TYPES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_stat_type</span><span class="p">()])</span>
@@ -547,11 +685,17 @@
 <div class="viewcode-block" id="StatFilterRunning.set_stat_type"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.set_stat_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_stat_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat_type</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set running statistics type as a default for resulting.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        stat_type -- type of a statistic calculated from registered running</span>
-<span class="sd">                     values by default in the method &#39;result&#39;. If not from</span>
-<span class="sd">                     allowed enumeration, nothing changes.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        stat_type : enum</span>
+<span class="sd">            Enumerated type of a statistic calculated from registered running</span>
+<span class="sd">            values by default in the method `result`.</span>
+<span class="sd">            The argument is defined by one of module&#39;s constants</span>
+<span class="sd">            ``AVERAGE``, ``MEDIAN``, ``MINIMUM``, ``MAXIMUM``.</span>
+<span class="sd">            If none from allowed enumerations is provided, nothing changes and</span>
+<span class="sd">            statistical calculation is executed by current type.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">stat_type</span> <span class="ow">in</span> <span class="p">[</span>
             <span class="n">AVERAGE</span><span class="p">,</span>
@@ -565,9 +709,15 @@
     <span class="c1"># Getters</span>
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="StatFilterRunning.get_stat_type"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.statfilter.StatFilterRunning.get_stat_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_stat_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return defaulting running statistics type.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_stat_type&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stat_type</span></div></div>
+        <span class="sd">&quot;&quot;&quot;Return default running statistics type.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            Numerical representation of current default statistical type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stat_type</span></div></div>
 </pre></div>
 
            </div>

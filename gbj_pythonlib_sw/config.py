@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Module for managing a configuration file."""
-__version__ = "0.4.1"
-__status__ = "Development"
+"""Module for managing a configuration INI file."""
+__version__ = "0.2.0"
+__status__ = "Testing"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018, " + __author__
 __credits__ = []
@@ -11,7 +11,6 @@ __maintainer__ = __author__
 __email__ = "libor.gabaj@gmail.com"
 
 
-# Standard library modules
 import logging
 from ConfigParser import SafeConfigParser
 
@@ -22,20 +21,23 @@ from ConfigParser import SafeConfigParser
 class Config(object):
     """Create a manager for a configuration INI file.
 
-    A single class instance object manages just one configuration file.
-    If more configuration files are needed to manage, separate instance should
-    be created.
-
     Arguments
     ---------
     file : string, pointer
-        Full path to a configuration file or file pointer already opened
+        Full path to a configuration file or file pointer of already opened
         file.
+        *The argument is mandatory and has no default value.*
+
+    Notes
+    -----
+    A single class instance object manages just one configuration file.
+    If more configuration files are needed to manage, separate instances should
+    be created.
 
     """
 
     def __init__(self, file):
-        """Create class instance."""
+        """Create the class instance - constructor."""
         self._logger = logging.getLogger(" ".join([__name__, __version__]))
         self._logger.debug("Instance of %s created", self.__class__.__name__)
         self._parser = SafeConfigParser()
@@ -62,8 +64,10 @@ class Config(object):
         ---------
         option : str
             Configuration file option to be read.
+            *The argument is mandatory and has no default value.*
         section : str
-            Configuration file section to be read from.
+            Configuration file section where to search the option.
+            *The argument is mandatory and has no default value.*
         default : str
             Default option value, if configuration file has neither
             the option nor the section.
@@ -79,19 +83,28 @@ class Config(object):
         return self._parser.get(section, option) or default
 
     def option_split(self, option, section, appendix=[], separator=","):
-        """Read configuration option and append and split its value to tuple.
+        """Read configuration option, append to it, and split its value.
 
         Arguments
         ---------
-        option -- configuration file option to be read.
-        section -- configuration file section to be read from.
-        appendix -- list of additonal option value parts that should be added.
-        separator -- string for separating appendix list members and split
-                     the entire option value
+        option : str
+            Configuration file option to be read.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration file section where to search the option.
+            *The argument is mandatory and has no default value.*
+        appendix : list
+            List of additonal option value parts that should be added
+            to the read option for splitting purposes.
+        separator : str
+            String used as a separator for spliting the option. It is used
+            for glueing appendix list members with read option and at the same
+            time for splitting the entire, composed option value.
 
         Returns
         -------
-        List with configuration option parts.
+        list of str
+            List of a configuration option parts.
 
         """
         # Read option
@@ -122,11 +135,12 @@ class Config(object):
         ---------
         section : str
             Configuration section to be read from.
+            *The argument is mandatory and has no default value.*
 
         Returns
         -------
         list of str
-            List with configuration option names.
+            List of configuration option names.
 
         """
         options = []
@@ -142,12 +156,14 @@ class Config(object):
     def get_content(self):
         """Create string with configuration parameters in form of INI file.
 
-        All section and options are listed including from DEFAULT section.
-
         Returns
         -------
         str
-            Concent of configuration file without comments.
+            Content of the configuration file without comments.
+
+        Notes
+        -----
+        All section and options are listed including from ``DEFAULT`` section.
 
         """
         pattern = "\n\n---CONGIGURATION - {}---"

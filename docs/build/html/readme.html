@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Change log" href="changelog.html" />
     <link rel="prev" title="Documentation for Python library package gbj_phytonlib_sw" href="index.html" /> 
 
   
@@ -83,6 +84,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change log</a></li>
 </ul>
 
             
@@ -167,16 +169,16 @@ documentation of modules’ interfaces.</p>
 <dt>timer</dt>
 <dd>Managing timers utilizing threading.</dd>
 <dt>trigger</dt>
-<dd><p class="first">Managing numeric triggers. Triggers are identified by textual names. Each of
-them can be defined as upper trigger o lower trigger with particular trigger
-value.</p>
+<dd><p class="first">Managing numeric triggers. Triggers are identified usualy by textual names.
+Each of them can be defined as upper trigger or lower trigger with particular
+threshold (trigger) value.</p>
 <dl class="last docutils">
 <dt>Upper trigger</dt>
-<dd>It calls respective callback function when current value reaches or exceeds
-the trigger value.</dd>
+<dd>It calls callback function(s) when provided comparison value reaches or
+exceeds the threshold value.</dd>
 <dt>Lower trigger</dt>
-<dd>It calls callback function when the current value reaches or is less than
-trigger one.</dd>
+<dd>It calls callback function(s) when the comparison value sinks to the
+threshold value or below.</dd>
 </dl>
 </dd>
 </dl>
@@ -190,6 +192,8 @@ trigger one.</dd>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Change log" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="Documentation for Python library package gbj_phytonlib_sw" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

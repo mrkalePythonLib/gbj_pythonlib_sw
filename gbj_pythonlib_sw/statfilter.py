@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""Module for statistical filtering."""
-__version__ = "0.1.0"
-__status__ = "Development"
+"""Module for statistical filtering and smoothing."""
+__version__ = "0.2.0"
+__status__ = "Testing"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018, " + __author__
 __credits__ = []
@@ -18,9 +18,17 @@ import logging
 # Constants
 ###############################################################################
 AVERAGE = 0
+"""int: Enumeration for statistical type ``average``."""
+
 MEDIAN = 1
+"""int: Enumeration for statistical type ``median``."""
+
 MINIMUM = 2
+"""int: Enumeration for statistical type ``minimum``."""
+
 MAXIMUM = 3
+"""int: Enumeration for statistical type ``maximum``."""
+
 STAT_TYPES = ['Average', 'Median', 'Minimum', 'Maximum']
 
 
@@ -28,22 +36,33 @@ STAT_TYPES = ['Average', 'Median', 'Minimum', 'Maximum']
 # Classes
 ###############################################################################
 class StatFilter(object):
-    """Creating a scuffolding for statistical filtering."""
+    """Common statistical filtering and smoothing management.
+
+    Arguments
+    ---------
+    value_max : float
+        Maximal measuring value acceptable for filtering.
+    value_min : float
+        Minimal measuring value acceptable for filtering.
+    buffer_len : int
+        Positive integer number of values held in the data buffer used for
+        statistical smoothing. It should be an odd number, otherwise it is
+        extended to the nearest odd one.
+    decimals : int
+        Positive integer number of decimal places for rounding statistical
+        results. If None is provided, no rounding occures.
+
+    Notes
+    -----
+    This class should not be instanciated. It servers as a abstract class and
+    a parent class for operational classes with corresponding statictical and
+    smoothing methods.
+
+    """
 
     def __init__(self, value_max=None, value_min=None, buffer_len=5,
                  decimals=None):
-        """Initialize instance object with common parameters.
-
-        Positional arguments:
-        ---------------------
-        value_max -- maximal measuring value acceptable for filtering.
-        value_min -- minimal measuring value acceptable for filtering.
-        buffer_len -- number of values held in the data buffer used for
-                      statistical filtering. It should be an odd number,
-                      otherwise it is extended to the nearest odd one.
-        decimals -- number of decimal places for rounding filtering results.
-                    If None, no rounding occures.
-        """
+        """Create the class instance - constructor."""
         self._logger = logging.getLogger(" ".join([__name__, __version__]))
         self._value_max = None
         self._value_min = None
@@ -55,9 +74,6 @@ class StatFilter(object):
         self.set_filter(value_max=value_max, value_min=value_min)
         self.set_buffer(buffer_len)
         self.reset()
-
-    def __del__(self):
-        """Cleansing at instance object destroying - destructor."""
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -72,10 +88,18 @@ class StatFilter(object):
     def filter(self, value):
         """Filter value against acceptable value range.
 
-        Positional arguments:
-        ---------------------
-        value -- value to be filtered. If outside the value range, None is
-                 returned.
+        Arguments
+        ---------
+        value : float
+            Value to be filtered.
+            *The argument is mandatory and has no default value.*
+
+        Returns
+        -------
+        float
+            If the input value is outside of the acceptable value range, None
+            is returned, otherwise that value.
+
         """
         if value is None:
             return None
@@ -90,7 +114,21 @@ class StatFilter(object):
         return value
 
     def result(self, value):
-        """Return rounded value if needed and possible."""
+        """Round value if needed and possible.
+
+        Arguments
+        ---------
+        value : float
+            Value to be processed.
+            *The argument is mandatory and has no default value.*
+
+        Returns
+        -------
+        float
+            Rouded value, if number of decimal places is defined, otherwise the
+            input value.
+
+        """
         try:
             r = round(value, self._decimals)
         except TypeError:
@@ -105,12 +143,18 @@ class StatFilter(object):
     def set_filter(self, **kwargs):
         """Set acceptable value range.
 
-        Keyworded arguments:
-        --------------------
-        value_max -- maximal measuring value acceptable for filtering.
-                     Default from constructor.
-        value_min -- minimal measuring value acceptable for filtering.
-                     Default from constructor.
+        Keyword arguments
+        -----------------
+        value_max : float
+            Maximal measuring value acceptable for filtering.
+        value_min : float
+            Minimal measuring value acceptable for filtering.
+
+        Notes
+        -----
+        - Initial (default) values are defined by the constructor.
+        - Use just that argument, which you need to changing.
+
         """
         self._value_max = kwargs.pop("value_max", self._value_max)
         self._value_min = kwargs.pop("value_min", self._value_min)
@@ -124,8 +168,8 @@ class StatFilter(object):
             self._value_min = t
 
     def set_buffer(self, buffer_len=5):
-        """Adjust data buffer for staticital filtering."""
-        buffer_len = abs(buffer_len) | 1    # Make odd number and minimum 1
+        """Adjust data buffer length for staticital smoothing."""
+        buffer_len = abs(int(buffer_len)) | 1  # Make odd number and minimum 1
         if self.get_buffer_len() < buffer_len:
             for i in range(buffer_len - self.get_buffer_len()):
                 self._buffer.append(None)
@@ -139,6 +183,13 @@ class StatFilter(object):
     def get_buffer_len(self):
         """Return real length of the data buffer.
 
+        Returns
+        -------
+        int
+            Real utilized data buffer length.
+
+        Notes
+        -----
         - Usually the returned value is the same as length put to the
           constructor.
         - If class has adjusted or limited the input buffer length, the
@@ -146,25 +197,48 @@ class StatFilter(object):
         - The method is useful, if the length has been put to the constructor
           as a numeric literal and there is no variable of the length to use
           it in other statements.
+
         """
         return len(self._buffer)
 
     def get_value_min(self):
-        """Return minimal acceptable value."""
+        """Return minimal acceptable value.
+
+        Returns
+        -------
+        float
+            Current acceptable minimal value for statistical smoothing.
+
+        """
         return self._value_min
 
     def get_value_max(self):
-        """Return maximal acceptable value."""
+        """Return maximal acceptable value.
+
+        Returns
+        -------
+        float
+            Current acceptable maximal value for statistical smoothing.
+
+        """
         return self._value_max
 
     def get_readings(self):
         """Return current number of values in data buffer.
 
-        - The statistical calculation can be provided beforeregistering
-          the full data buffer. In that case the method returns the values,
-          which a statistic is calculated from.
+        Returns
+        -------
+        int
+            Number of values acctually present in the data buffer.
+
+        Notes
+        -----
+        - The statistical calculation can be provided before filling
+          the entire data buffer. In that case the method returns the values
+          count, which a statistic is calculated from.
         - Usually the returned value should be the same as length of the data
           buffer at the end of a measurement cycle.
+
         """
         for i, value in enumerate(self._buffer):
             if value is None:
@@ -176,23 +250,32 @@ class StatFilter(object):
 # Exponential filtering
 # -----------------------------------------------------------------------------
 class StatFilterExponential(StatFilter):
-    """Exponential statistical filtering."""
+    """Exponential statistical smoothing.
+
+    Arguments
+    ---------
+    factor : float
+        Positive smoothing factor for exponential filtering.
+        It is converted to absolute value provided.
+
+        - Default value ``0.5`` means ``runnig average``.
+        - Acceptable value range is ``0.0 ~ 1.0`` and input value is limited
+          to it.
+
+    value_max : float
+        Maximal measuring value acceptable for filtering.
+    value_min : float
+        Minimal measuring value acceptable for filtering.
+    decimals : int
+        Positive integer number of decimal places for rounding statistical
+        results. If None is provided, no rounding occures.
+
+    """
 
     def __init__(self, factor=0.5, value_max=None, value_min=None,
                  decimals=None):
-        """Initialize instance object with common parameters.
-
-        Positional arguments:
-        ---------------------
-        factor -- smoothing factor for exponential filtering.
-                  Default for running average.
-                  Value range 0.0 ~ 1.0.
-        value_max -- maximal measuring value acceptable for filtering.
-        value_min -- minimal measuring value acceptable for filtering.
-        decimals -- number of decimal places for rounding filtering results.
-                    If None, no rounding occures.
-        """
-        self._factor = abs(factor)
+        """Create the class instance - constructor."""
+        self._factor = abs(factor or 0.5)
         self._factor = min(self._factor, 1.0)
         self._factor = max(self._factor, 0.0)
         super(type(self), self).__init__(
@@ -205,18 +288,27 @@ class StatFilterExponential(StatFilter):
         self._logger.debug("Smoothing factor %.2f", self._factor)
 
     def result(self, value=None):
-        """Calculate and return statistically smoothed value.
+        """Calculate statistically smoothed value.
 
-        Positional arguments:
-        ---------------------
-        value -- sample value to be filtered. If None, recent filtered result
-                 provided.
+        Arguments
+        ---------
+        value : float
+            Sample value to be filtered.
 
+        Returns
+        -------
+        float
+            If None input value is provided, recent result is returned,
+            otherwise the new smoothed value is.
+
+        Notes
+        -----
         - The method calculates a new filtered value from the input value,
           previous stored filtered value, and stored smoothing factor in the
           class instance object.
         - The very first input value is considered as a previous filtered value
           or starting value.
+
         """
         value = self.filter(value)
         if value is not None:
@@ -235,34 +327,50 @@ class StatFilterExponential(StatFilter):
     # Getters
     # -------------------------------------------------------------------------
     def get_factor(self):
-        """Return smoothing factor."""
-        if hasattr(self, "_factor"):
-            return self._factor
+        """Return current smoothing factor.
+
+        Returns
+        -------
+        float
+            Current smoothing factor utilized for statistical smoothing.
+
+        """
+        return self._factor
 
 
 # -----------------------------------------------------------------------------
 # Running statistics filtering
 # -----------------------------------------------------------------------------
 class StatFilterRunning(StatFilter):
-    """Running statistics filtering."""
+    """Running statistical smoothing.
+
+    Arguments
+    ---------
+    stat_type : enum
+        Enumerated type of a statistic calculated from registered running
+        values. The argument is defined by one of module's constants
+        ``AVERAGE``, ``MEDIAN``, ``MINIMUM``, ``MAXIMUM``.
+        Statistical type enables dynamically change statistical method for
+        smoothing input values without changing program code when just
+        one smoothing method is used.
+    value_max : float
+        Maximal measuring value acceptable for filtering.
+    value_min : float
+        Minimal measuring value acceptable for filtering.
+    buffer_len : int
+        Positive integer number of values held in the data buffer used for
+        statistical smoothing. It should be an odd number, otherwise it is
+        extended to the nearest odd one.
+    decimals : int
+        Positive integer number of decimal places for rounding statistical
+        results. If None is provided, no rounding occures.
+
+    """
 
     def __init__(self, stat_type=AVERAGE, value_max=None, value_min=None,
                  buffer_len=5, decimals=None):
-        """Initialize instance object with common parameters.
-
-        Positional arguments:
-        ---------------------
-        stat_type -- type of statistic calculated from registered running
-                     values.
-        value_max -- maximal measuring value acceptable for filtering.
-        value_min -- minimal measuring value acceptable for filtering.
-        buffer_len -- number of values held in the data buffer used for
-                      statistical filtering. It should be an odd number,
-                      otherwise it is extended to the nearest odd one.
-        decimals -- number of decimal places for rounding filtering results.
-                    If None, no rounding occurs.
-        """
-        self.set_stat_type(stat_type)
+        """Create the class instance - constructor."""
+        self.set_stat_type(stat_type or AVERAGE)
         super(type(self), self).__init__(
             value_max,
             value_min,
@@ -274,16 +382,21 @@ class StatFilterRunning(StatFilter):
     def _register_value(self, value):
         """Filter and register new value to the data buffer.
 
-        Positional arguments:
-        ---------------------
-        value -- sample value to be filtered.
+        Arguments
+        ---------
+        value : float
+            Sample value to be registered in the data buffer and use for
+            statistical smoothing if succesfully filtered.
+            *The argument is mandatory and has no default value.*
 
+        Notes
+        -----
+        - If new value does not fit to the filter range, it is ignored.
         - The most recent (fresh) sample value is always in the 0 index of the
           data buffer.
-        - If new value does not fit to the filter range, it is ignored.
         - Sample values are shifted to the right in the data buffer (to higher
-          indices), so that the most recent value is lost. The new value is
-          stored in the zero index of  the buffer.
+          indices), so that the most recent value is lost.
+
         """
         value = self.filter(value)
         if value is not None:
@@ -298,13 +411,17 @@ class StatFilterRunning(StatFilter):
     def result_avg(self, value=None):
         """Register new value and calculate running average.
 
-        Positional arguments:
-        ---------------------
-        value -- new sample value. If None, statistic is calculated from
-                 current content of the data buffer.
+        Arguments
+        ---------
+        value : float
+            New sample value. If None is provided, statistic is calculated from
+            current content of the data buffer.
 
-        - The method calculates new statistic from the input value and
-          previous stored sample values in the class instance object.
+        Notes
+        -----
+        The method calculates new statistic from the input value and previously
+        stored sample values in the class instance object.
+
         """
         statistic = self._register_value(value)
         readings = self.get_readings()
@@ -318,15 +435,19 @@ class StatFilterRunning(StatFilter):
     def result_med(self, value=None):
         """Register new value and calculate running median.
 
-        Positional arguments:
-        ---------------------
-        value -- new sample value. If None, statistic is calculated from
-                 current content of the data buffer.
+        Arguments
+        ---------
+        value : float
+            New sample value. If None is provided, statistic is calculated from
+            current content of the data buffer.
 
+        Notes
+        -----
         - The method calculates new statistic from the input value and
-          previous stored sample values in the class instance object.
-        - Until the data buffer is full, the method calculates median high at
-          even readings in the buffer.
+          previously stored sample values in the class instance object.
+        - Until the data buffer is full, the method calculates high median
+          at even readings in the buffer.
+
         """
         statistic = self._register_value(value)
         readings = self.get_readings()
@@ -337,13 +458,17 @@ class StatFilterRunning(StatFilter):
     def result_min(self, value=None):
         """Register new value and calculate running minimum.
 
-        Positional arguments:
-        ---------------------
-        value -- new sample value. If None, statistic is calculated from
-                 current content of the data buffer.
+        Arguments
+        ---------
+        value : float
+            New sample value. If None is provided, statistic is calculated from
+            current content of the data buffer.
 
-        - The method calculates new statistic from the input value and
-          previous stored sample values in the class instance object.
+        Notes
+        -----
+        The method calculates new statistic from the input value and previously
+        stored sample values in the class instance object.
+
         """
         statistic = self._register_value(value)
         readings = self.get_readings()
@@ -356,13 +481,17 @@ class StatFilterRunning(StatFilter):
     def result_max(self, value=None):
         """Register new value and calculate running maximum.
 
-        Positional arguments:
-        ---------------------
-        value -- new sample value. If None, statistic is calculated from
-                 current content of the data buffer.
+        Arguments
+        ---------
+        value : float
+            New sample value. If None is provided, statistic is calculated from
+            current content of the data buffer.
 
-        - The method calculates new statistic from the input value and
-          previous stored sample values in the class instance object.
+        Notes
+        -----
+        The method calculates new statistic from the input value and previously
+        stored sample values in the class instance object.
+
         """
         statistic = self._register_value(value)
         readings = self.get_readings()
@@ -375,13 +504,22 @@ class StatFilterRunning(StatFilter):
     def result(self, value=None):
         """Register new value and calculate default running statistic.
 
-        Positional arguments:
-        ---------------------
-        value -- new sample value. If None, statistic is calculated from
-                 current content of the data buffer.
+        Arguments
+        ---------
+        value : float
+            Sample value to be filtered.
 
+        Returns
+        -------
+        float
+            If None input value is provided, the statistic is calculated from
+            current content of the data buffer.
+
+        Notes
+        -----
         - The method calculates a new filtered value from the input value and
-          previous stored sample values in the class instance object.
+          previously stored sample values in the class instance object.
+
         """
         self._logger.debug("Default statistic: %s",
                            STAT_TYPES[self.get_stat_type()])
@@ -402,11 +540,17 @@ class StatFilterRunning(StatFilter):
     def set_stat_type(self, stat_type):
         """Set running statistics type as a default for resulting.
 
-        Positional arguments:
-        ---------------------
-        stat_type -- type of a statistic calculated from registered running
-                     values by default in the method 'result'. If not from
-                     allowed enumeration, nothing changes.
+        Arguments
+        ---------
+        stat_type : enum
+            Enumerated type of a statistic calculated from registered running
+            values by default in the method `result`.
+            The argument is defined by one of module's constants
+            ``AVERAGE``, ``MEDIAN``, ``MINIMUM``, ``MAXIMUM``.
+            If none from allowed enumerations is provided, nothing changes and
+            statistical calculation is executed by current type.
+            *The argument is mandatory and has no default value.*
+
         """
         if stat_type in [
             AVERAGE,
@@ -420,6 +564,12 @@ class StatFilterRunning(StatFilter):
     # Getters
     # -------------------------------------------------------------------------
     def get_stat_type(self):
-        """Return defaulting running statistics type."""
-        if hasattr(self, "_stat_type"):
-            return self._stat_type
+        """Return default running statistics type.
+
+        Returns
+        -------
+        int
+            Numerical representation of current default statistical type.
+
+        """
+        return self._stat_type

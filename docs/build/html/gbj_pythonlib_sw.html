@@ -76,20 +76,12 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">gbj_pythonlib_sw package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-gbj_pythonlib_sw.config">gbj_pythonlib_sw.config module</a></li>
-<li><a class="reference internal" href="#module-gbj_pythonlib_sw.mqtt">gbj_pythonlib_sw.mqtt module</a></li>
-<li><a class="reference internal" href="#module-gbj_pythonlib_sw.statfilter">gbj_pythonlib_sw.statfilter module</a></li>
-<li><a class="reference internal" href="#module-gbj_pythonlib_sw.timer">gbj_pythonlib_sw.timer module</a></li>
-<li><a class="reference internal" href="#module-gbj_pythonlib_sw.trigger">gbj_pythonlib_sw.trigger module</a></li>
-<li><a class="reference internal" href="#module-gbj_pythonlib_sw">Module contents</a></li>
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Purpose of the package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change log</a></li>
 </ul>
-</li>
-</ul>
-</div>
+
             
           
         </div>
@@ -159,39 +151,42 @@
 </div>
 <div class="section" id="module-gbj_pythonlib_sw.config">
 <span id="gbj-pythonlib-sw-config-module"></span><h2>gbj_pythonlib_sw.config module<a class="headerlink" href="#module-gbj_pythonlib_sw.config" title="Permalink to this headline">¶</a></h2>
-<p>Module for managing a configuration file.</p>
+<p>Module for managing a configuration INI file.</p>
 <dl class="class">
 <dt id="gbj_pythonlib_sw.config.Config">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.config.</code><code class="descname">Config</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Create a manager for a configuration INI file.</p>
-<p>A single class instance object manages just one configuration file.
-If more configuration files are needed to manage, separate instance should
-be created.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>string</em><em>, </em><em>pointer</em>) – Full path to a configuration file or file pointer already opened
-file.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>string</em><em>, </em><em>pointer</em>) – Full path to a configuration file or file pointer of already opened
+file.
+<em>The argument is mandatory and has no default value.</em></td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>A single class instance object manages just one configuration file.
+If more configuration files are needed to manage, separate instances should
+be created.</p>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.config.Config.get_content">
 <code class="descname">get_content</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config.get_content"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config.get_content" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create string with configuration parameters in form of INI file.</p>
-<p>All section and options are listed including from DEFAULT section.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Concent of configuration file without comments.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Content of the configuration file without comments.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>All section and options are listed including from <code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> section.</p>
 </dd></dl>
 
 <dl class="method">
@@ -203,8 +198,10 @@ file.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>option</strong> (<em>str</em>) – Configuration file option to be read.</li>
-<li><strong>section</strong> (<em>str</em>) – Configuration file section to be read from.</li>
+<li><strong>option</strong> (<em>str</em>) – Configuration file option to be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration file section where to search the option.
+<em>The argument is mandatory and has no default value.</em></li>
 <li><strong>default</strong> (<em>str</em>) – Default option value, if configuration file has neither
 the option nor the section.</li>
 </ul>
@@ -223,23 +220,28 @@ the option nor the section.</li>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.config.Config.option_split">
 <code class="descname">option_split</code><span class="sig-paren">(</span><em>option</em>, <em>section</em>, <em>appendix=[]</em>, <em>separator='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/config.html#Config.option_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.config.Config.option_split" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read configuration option and append and split its value to tuple.</p>
+<dd><p>Read configuration option, append to it, and split its value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>-- configuration file option to be read.</strong> (<em>option</em>) – </li>
-<li><strong>-- configuration file section to be read from.</strong> (<em>section</em>) – </li>
-<li><strong>-- list of additonal option value parts that should be added.</strong> (<em>appendix</em>) – </li>
-<li><strong>-- string for separating appendix list members and split</strong> (<em>separator</em>) – the entire option value</li>
+<li><strong>option</strong> (<em>str</em>) – Configuration file option to be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration file section where to search the option.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>appendix</strong> (<em>list</em>) – List of additonal option value parts that should be added
+to the read option for splitting purposes.</li>
+<li><strong>separator</strong> (<em>str</em>) – String used as a separator for spliting the option. It is used
+for glueing appendix list members with read option and at the same
+time for splitting the entire, composed option value.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of a configuration option parts.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">List with configuration option parts.</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of str</p>
 </td>
 </tr>
 </tbody>
@@ -254,9 +256,10 @@ the option nor the section.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>section</strong> (<em>str</em>) – Configuration section to be read from.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>section</strong> (<em>str</em>) – Configuration section to be read from.
+<em>The argument is mandatory and has no default value.</em></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List with configuration option names.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of configuration option names.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of str</td>
 </tr>
@@ -275,10 +278,43 @@ the option nor the section.</li>
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MQTT</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MQTT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MQTT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Common MQTT management.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>object</em>) – Object for access to a configuration INI file.
+It is instance of the class <code class="docutils literal notranslate"><span class="pre">Config</span></code> from this package’s module
+<code class="docutils literal notranslate"><span class="pre">config</span></code>.
+Particular configuration file is already open.
+Injection of the config file object to this class instance is a form
+of attaching that file to this object.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This class should not be instanciated. It servers as a abstract class and
+a parent class for operational classes for particular MQTT brokers.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">config.Config</span></code></dt>
+<dd>Class for managing configuration INI files.</dd>
+</dl>
+</div>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MQTT.get_connected">
 <code class="descname">get_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MQTT.get_connected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MQTT.get_connected" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return boolena connection flag.</p>
+<dd><p>Return connection flag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Flag about successful connection to an MQTT broker.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -287,7 +323,8 @@ the option nor the section.</li>
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MqttBroker</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MQTT" title="gbj_pythonlib_sw.mqtt.MQTT"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.mqtt.MQTT</span></code></a></p>
-<p>Create MQTT client connecting to usually local MQTT broker.</p>
+<p>Managing an MQTT client connection to usually local MQTT broker.</p>
+<p class="rubric">Notes</p>
 <ul class="simple">
 <li>The client utilizes MQTT topics and filter definitions from
 a configuration file.</li>
@@ -295,72 +332,59 @@ a configuration file.</li>
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER">
 <code class="descname">GROUP_BROKER</code><em class="property"> = 'MQTTbroker'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>str</em> – Predefined configuration section with MQTT broker parameters.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_FILTERS">
 <code class="descname">GROUP_FILTERS</code><em class="property"> = 'MQTTfilters'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_FILTERS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>str</em> – Predefined configuration section with MQTT topic filters.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_TOPICS">
 <code class="descname">GROUP_TOPICS</code><em class="property"> = 'MQTTtopics'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_TOPICS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="gbj_pythonlib_sw.mqtt.MqttBroker._on_connect">
-<code class="descname">_on_connect</code><span class="sig-paren">(</span><em>client</em>, <em>userdata</em>, <em>flags</em>, <em>rc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker._on_connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker._on_connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process actions when the broker responds to a connection request.</p>
-<p>client – the client instance for this callback
-userdata – the private user data as set in Client() or user_data_set()
-flags – response flags sent by the broker
-rc – the connection result (result code)</p>
-<dl class="docutils">
-<dt>flags is a dict that contains response flags from the broker:</dt>
-<dd>flags[‘session present’] - this flag is useful for clients that are
-using clean session set to 0 only. If a client with clean
-session=0, that reconnects to a broker that it has previously
-connected to, this flag indicates whether the broker still has the
-session information for the client. If 1, the session still exists.</dd>
-</dl>
-<p>The value of rc indicates success or not:
-0: Connection successful
-1: Connection refused - incorrect protocol version
-2: Connection refused - invalid client identifier
-3: Connection refused - server unavailable
-4: Connection refused - bad username or password
-5: Connection refused - not authorised
-6-255: Currently unused.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gbj_pythonlib_sw.mqtt.MqttBroker._on_disconnect">
-<code class="descname">_on_disconnect</code><span class="sig-paren">(</span><em>client</em>, <em>userdata</em>, <em>rc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker._on_disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker._on_disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process actions when the client disconnects from the broker.</p>
-<p>client – the client instance for this callback
-userdata – the private user data as set in Client() or user_data_set()
-rc – the disconnection result (result code)</p>
+<dd><p><em>str</em> – Predefined configuration section with MQTT topics.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.callback_filters">
 <code class="descname">callback_filters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.callback_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.callback_filters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register callback functions for particular MQTT topic groups.</p>
-<dl class="docutils">
-<dt>key – the key of the argument dictionary is a configuration option</dt>
-<dd>defining a topic, to which a topic filter is related.</dd>
-<dt>value – the value of the argument dictionary is a tuple with callback</dt>
-<dd>and section defining MQTT topic filter, if it is not
-GROUP_FILTERS, or just a callback, e.g.</dd>
-</dl>
-<p>server_test=mqtt_on_message_test
-server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> (<em>str</em>) – The key of the argument dictionary is a configuration option
+defining a topic, to which a topic filter is related.</li>
+<li><strong>value</strong> (<em>tuple</em>) – <p>The value of the argument dictionary is a tuple with <code class="docutils literal notranslate"><span class="pre">callback</span></code>
+and <code class="docutils literal notranslate"><span class="pre">section</span></code> defining MQTT topic filter.</p>
+<ul>
+<li>If section is <cite>GROUP_FILTERS</cite>, the argument value can be just
+the callback  function.</li>
+<li>If section is not <cite>GROUP_FILTERS</cite>, the argument value should be
+a tuple:<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">server_test</span><span class="o">=</span><span class="n">mqtt_on_message_test</span>
+<span class="n">server_sensor_temp</span><span class="o">=</span><span class="p">(</span><span class="n">mqtt_on_temp</span><span class="p">,</span> <span class="n">ConfigMqtt</span><span class="o">.</span><span class="n">GROUP_TOPICS</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
 <li>The method should be used before subscribing to respective filtered
-topics. The best place is in the on_connect callback.</li>
+topics. The best place is in the <code class="docutils literal notranslate"><span class="pre">on_connect</span></code> callback.</li>
 <li>The method can be called multiple times. For configuration option
-used at a previous call the filter callback is just updated. If the
-callback is None, the filter for correscponding topic is removed.</li>
+used at a previous call the filter callback is just updated.</li>
+<li>If the callback is None, the filter for corresponding topic is
+removed.</li>
 </ul>
 </dd></dl>
 
@@ -374,19 +398,20 @@ callback is None, the filter for correscponding topic is removed.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
 <tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
-<li><strong>key for callback function are root words from MQTT client callbacks</strong> (<em>All</em>) – </li>
-<li><strong>prefix on_.</strong> (<em>without</em>) – </li>
-<li><strong>-- callback launched after connection to MQTT broker</strong> (<a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MqttBroker.connect" title="gbj_pythonlib_sw.mqtt.MqttBroker.connect"><em>connect</em></a>) – </li>
-<li><strong>-- callback launched after disconnection from MQTT broker</strong> (<a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MqttBroker.disconnect" title="gbj_pythonlib_sw.mqtt.MqttBroker.disconnect"><em>disconnect</em></a>) – </li>
-<li><strong>-- callback launched after subscription to MQTT topics</strong> (<em>subscribe</em>) – </li>
-<li><strong>-- callback launched after receiving message from MQTT topics</strong> (<em>message</em>) – </li>
-<li><strong>-- loging name of the registered user at MQTT broker</strong> (<em>username</em>) – </li>
-<li><strong>-- password of the registered user at MQTT broker</strong> (<em>password</em>) – </li>
+<li><strong>connect</strong> (<em>function</em>) – Callback launched after connection to MQTT broker.</li>
+<li><strong>disconnect</strong> (<em>function</em>) – Callback launched after disconnection from MQTT broker.</li>
+<li><strong>subscribe</strong> (<em>function</em>) – Callback launched after subscription to MQTT topics.</li>
+<li><strong>message</strong> (<em>function</em>) – Callback launched after receiving message from MQTT topics.</li>
+<li><strong>username</strong> (<em>str</em>) – Login name of the registered user at MQTT broker.</li>
+<li><strong>password</strong> (<em>str</em>) – Password of the registered user at MQTT broker.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>All keys for callback functions are root words from MQTT client
+callbacks without prefix <code class="docutils literal notranslate"><span class="pre">on_</span></code>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -398,47 +423,171 @@ callback is None, the filter for correscponding topic is removed.</li>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.publish">
 <code class="descname">publish</code><span class="sig-paren">(</span><em>message</em>, <em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.publish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.publish" title="Permalink to this definition">¶</a></dt>
-<dd><p>Publish to a MQTT topic determined by configuration option.</p>
-<p>message – data to be published
-option – configuration file option to be read
-section – configuration file section to be read from</p>
-<p>General exception with error message</p>
+<dd><p>Publish to an MQTT topic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>str</em>) – Data to be published into the topic.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic, which should be published to.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – General exception with error code.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_filters">
 <code class="descname">subscribe_filters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.subscribe_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_filters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Subscribe to all MQTT topic filters.</p>
-<p>General exception with error code</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – General exception with error code.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_topic">
 <code class="descname">subscribe_topic</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.subscribe_topic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_topic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Subscribe to a MQTT topic determined by configuration option.</p>
-<p>option – configuration file option to be read
-section – configuration file section to be read from</p>
-<p>General exception with error code</p>
+<dd><p>Subscribe to an MQTT topic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic, which should be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – General exception with error code.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_def">
 <code class="descname">topic_def</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_def"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_def" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return topic definition as a ‘topic,qos’ tuple.</p>
+<dd><p>Return MQTT topic definition parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic, which should be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Pair of MQTT topic parameters as <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">qos</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple of str</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The method appends <code class="docutils literal notranslate"><span class="pre">0</span></code> as the default <cite>qos</cite> to the read topic
+definition for cases, when no <cite>qos</cite> is defined in order to split
+the topic properly.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_name">
 <code class="descname">topic_name</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return topic name from configuration MQTT topic definition.</p>
+<dd><p>Return MQTT topic name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic, which should be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">MQTT topic name.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_qos">
 <code class="descname">topic_qos</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_qos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_qos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return topic QoS from configuration MQTT topic definition.</p>
+<dd><p>Return MQTT topic QoS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic, which should be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">MQTT topic <cite>quality of service</cite> as an absolute integer of second
+parameter of read topic definition.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.mqtt.OPTION_CLIENTID">
+<code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">OPTION_CLIENTID</code><em class="property"> = 'clientid'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.OPTION_CLIENTID" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Configuration option with MQTT client identifier.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.mqtt.OPTION_HOST">
+<code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">OPTION_HOST</code><em class="property"> = 'host'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.OPTION_HOST" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Configuration option with MQTT broker IP or URL.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.mqtt.OPTION_PORT">
+<code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">OPTION_PORT</code><em class="property"> = 'port'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.OPTION_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Configuration option with MQTT broker HTTP port.</p>
 </dd></dl>
 
 <dl class="class">
@@ -446,59 +595,117 @@ section – configuration file section to be read from</p>
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">ThingSpeak</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#ThingSpeak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MQTT" title="gbj_pythonlib_sw.mqtt.MQTT"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.mqtt.MQTT</span></code></a></p>
 <p>Connect and publish to ThingSpeak MQTT broker.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>object</em>) – Object for access to a configuration INI file.
+It is instance of the class <code class="docutils literal notranslate"><span class="pre">Config</span></code> from this package module
+<code class="docutils literal notranslate"><span class="pre">config</span></code>.
+Particular configuration is already open.
+Injection of the config file object to this class instance it a form
+of attaching that file to this object.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
-<li>The client utilizes MQTT topics and filter definitions from
-a configuration file.</li>
 <li>The class only provides single publishing to ThingSpeak, so that
 connecting and disconnecting to the ThingSpeak broker is automatic.</li>
+<li>The class follows allowed delay between publishings set for free acounts
+and buffers frequent messagge preferably with status.</li>
 </ul>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">config.Config</span></code></dt>
+<dd>Class for managing configuration INI files.</dd>
+</dl>
+</div>
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.GROUP_BROKER">
 <code class="descname">GROUP_BROKER</code><em class="property"> = 'ThingSpeak'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.GROUP_BROKER" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>str</em> – Configuration section with ThingSpeak parameters.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_CHANNEL_ID">
 <code class="descname">OPTION_CHANNEL_ID</code><em class="property"> = 'channel_id'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_CHANNEL_ID" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>int</em> – Configuration option with ThingSpeak channel id.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_MQTT_API_KEY">
 <code class="descname">OPTION_MQTT_API_KEY</code><em class="property"> = 'mqtt_api_key'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_MQTT_API_KEY" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>str</em> – Configuration option with ThingSpeak MQTT API key.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_PUBLISH_DELAY">
 <code class="descname">OPTION_PUBLISH_DELAY</code><em class="property"> = 'publish_delay'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_PUBLISH_DELAY" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>float</em> – Configuration option with minimal publish delay in seconds.
+Default value is 15.0 s.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_WRITE_API_KEY">
 <code class="descname">OPTION_WRITE_API_KEY</code><em class="property"> = 'write_api_key'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.OPTION_WRITE_API_KEY" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><em>str</em> – Configuration option with ThingSpeak write key.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.get_publish_delay">
 <code class="descname">get_publish_delay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#ThingSpeak.get_publish_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.get_publish_delay" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return current publish delay limit in seconds.</p>
+<dd><p>Return minimal publish delay in seconds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Minimal ThinsgSpeak publish delay in seconds.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.ThingSpeak.publish">
 <code class="descname">publish</code><span class="sig-paren">(</span><em>fields={}</em>, <em>status=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#ThingSpeak.publish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.ThingSpeak.publish" title="Permalink to this definition">¶</a></dt>
-<dd><p>Publish single message to the ThingSpeak MQTT broker.</p>
-<dl class="docutils">
-<dt>fields – dictionary with ThingSpeak channel field numbers and values</dt>
-<dd>for publishing, e.g., {1: 23.4, 2: 1}</dd>
-</dl>
-<p>status – text to be published in the ThingSpeak channel as a status</p>
+<dd><p>Publish single message to ThingSpeak.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fields</strong> (<em>dict</em>) – Dictionary with ThingSpeak channel pairs
+<code class="docutils literal notranslate"><span class="pre">field</span> <span class="pre">number:</span> <span class="pre">field</span> <span class="pre">value</span></code>, e.g., <cite>{1: 23.4, 2: 1}</cite>, where
+<cite>field number</cite> is integer in the range <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">~</span> <span class="pre">8</span></code>.</li>
+<li><strong>status</strong> (<em>str</em>) – Text to be published in the ThingSpeak channel as a status.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
-<li>If a field number is outside the range 1 ~ 8, this field is ignored.</li>
-<li>If a value is undefined or empty, the corresponding field or status
+<li>If a field number is outside the expected range, this field
+is ignored.</li>
+<li>If a value is none or empty, the corresponding field or status
 is ignored.</li>
 </ul>
-<p>Boolean flag about real publishing to ThingSpeak
-General exception with error message from ThingSpeak</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Flag about real, successful publishing to ThingSpeak.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – General exception with error message from ThingSpeak.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -506,26 +713,92 @@ General exception with error message from ThingSpeak</p>
 </div>
 <div class="section" id="module-gbj_pythonlib_sw.statfilter">
 <span id="gbj-pythonlib-sw-statfilter-module"></span><h2>gbj_pythonlib_sw.statfilter module<a class="headerlink" href="#module-gbj_pythonlib_sw.statfilter" title="Permalink to this headline">¶</a></h2>
-<p>Module for statistical filtering.</p>
+<p>Module for statistical filtering and smoothing.</p>
+<dl class="data">
+<dt id="gbj_pythonlib_sw.statfilter.AVERAGE">
+<code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">AVERAGE</code><em class="property"> = 0</em><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.AVERAGE" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Enumeration for statistical type <code class="docutils literal notranslate"><span class="pre">average</span></code>.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.statfilter.MAXIMUM">
+<code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">MAXIMUM</code><em class="property"> = 3</em><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.MAXIMUM" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Enumeration for statistical type <code class="docutils literal notranslate"><span class="pre">maximum</span></code>.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.statfilter.MEDIAN">
+<code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">MEDIAN</code><em class="property"> = 1</em><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.MEDIAN" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Enumeration for statistical type <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.statfilter.MINIMUM">
+<code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">MINIMUM</code><em class="property"> = 2</em><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.MINIMUM" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Enumeration for statistical type <code class="docutils literal notranslate"><span class="pre">minimum</span></code>.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">StatFilter</code><span class="sig-paren">(</span><em>value_max=None</em>, <em>value_min=None</em>, <em>buffer_len=5</em>, <em>decimals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Creating a scuffolding for statistical filtering.</p>
+<p>Common statistical filtering and smoothing management.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>value_max</strong> (<em>float</em>) – Maximal measuring value acceptable for filtering.</li>
+<li><strong>value_min</strong> (<em>float</em>) – Minimal measuring value acceptable for filtering.</li>
+<li><strong>buffer_len</strong> (<em>int</em>) – Positive integer number of values held in the data buffer used for
+statistical smoothing. It should be an odd number, otherwise it is
+extended to the nearest odd one.</li>
+<li><strong>decimals</strong> (<em>int</em>) – Positive integer number of decimal places for rounding statistical
+results. If None is provided, no rounding occures.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This class should not be instanciated. It servers as a abstract class and
+a parent class for operational classes with corresponding statictical and
+smoothing methods.</p>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.filter">
 <code class="descname">filter</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter value against acceptable value range.</p>
-<dl class="docutils">
-<dt>value – value to be filtered. If outside the value range, None is</dt>
-<dd>returned.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – Value to be filtered.
+<em>The argument is mandatory and has no default value.</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If the input value is outside of the acceptable value range, None
+is returned, otherwise that value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_buffer_len">
 <code class="descname">get_buffer_len</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_buffer_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_buffer_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return real length of the data buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Real utilized data buffer length.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
 <li>Usually the returned value is the same as length put to the
 constructor.</li>
@@ -541,10 +814,21 @@ it in other statements.</li>
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_readings">
 <code class="descname">get_readings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_readings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_readings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return current number of values in data buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of values acctually present in the data buffer.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
-<li>The statistical calculation can be provided beforeregistering
-the full data buffer. In that case the method returns the values,
-which a statistic is calculated from.</li>
+<li>The statistical calculation can be provided before filling
+the entire data buffer. In that case the method returns the values
+count, which a statistic is calculated from.</li>
 <li>Usually the returned value should be the same as length of the data
 buffer at the end of a measurement cycle.</li>
 </ul>
@@ -554,12 +838,32 @@ buffer at the end of a measurement cycle.</li>
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_value_max">
 <code class="descname">get_value_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_value_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_value_max" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return maximal acceptable value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Current acceptable maximal value for statistical smoothing.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.get_value_min">
 <code class="descname">get_value_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.get_value_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.get_value_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return minimal acceptable value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Current acceptable minimal value for statistical smoothing.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -571,25 +875,51 @@ buffer at the end of a measurement cycle.</li>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.result">
 <code class="descname">result</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.result" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return rounded value if needed and possible.</p>
+<dd><p>Round value if needed and possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – Value to be processed.
+<em>The argument is mandatory and has no default value.</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Rouded value, if number of decimal places is defined, otherwise the
+input value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.set_buffer">
 <code class="descname">set_buffer</code><span class="sig-paren">(</span><em>buffer_len=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.set_buffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.set_buffer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adjust data buffer for staticital filtering.</p>
+<dd><p>Adjust data buffer length for staticital smoothing.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilter.set_filter">
 <code class="descname">set_filter</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilter.set_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilter.set_filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set acceptable value range.</p>
-<dl class="docutils">
-<dt>value_max – maximal measuring value acceptable for filtering.</dt>
-<dd>Default from constructor.</dd>
-<dt>value_min – minimal measuring value acceptable for filtering.</dt>
-<dd>Default from constructor.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>value_max</strong> (<em>float</em>) – Maximal measuring value acceptable for filtering.</li>
+<li><strong>value_min</strong> (<em>float</em>) – Minimal measuring value acceptable for filtering.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li>Initial (default) values are defined by the constructor.</li>
+<li>Use just that argument, which you need to changing.</li>
+</ul>
 </dd></dl>
 
 </dd></dl>
@@ -598,21 +928,63 @@ buffer at the end of a measurement cycle.</li>
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterExponential">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">StatFilterExponential</code><span class="sig-paren">(</span><em>factor=0.5</em>, <em>value_max=None</em>, <em>value_min=None</em>, <em>decimals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterExponential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterExponential" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.statfilter.StatFilter" title="gbj_pythonlib_sw.statfilter.StatFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.statfilter.StatFilter</span></code></a></p>
-<p>Exponential statistical filtering.</p>
+<p>Exponential statistical smoothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>factor</strong> (<em>float</em>) – <p>Positive smoothing factor for exponential filtering.
+It is converted to absolute value provided.</p>
+<ul>
+<li>Default value <code class="docutils literal notranslate"><span class="pre">0.5</span></code> means <code class="docutils literal notranslate"><span class="pre">runnig</span> <span class="pre">average</span></code>.</li>
+<li>Acceptable value range is <code class="docutils literal notranslate"><span class="pre">0.0</span> <span class="pre">~</span> <span class="pre">1.0</span></code> and input value is limited
+to it.</li>
+</ul>
+</li>
+<li><strong>value_max</strong> (<em>float</em>) – Maximal measuring value acceptable for filtering.</li>
+<li><strong>value_min</strong> (<em>float</em>) – Minimal measuring value acceptable for filtering.</li>
+<li><strong>decimals</strong> (<em>int</em>) – Positive integer number of decimal places for rounding statistical
+results. If None is provided, no rounding occures.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterExponential.get_factor">
 <code class="descname">get_factor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterExponential.get_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterExponential.get_factor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return smoothing factor.</p>
+<dd><p>Return current smoothing factor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Current smoothing factor utilized for statistical smoothing.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterExponential.result">
 <code class="descname">result</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterExponential.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterExponential.result" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate and return statistically smoothed value.</p>
-<dl class="docutils">
-<dt>value – sample value to be filtered. If None, recent filtered result</dt>
-<dd>provided.</dd>
-</dl>
+<dd><p>Calculate statistically smoothed value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – Sample value to be filtered.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If None input value is provided, recent result is returned,
+otherwise the new smoothed value is.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
 <li>The method calculates a new filtered value from the input value,
 previous stored filtered value, and stored smoothing factor in the
@@ -628,39 +1000,67 @@ or starting value.</li>
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.statfilter.</code><code class="descname">StatFilterRunning</code><span class="sig-paren">(</span><em>stat_type=0</em>, <em>value_max=None</em>, <em>value_min=None</em>, <em>buffer_len=5</em>, <em>decimals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.statfilter.StatFilter" title="gbj_pythonlib_sw.statfilter.StatFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.statfilter.StatFilter</span></code></a></p>
-<p>Running statistics filtering.</p>
-<dl class="method">
-<dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning._register_value">
-<code class="descname">_register_value</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning._register_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning._register_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filter and register new value to the data buffer.</p>
-<p>value – sample value to be filtered.</p>
-<ul class="simple">
-<li>The most recent (fresh) sample value is always in the 0 index of the
-data buffer.</li>
-<li>If new value does not fit to the filter range, it is ignored.</li>
-<li>Sample values are shifted to the right in the data buffer (to higher
-indices), so that the most recent value is lost. The new value is
-stored in the zero index of  the buffer.</li>
+<p>Running statistical smoothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>stat_type</strong> (<em>enum</em>) – Enumerated type of a statistic calculated from registered running
+values. The argument is defined by one of module’s constants
+<code class="docutils literal notranslate"><span class="pre">AVERAGE</span></code>, <code class="docutils literal notranslate"><span class="pre">MEDIAN</span></code>, <code class="docutils literal notranslate"><span class="pre">MINIMUM</span></code>, <code class="docutils literal notranslate"><span class="pre">MAXIMUM</span></code>.
+Statistical type enables dynamically change statistical method for
+smoothing input values without changing program code when just
+one smoothing method is used.</li>
+<li><strong>value_max</strong> (<em>float</em>) – Maximal measuring value acceptable for filtering.</li>
+<li><strong>value_min</strong> (<em>float</em>) – Minimal measuring value acceptable for filtering.</li>
+<li><strong>buffer_len</strong> (<em>int</em>) – Positive integer number of values held in the data buffer used for
+statistical smoothing. It should be an odd number, otherwise it is
+extended to the nearest odd one.</li>
+<li><strong>decimals</strong> (<em>int</em>) – Positive integer number of decimal places for rounding statistical
+results. If None is provided, no rounding occures.</li>
 </ul>
-</dd></dl>
-
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.get_stat_type">
 <code class="descname">get_stat_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.get_stat_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.get_stat_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return defaulting running statistics type.</p>
+<dd><p>Return default running statistics type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Numerical representation of current default statistical type.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result">
 <code class="descname">result</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register new value and calculate default running statistic.</p>
-<dl class="docutils">
-<dt>value – new sample value. If None, statistic is calculated from</dt>
-<dd>current content of the data buffer.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – Sample value to be filtered.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If None input value is provided, the statistic is calculated from
+current content of the data buffer.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
 <li>The method calculates a new filtered value from the input value and
-previous stored sample values in the class instance object.</li>
+previously stored sample values in the class instance object.</li>
 </ul>
 </dd></dl>
 
@@ -668,43 +1068,57 @@ previous stored sample values in the class instance object.</li>
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_avg">
 <code class="descname">result_avg</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_avg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_avg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register new value and calculate running average.</p>
-<dl class="docutils">
-<dt>value – new sample value. If None, statistic is calculated from</dt>
-<dd>current content of the data buffer.</dd>
-</dl>
-<ul class="simple">
-<li>The method calculates new statistic from the input value and
-previous stored sample values in the class instance object.</li>
-</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – New sample value. If None is provided, statistic is calculated from
+current content of the data buffer.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The method calculates new statistic from the input value and previously
+stored sample values in the class instance object.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_max">
 <code class="descname">result_max</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_max" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register new value and calculate running maximum.</p>
-<dl class="docutils">
-<dt>value – new sample value. If None, statistic is calculated from</dt>
-<dd>current content of the data buffer.</dd>
-</dl>
-<ul class="simple">
-<li>The method calculates new statistic from the input value and
-previous stored sample values in the class instance object.</li>
-</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – New sample value. If None is provided, statistic is calculated from
+current content of the data buffer.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The method calculates new statistic from the input value and previously
+stored sample values in the class instance object.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_med">
 <code class="descname">result_med</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_med"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_med" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register new value and calculate running median.</p>
-<dl class="docutils">
-<dt>value – new sample value. If None, statistic is calculated from</dt>
-<dd>current content of the data buffer.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – New sample value. If None is provided, statistic is calculated from
+current content of the data buffer.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
 <li>The method calculates new statistic from the input value and
-previous stored sample values in the class instance object.</li>
-<li>Until the data buffer is full, the method calculates median high at
-even readings in the buffer.</li>
+previously stored sample values in the class instance object.</li>
+<li>Until the data buffer is full, the method calculates high median
+at even readings in the buffer.</li>
 </ul>
 </dd></dl>
 
@@ -712,25 +1126,38 @@ even readings in the buffer.</li>
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.result_min">
 <code class="descname">result_min</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.result_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.result_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register new value and calculate running minimum.</p>
-<dl class="docutils">
-<dt>value – new sample value. If None, statistic is calculated from</dt>
-<dd>current content of the data buffer.</dd>
-</dl>
-<ul class="simple">
-<li>The method calculates new statistic from the input value and
-previous stored sample values in the class instance object.</li>
-</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) – New sample value. If None is provided, statistic is calculated from
+current content of the data buffer.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The method calculates new statistic from the input value and previously
+stored sample values in the class instance object.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.statfilter.StatFilterRunning.set_stat_type">
 <code class="descname">set_stat_type</code><span class="sig-paren">(</span><em>stat_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/statfilter.html#StatFilterRunning.set_stat_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.statfilter.StatFilterRunning.set_stat_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set running statistics type as a default for resulting.</p>
-<dl class="docutils">
-<dt>stat_type – type of a statistic calculated from registered running</dt>
-<dd>values by default in the method ‘result’. If not from
-allowed enumeration, nothing changes.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>stat_type</strong> (<em>enum</em>) – Enumerated type of a statistic calculated from registered running
+values by default in the method <cite>result</cite>.
+The argument is defined by one of module’s constants
+<code class="docutils literal notranslate"><span class="pre">AVERAGE</span></code>, <code class="docutils literal notranslate"><span class="pre">MEDIAN</span></code>, <code class="docutils literal notranslate"><span class="pre">MINIMUM</span></code>, <code class="docutils literal notranslate"><span class="pre">MAXIMUM</span></code>.
+If none from allowed enumerations is provided, nothing changes and
+statistical calculation is executed by current type.
+<em>The argument is mandatory and has no default value.</em></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -738,61 +1165,107 @@ allowed enumeration, nothing changes.</dd>
 </div>
 <div class="section" id="module-gbj_pythonlib_sw.timer">
 <span id="gbj-pythonlib-sw-timer-module"></span><h2>gbj_pythonlib_sw.timer module<a class="headerlink" href="#module-gbj_pythonlib_sw.timer" title="Permalink to this headline">¶</a></h2>
-<p>Module for creating a timer and its prescalers.</p>
+<p>Module for creating a timer and setting its prescalers.</p>
+<p>A prescaler can be considered as a timer period divider and can run its own
+callbacks separately from the timer’s callbacks.</p>
 <dl class="class">
 <dt id="gbj_pythonlib_sw.timer.Timer">
-<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">Timer</code><span class="sig-paren">(</span><em>period=1</em>, <em>callback=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">Timer</code><span class="sig-paren">(</span><em>period</em>, <em>callback</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Creating a timer.</p>
-<ul class="simple">
-<li>If it is created without defined count of shots, it is a periodic timer
-marked with “R” (repeating) in the string instance representation.</li>
-<li>If it is created with count greater than 1, it is a countdown timer
-marked with “C” (countdown) in the string instance representation.</li>
-<li>If it is created with count equal 1, it is an one-shot timer
-marked with “O” (oneshot) in the string instance representation.</li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>period</strong> (<em>float</em>) – Positive float interval of the timer in seconds. If other type is
+provided, it is converted to an absolute float.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>callback</strong> (<em>function</em><em>, </em><em>tuple of functions</em>) – One of more functions in role of callbacks that the timer calls
+when expires.
+<em>The argument is mandatory and has no default value.</em></li>
 </ul>
-<dl class="method">
-<dt id="gbj_pythonlib_sw.timer.Timer._create_timer">
-<code class="descname">_create_timer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer._create_timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer._create_timer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new timer object and start it.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gbj_pythonlib_sw.timer.Timer._run_callback">
-<code class="descname">_run_callback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer._run_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer._run_callback" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run external instance callback.</p>
-<p>exec_last – flag about last calling at countdown timers</p>
-</dd></dl>
-
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>count</strong> (<em>int</em>) – Positive integer number of desired shots of the timer. If other
+type is provided, it is converted to absolute integer.
+If it is not defined, the timer is processed as periodic one with
+endless running.</li>
+<li><strong>name</strong> (<em>str</em>) – Name of the timer incorporated to its object. If none is provided,
+the name of the class is used.
+This name has nothing commong with registration name of the timer used
+in the function <cite>register_timer</cite>. However, it is convinient to use
+the same name for both purposes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li>If the timer is created without defined count of shots, it is a periodic
+timer marked with <code class="docutils literal notranslate"><span class="pre">R</span></code> as <code class="docutils literal notranslate"><span class="pre">repeating</span></code> in the string instance
+representation.</li>
+<li>If the timer is created with count greater than 1, it is a countdown
+timer marked with <code class="docutils literal notranslate"><span class="pre">C</span></code> as <code class="docutils literal notranslate"><span class="pre">countdown</span></code> in the string instance
+representation.</li>
+<li>If the timer is created with count equal 1, it is an one-shot timer
+marked with <code class="docutils literal notranslate"><span class="pre">O</span></code> as <code class="docutils literal notranslate"><span class="pre">oneshot</span></code> in the string instance representation.</li>
+<li>Keyword arguments not listed here are passed to the callback function(s).</li>
+</ul>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="#gbj_pythonlib_sw.timer.register_timer" title="gbj_pythonlib_sw.timer.register_timer"><code class="xref py py-class docutils literal notranslate"><span class="pre">register_timer</span></code></a></dt>
+<dd>Registration of timers under names.</dd>
+</dl>
+</div>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.timer.Timer.get_prescalers">
 <code class="descname">get_prescalers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.get_prescalers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.get_prescalers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return list of prescalers.</p>
+<dd><p>Return dictionary of prescalers.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.timer.Timer.prescaler">
 <code class="descname">prescaler</code><span class="sig-paren">(</span><em>factor</em>, <em>callback</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.prescaler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.prescaler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Register a callback function called at each factor tickself.</p>
-<dl class="docutils">
-<dt>factor – integer divider of the initial timer period. It is truncated</dt>
-<dd>to integer and ignored if less than 2.</dd>
-<dt>callback – function or tuple of them calling by the timer</dt>
-<dd>at each factor-th period</dd>
-</dl>
-<p>args – additional positional arguments passed to the callback</p>
-<p>kwargs – additional keyworded arguments passed to the callback.</p>
+<dd><p>Register a callback function called at each factor tick.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>factor</strong> (<em>int</em>) – Positive integer as a divider of the timer’s period. It is
+truncated to an absolute integer and ignored, if it results to less
+than 2. The factor is used as a key in registration dictionary of
+prescalers.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>callback</strong> (<em>function</em><em>, </em><em>tuple of functions</em>) – One or more functions calling by the timer at each factor-th
+period.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>args</strong> (<em>tuple</em>) – Additional positional arguments passed to the callback(s).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>kwargs</strong> (<em>dict</em>) – Additional keyword arguments passed to the callback(s).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
-<li>The prescaler method enables launching a specific callback
-at multiple timer period and acts as a frequency divider.</li>
+<li>The prescaler method enables launching a specific callback or more
+callback at multiple timer periods and acts as a frequency divider.</li>
 <li>Prescale factor equal 1 is useless, because it is equivalent to basic
 timer callback. In this case it is ignored.</li>
 <li>The prescaler method can be called multiple times. For the same
 factor the corresponding callback is updated including its arguments.
-If None, the prescaler is removed.</li>
-<li>None of prescalers is launched if basic timer callback is defined or
-timer is one-timer one.</li>
+If none factor is provided, the prescaler is removed.</li>
+<li>None of prescalers is launched, if timer’s callback is not defined or
+timer is one-time one.</li>
 <li>All prescalers are called at random order, but usually in order of
 their registration.</li>
 </ul>
@@ -807,7 +1280,7 @@ their registration.</li>
 <dl class="method">
 <dt id="gbj_pythonlib_sw.timer.Timer.stop">
 <code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#Timer.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.Timer.stop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stop timer.</p>
+<dd><p>Destroy timer thread object.</p>
 </dd></dl>
 
 </dd></dl>
@@ -815,12 +1288,34 @@ their registration.</li>
 <dl class="function">
 <dt id="gbj_pythonlib_sw.timer.register_timer">
 <code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">register_timer</code><span class="sig-paren">(</span><em>name</em>, <em>timer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/timer.html#register_timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.timer.register_timer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store a timer object in the dictionary.</p>
-<p>name – key name of a timer
-timer – value object of a timer. If name already exists in the dictionary,</p>
-<blockquote>
-<div>the timer is update. If none and name already exists, the timer
-is stopped and removed from the dictionary.</div></blockquote>
+<dd><p>Store a timer object in the registration dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – <p>Name of a timer that is used as a key in timers registration
+dictionary, so that it has to be unique within all registered timers.
+<em>The argument is mandatory and has no default value.</em></p>
+<ul>
+<li>If name already exists in the dictionary, the timer is updated.</li>
+<li>If name is not correct dictionary key, the registration is ingored.</li>
+</ul>
+</li>
+<li><strong>timer</strong> (<em>object</em>) – Object of a timer that is used as a value in timers registration
+dictionary.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li>Object is instance of the class <code class="docutils literal notranslate"><span class="pre">Timer</span></code> from the standard library
+module <code class="docutils literal notranslate"><span class="pre">threading</span></code>.</li>
+<li>If none object is provided and name already exists, the named timer
+is stopped and removed from the dictionary.</li>
+</ul>
 </dd></dl>
 
 <dl class="function">
@@ -835,10 +1330,22 @@ is stopped and removed from the dictionary.</div></blockquote>
 <dd><p>Stop all registered timers.</p>
 </dd></dl>
 
+<dl class="data">
+<dt id="gbj_pythonlib_sw.timer.timers">
+<code class="descclassname">gbj_pythonlib_sw.timer.</code><code class="descname">timers</code><em class="property"> = {}</em><a class="headerlink" href="#gbj_pythonlib_sw.timer.timers" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Registration storage of timers.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-gbj_pythonlib_sw.trigger">
 <span id="gbj-pythonlib-sw-trigger-module"></span><h2>gbj_pythonlib_sw.trigger module<a class="headerlink" href="#module-gbj_pythonlib_sw.trigger" title="Permalink to this headline">¶</a></h2>
-<p>Module for managing and executing triggers - value dependend callbacks.</p>
+<p>Module for managing and executing triggers as value dependend callbacks.</p>
+<dl class="data">
+<dt id="gbj_pythonlib_sw.trigger.LOWER">
+<code class="descclassname">gbj_pythonlib_sw.trigger.</code><code class="descname">LOWER</code><em class="property"> = 1</em><a class="headerlink" href="#gbj_pythonlib_sw.trigger.LOWER" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Enumeration for lower trigger mode.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="gbj_pythonlib_sw.trigger.Trigger">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.trigger.</code><code class="descname">Trigger</code><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger" title="Permalink to this definition">¶</a></dt>
@@ -848,48 +1355,130 @@ is stopped and removed from the dictionary.</div></blockquote>
 <dt id="gbj_pythonlib_sw.trigger.Trigger.del_triggers">
 <code class="descname">del_triggers</code><span class="sig-paren">(</span><em>ids=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.del_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.del_triggers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete all or listed triggers.</p>
-<p>ids – list of trigger identifiers that should be Removed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ids</strong> (<em>list</em>) – List of trigger identifiers that should be removed from class
+instance regristration.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.trigger.Trigger.exec_triggers">
 <code class="descname">exec_triggers</code><span class="sig-paren">(</span><em>value</em>, <em>ids=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.exec_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.exec_triggers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate and execute all or listed triggers.</p>
-<p>value – comparison value
-ids – list of trigger identifiers that should be evaluated</p>
-<p>value – comparison value
-threshold – threshold value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> (<em>float</em>) – Comparison value, which is compared to threshold values of triggers
+in order to run callback(s) or not.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>ids</strong> (<em>list</em>) – <p>List of trigger identifiers that should be evaluated.</p>
+<ul>
+<li>If the input value is not a list, e.g., just string with
+identifier of one trigger or string with tuple of identifiers,
+it is converted to the list.</li>
+<li>If argument is not provided, all triggers are executed against
+the comparison value.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>value</strong> (<em>float</em>) – Comparison value.</li>
+<li><strong>threshold</strong> (<em>float</em>) – Threshold value taken from definition of respective trigger.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The method injects other parameters to each called callback function
+as keyword arguments in order to inform those callbacks about values,
+that caused  their invocation.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.trigger.Trigger.get_triggers">
 <code class="descname">get_triggers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.get_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.get_triggers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return list of triggers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Registered triggers with all their parameters.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.trigger.Trigger.set_trigger">
 <code class="descname">set_trigger</code><span class="sig-paren">(</span><em>id</em>, <em>mode=None</em>, <em>value=None</em>, <em>callback=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/trigger.html#Trigger.set_trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.trigger.Trigger.set_trigger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create or update trigger.</p>
-<p>id – unique identifier of a trigger in the list of them of any type
-mode – processing mode of the trigger [UPPER, LOWER]
-value – threshold value
-callback – function or tuple of them calling at threshold value.
-args – additional positional arguments passed to the callback after</p>
-<blockquote>
-<div>forced arguments by this class.</div></blockquote>
-<p>kwargs – additional keyworded arguments passed to the callback.</p>
-<p>Exception NameError - if identifier is not provided
-Exception TypeError - if mode is not from the allowed enumeration</p>
+<dd><p>Create or update trigger and register it to class instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id</strong> – Unique identifier of a trigger in the list of them of any type.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>mode</strong> (<em>enum</em>) – <p>Processing mode of the trigger. The argument is defined by one of
+module’s constants <code class="docutils literal notranslate"><span class="pre">UPPER</span></code>, <code class="docutils literal notranslate"><span class="pre">LOWER</span></code>.</p>
+<ul>
+<li>Upper trigger calls callback(s) when comparison value reaches or
+exceeds the threshold value.</li>
+<li>Lower trigger calls callback(s) when comparison value sinks to
+the threshold value or below.</li>
+</ul>
+</li>
+<li><strong>value</strong> (<em>float</em>) – Threshold value, which in comparison to an comparison value causes
+running a callback function.</li>
+<li><strong>callback</strong> (<em>function</em><em>, </em><em>tuple of functions</em>) – One of more functions in role of callbacks that the trigger calls
+when threshold value is reached from direction corresponding to the
+mode of the trigger.</li>
+<li><strong>args</strong> (<em>tuple</em>) – Additional positional arguments passed to the callback(s) after
+forced arguments by this class.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first"><strong>kwargs</strong> (<em>dict</em>) – Additional keyworded arguments passed to the callback(s).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">NameError</span></code> – Identifier is not provided.</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – Mode is not from the expected enumeration.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
 <ul class="simple">
-<li>The trigger method can be called multiple times. For the same
-trigger value corresponding callback is updated including its
-arguments. If None, the trigger is removed.</li>
-<li>For a particular threshold value only one trigger can be defined,
-either upper or lower, but not both.</li>
+<li>The trigger method can be called multiple times.</li>
+<li>For the same trigger identifier corresponding callback is updated
+including its arguments.</li>
 </ul>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.trigger.UPPER">
+<code class="descclassname">gbj_pythonlib_sw.trigger.</code><code class="descname">UPPER</code><em class="property"> = 0</em><a class="headerlink" href="#gbj_pythonlib_sw.trigger.UPPER" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – Enumeration for upper trigger mode.</p>
 </dd></dl>
 
 </div>

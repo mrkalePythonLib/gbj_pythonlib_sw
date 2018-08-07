@@ -28,14 +28,14 @@ timer
   Managing timers utilizing threading.
 
 trigger
-  Managing numeric triggers. Triggers are identified by textual names. Each of
-  them can be defined as upper trigger o lower trigger with particular trigger
-  value.
+  Managing numeric triggers. Triggers are identified usualy by textual names.
+  Each of them can be defined as upper trigger or lower trigger with particular
+  threshold (trigger) value.
 
   Upper trigger
-    It calls respective callback function when current value reaches or exceeds
-    the trigger value.
+    It calls callback function(s) when provided comparison value reaches or
+    exceeds the threshold value.
 
   Lower trigger
-    It calls callback function when the current value reaches or is less than
-    trigger one.
+    It calls callback function(s) when the comparison value sinks to the
+    threshold value or below.

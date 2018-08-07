@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Module for communicating with MQTT brokers."""
-__version__ = "0.1.0"
-__status__ = "Development"
+__version__ = "0.2.0"
+__status__ = "Testing"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018, " + __author__
 __credits__ = []
@@ -24,8 +24,14 @@ import paho.mqtt.publish as mqttpublish
 # Module constants
 ###############################################################################
 OPTION_CLIENTID = "clientid"
+"""str: Configuration option with MQTT client identifier."""
+
 OPTION_HOST = "host"
+"""str: Configuration option with MQTT broker IP or URL."""
+
 OPTION_PORT = "port"
+"""int: Configuration option with MQTT broker HTTP port."""
+
 RESULTS = [
     "SUCCESS",
     "BAD PROTOCOL",
@@ -40,15 +46,31 @@ RESULTS = [
 # Classes
 ###############################################################################
 class MQTT(object):
-    """Common MQTT management."""
+    """Common MQTT management.
+
+    Arguments
+    ---------
+    config : object
+        Object for access to a configuration INI file.
+        It is instance of the class ``Config`` from this package's module
+        ``config``.
+        Particular configuration file is already open.
+        Injection of the config file object to this class instance is a form
+        of attaching that file to this object.
+
+    Notes
+    -----
+    This class should not be instanciated. It servers as a abstract class and
+    a parent class for operational classes for particular MQTT brokers.
+
+    See Also
+    --------
+    config.Config : Class for managing configuration INI files.
+
+    """
 
     def __init__(self, config):
-        """Initialize instance object - constructor.
-
-        Positional arguments:
-        ---------------------
-        config -- object for access to a configuration file
-        """
+        """Create the class instance - constructor."""
         self._logger = logging.getLogger(" ".join([__name__, __version__]))
         self._logger.debug("Instance of %s created", self.__class__.__name__)
         self._config = config
@@ -62,21 +84,36 @@ class MQTT(object):
             return "Config file '{}'".format(self._config._file)
 
     def get_connected(self):
-        """Return boolena connection flag."""
+        """Return connection flag.
+
+        Returns
+        -------
+        bool
+            Flag about successful connection to an MQTT broker.
+
+        """
         return self._connected
 
 
 class MqttBroker(MQTT):
-    """Create MQTT client connecting to usually local MQTT broker.
+    """Managing an MQTT client connection to usually local MQTT broker.
 
+    Notes
+    -----
     - The client utilizes MQTT topics and filter definitions from
       a configuration file.
+
     """
 
     # Predefined configuration file sections related to MQTT
     GROUP_BROKER = "MQTTbroker"
+    """str: Predefined configuration section with MQTT broker parameters."""
+
     GROUP_TOPICS = "MQTTtopics"
+    """str: Predefined configuration section with MQTT topics."""
+
     GROUP_FILTERS = "MQTTfilters"
+    """str: Predefined configuration section with MQTT topic filters."""
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -86,7 +123,30 @@ class MqttBroker(MQTT):
             return "No MQTT client active"
 
     def topic_def(self, option, section=GROUP_TOPICS):
-        """Return topic definition as a 'topic,qos' tuple."""
+        """Return MQTT topic definition parameters.
+
+        Arguments
+        ---------
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic, which should be read.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
+
+        Returns
+        -------
+        tuple of str
+            Pair of MQTT topic parameters as ``name``, ``qos``.
+
+        Notes
+        -----
+        The method appends ``0`` as the default `qos` to the read topic
+        definition for cases, when no `qos` is defined in order to split
+        the topic properly.
+
+        """
         try:
             name, qos = self._config.option_split(option, section, ['0'])
             qos = int(qos)
@@ -96,42 +156,82 @@ class MqttBroker(MQTT):
         return (name, qos)
 
     def topic_name(self, option, section=GROUP_TOPICS):
-        """Return topic name from configuration MQTT topic definition."""
+        """Return MQTT topic name.
+
+        Arguments
+        ---------
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic, which should be read.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
+
+        Returns
+        -------
+        str
+            MQTT topic name.
+
+        """
         name, _ = self.topic_def(option, section)
         return name
 
     def topic_qos(self, option, section=GROUP_TOPICS):
-        """Return topic QoS from configuration MQTT topic definition."""
+        """Return MQTT topic QoS.
+
+        Arguments
+        ---------
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic, which should be read.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
+
+        Returns
+        -------
+        int
+            MQTT topic `quality of service` as an absolute integer of second
+            parameter of read topic definition.
+
+        """
         _, qos = self.topic_def(option, section)
-        return qos
+        return abs(int(qos))
 
     def _on_connect(self, client, userdata, flags, rc):
-        """Process actions when the broker responds to a connection request.
+        """Process actions when MQTT broker responds to a connection request.
 
-        Positional arguments:
-        ---------------------
-        client -- the client instance for this callback
-        userdata -- the private user data as set in Client() or user_data_set()
-        flags -- response flags sent by the broker
-        rc -- the connection result (result code)
-
-        Desciption:
-        -----------
-        flags is a dict that contains response flags from the broker:
-            flags['session present'] - this flag is useful for clients that are
-            using clean session set to 0 only. If a client with clean
-            session=0, that reconnects to a broker that it has previously
+        Arguments
+        ---------
+        client : object
+            The client instance for this callback.
+        userdata
+            The private user data as set in Client() or user_data_set().
+        flags : dict
+            Response flags sent by the MQTT broker.
+            ``flags['session present']`` is useful for clients that are
+            using clean session set to `0` only. If a client with clean
+            `session=0`, that reconnects to a broker that it has previously
             connected to, this flag indicates whether the broker still has the
-            session information for the client. If 1, the session still exists.
+            session information for the client. If `1`, the session still
+            exists.
+        rc : int
+            The connection result (result code):
 
-        The value of rc indicates success or not:
-        0: Connection successful
-        1: Connection refused - incorrect protocol version
-        2: Connection refused - invalid client identifier
-        3: Connection refused - server unavailable
-        4: Connection refused - bad username or password
-        5: Connection refused - not authorised
-        6-255: Currently unused.
+            - 0: Connection successful
+            - 1: Connection refused - incorrect protocol version
+            - 2: Connection refused - invalid client identifier
+            - 3: Connection refused - server unavailable
+            - 4: Connection refused - bad username or password
+            - 5: Connection refused - not authorised
+            - 6 ~ 255: Currently unused
+
+        See Also
+        --------
+        Client(),  user_data_set() : Methods from imported module.
+
         """
         self._wating = False
         self._logger.debug("MQTT connect result %s: %s", rc, RESULTS[rc])
@@ -143,11 +243,13 @@ class MqttBroker(MQTT):
     def _on_disconnect(self, client, userdata, rc):
         """Process actions when the client disconnects from the broker.
 
-        Positional arguments:
-        ---------------------
-        client -- the client instance for this callback
-        userdata -- the private user data as set in Client() or user_data_set()
-        rc -- the disconnection result (result code)
+        Arguments
+        ---------
+        client : object
+            The client instance for this callback.
+        userdata
+            The private user data as set in Client() or user_data_set().
+
         """
         self._logger.debug("MQTT disconnect result %s: %s", rc, RESULTS[rc])
         if self._cb_on_disconnect is not None:
@@ -158,21 +260,32 @@ class MqttBroker(MQTT):
     def callback_filters(self, **kwargs):
         """Register callback functions for particular MQTT topic groups.
 
-        Keyworded arguments:
-        ---------------------
-        key -- the key of the argument dictionary is a configuration option
-               defining a topic, to which a topic filter is related.
-        value -- the value of the argument dictionary is a tuple with callback
-                 and section defining MQTT topic filter, if it is not
-                 GROUP_FILTERS, or just a callback, e.g.
-        server_test=mqtt_on_message_test
-        server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)
+        Keyword Arguments
+        -----------------
+        key : str
+            The key of the argument dictionary is a configuration option
+            defining a topic, to which a topic filter is related.
+        value : tuple
+            The value of the argument dictionary is a tuple with ``callback``
+            and ``section`` defining MQTT topic filter.
 
+            - If section is `GROUP_FILTERS`, the argument value can be just
+              the callback  function.
+            - If section is not `GROUP_FILTERS`, the argument value should be
+              a tuple::
+
+                server_test=mqtt_on_message_test
+                server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)
+
+        Notes
+        -----
         - The method should be used before subscribing to respective filtered
-          topics. The best place is in the on_connect callback.
+          topics. The best place is in the ``on_connect`` callback.
         - The method can be called multiple times. For configuration option
-          used at a previous call the filter callback is just updated. If the
-          callback is None, the filter for correscponding topic is removed.
+          used at a previous call the filter callback is just updated.
+        - If the callback is None, the filter for corresponding topic is
+          removed.
+
         """
         for option, definition in kwargs.iteritems():
             if isinstance(definition, tuple):
@@ -194,17 +307,27 @@ class MqttBroker(MQTT):
     def connect(self, **kwargs):
         """Connect to MQTT broker and set callback functions and credentials.
 
-        Keyword arguments
+        Keyword Arguments
         -----------------
-        All key for callback function are root words from MQTT client callbacks
-        without prefix ``on_``.
 
-        connect -- callback launched after connection to MQTT broker
-        disconnect -- callback launched after disconnection from MQTT broker
-        subscribe -- callback launched after subscription to MQTT topics
-        message -- callback launched after receiving message from MQTT topics
-        username -- loging name of the registered user at MQTT broker
-        password -- password of the registered user at MQTT broker
+        connect : function
+            Callback launched after connection to MQTT broker.
+        disconnect : function
+            Callback launched after disconnection from MQTT broker.
+        subscribe : function
+            Callback launched after subscription to MQTT topics.
+        message : function
+            Callback launched after receiving message from MQTT topics.
+        username : str
+            Login name of the registered user at MQTT broker.
+        password : str
+            Password of the registered user at MQTT broker.
+
+        Notes
+        -----
+        All keys for callback functions are root words from MQTT client
+        callbacks without prefix ``on_``.
+
         """
         self._clientid = self._config.option(
             OPTION_CLIENTID, self.GROUP_BROKER,
@@ -261,9 +384,10 @@ class MqttBroker(MQTT):
     def subscribe_filters(self):
         """Subscribe to all MQTT topic filters.
 
-        Returns:
-        --------
-        General exception with error code
+        Raises
+        -------
+        Exception
+            General exception with error code.
 
         """
         if not self.get_connected():
@@ -283,16 +407,22 @@ class MqttBroker(MQTT):
                 raise Exception(str(result[0]))
 
     def subscribe_topic(self, option, section=GROUP_TOPICS):
-        """Subscribe to a MQTT topic determined by configuration option.
+        """Subscribe to an MQTT topic.
 
-        Positional arguments:
-        ---------------------
-        option -- configuration file option to be read
-        section -- configuration file section to be read from
+        Arguments
+        ---------
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic, which should be read.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
 
-        Returns:
-        --------
-        General exception with error code
+        Raises
+        -------
+        Exception
+            General exception with error code.
 
         """
         if not self.get_connected():
@@ -311,17 +441,25 @@ class MqttBroker(MQTT):
             raise Exception(str(result[0]))
 
     def publish(self, message, option, section=GROUP_TOPICS):
-        """Publish to a MQTT topic determined by configuration option.
+        """Publish to an MQTT topic.
 
-        Positional arguments:
-        ---------------------
-        message -- data to be published
-        option -- configuration file option to be read
-        section -- configuration file section to be read from
+        Arguments
+        ---------
+        message : str
+            Data to be published into the topic.
+            *The argument is mandatory and has no default value.*
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic, which should be published to.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
 
-        Returns:
-        --------
-        General exception with error message
+        Raises
+        -------
+        Exception
+            General exception with error code.
 
         """
         if not self.get_connected():
@@ -342,26 +480,49 @@ class MqttBroker(MQTT):
 class ThingSpeak(MQTT):
     """Connect and publish to ThingSpeak MQTT broker.
 
-    - The client utilizes MQTT topics and filter definitions from
-      a configuration file.
+    Arguments
+    ---------
+    config : object
+        Object for access to a configuration INI file.
+        It is instance of the class ``Config`` from this package module
+        ``config``.
+        Particular configuration is already open.
+        Injection of the config file object to this class instance it a form
+        of attaching that file to this object.
+
+    Notes
+    -----
     - The class only provides single publishing to ThingSpeak, so that
       connecting and disconnecting to the ThingSpeak broker is automatic.
+    - The class follows allowed delay between publishings set for free acounts
+      and buffers frequent messagge preferably with status.
+
+    See Also
+    --------
+    config.Config : Class for managing configuration INI files.
+
     """
 
     # Predefined configuration file sections and options related to ThingSpeak
     GROUP_BROKER = "ThingSpeak"
+    """str: Configuration section with ThingSpeak parameters."""
+
     OPTION_MQTT_API_KEY = "mqtt_api_key"
+    """str: Configuration option with ThingSpeak MQTT API key."""
+
     OPTION_CHANNEL_ID = "channel_id"
+    """int: Configuration option with ThingSpeak channel id."""
+
     OPTION_WRITE_API_KEY = "write_api_key"
+    """str: Configuration option with ThingSpeak write key."""
+
     OPTION_PUBLISH_DELAY = "publish_delay"
+    """float: Configuration option with minimal publish delay in seconds.
+    Default value is 15.0 s.
+    """
 
     def __init__(self, config):
-        """Initialize instance object - constructor.
-
-        Positional arguments:
-        ---------------------
-        config -- object for access to a configuration file
-        """
+        """Create the class instance - constructor."""
         super(type(self), self).__init__(config)
         self._timestamp_publish_last = 0.0
         self._msgbuffer = []
@@ -414,29 +575,41 @@ class ThingSpeak(MQTT):
             return "No ThingSpeak client active"
 
     def publish(self, fields={}, status=None):
-        """Publish single message to the ThingSpeak MQTT broker.
+        """Publish single message to ThingSpeak.
 
-        Positional arguments:
-        ---------------------
-        fields -- dictionary with ThingSpeak channel field numbers and values
-                  for publishing, e.g., {1: 23.4, 2: 1}
-        status -- text to be published in the ThingSpeak channel as a status
+        Arguments
+        ---------
+        fields : dict
+            Dictionary with ThingSpeak channel pairs
+            ``field number: field value``, e.g., `{1: 23.4, 2: 1}`, where
+            `field number` is integer in the range ``1 ~ 8``.
+        status : str
+            Text to be published in the ThingSpeak channel as a status.
 
-        - If a field number is outside the range 1 ~ 8, this field is ignored.
-        - If a value is undefined or empty, the corresponding field or status
+        Notes
+        -----
+        - If a field number is outside the expected range, this field
+          is ignored.
+        - If a value is none or empty, the corresponding field or status
           is ignored.
 
-        Returns:
-        --------
-        Boolean flag about real publishing to ThingSpeak
-        General exception with error message from ThingSpeak
+        Returns
+        -------
+        bool
+            Flag about real, successful publishing to ThingSpeak.
+
+        Raises
+        ------
+        Exception
+            General exception with error message from ThingSpeak.
 
         """
         no_status = status is None or len(status) == 0
         # Construct message payload
         msgParts = []
         for field_num, field_value in fields.iteritems():
-            if int(field_num) < 1 or int(field_num) > 8:
+            field_num = abs(int(field_num))
+            if field_num < 1 or field_num > 8:
                 continue
             if field_value is None:
                 continue
@@ -457,13 +630,13 @@ class ThingSpeak(MQTT):
                     "Buffered status message %s", msgPayload)
                 self._msgbuffer.append(msgPayload)
             return False
-        # Replace current message with status by stored message if any
+        # Replace current message without status by stored message if any
         elif no_status:
             if len(self._msgbuffer) > 0:
                 msgPayload = self._msgbuffer.pop(0)
                 self._logger.debug(
                     "Retrieved buffered message %s", msgPayload)
-        # Publish current message with status and throw away all stored ones
+        # Publish current message and throw away all stored ones
         else:
             self._msgbuffer = list()
         # Construct topic
@@ -475,7 +648,8 @@ class ThingSpeak(MQTT):
             self._logger.debug("Nothing to publish to ThingSpeak")
             return False
         try:
-            self._logger.debug("Publishing to ThingSpeak topic")
+            self._logger.debug("Publishing to ThingSpeak channel %s",
+                               self._channel_id)
             mqttpublish.single(
                 topic,
                 payload=msgPayload,
@@ -494,5 +668,12 @@ class ThingSpeak(MQTT):
         return True
 
     def get_publish_delay(self):
-        """Return current publish delay limit in seconds."""
+        """Return minimal publish delay in seconds.
+
+        Returns
+        -------
+        float
+            Minimal ThinsgSpeak publish delay in seconds.
+
+        """
         return self._publish_delay

@@ -145,9 +145,9 @@
   <h1>Source code for gbj_pythonlib_sw.trigger</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python2</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Module for managing and executing triggers - value dependend callbacks.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;Module for managing and executing triggers as value dependend callbacks.&quot;&quot;&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Testing&quot;</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Libor Gabaj&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2018, &quot;</span> <span class="o">+</span> <span class="n">__author__</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">[]</span>
@@ -163,7 +163,10 @@
 <span class="c1"># Constants</span>
 <span class="c1">###############################################################################</span>
 <span class="n">UPPER</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="sd">&quot;&quot;&quot;int: Enumeration for upper trigger mode.&quot;&quot;&quot;</span>
+
 <span class="n">LOWER</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="sd">&quot;&quot;&quot;int: Enumeration for lower trigger mode.&quot;&quot;&quot;</span>
 
 
 <span class="c1">###############################################################################</span>
@@ -172,11 +175,11 @@
 <div class="viewcode-block" id="Trigger"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.trigger.Trigger">[docs]</a><span class="k">class</span> <span class="nc">Trigger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creating a trigger manager.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Trigger.__init__"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.trigger.Trigger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize instance object - constructor.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the class instance - constructor.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">__version__</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instance of </span><span class="si">%s</span><span class="s2"> created&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">del_triggers</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">del_triggers</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Represent instance object as a string.&quot;&quot;&quot;</span>
@@ -184,31 +187,50 @@
 
 <div class="viewcode-block" id="Trigger.set_trigger"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.trigger.Trigger.set_trigger">[docs]</a>    <span class="k">def</span> <span class="nf">set_trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create or update trigger.</span>
+        <span class="sd">&quot;&quot;&quot;Create or update trigger and register it to class instance.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        id -- unique identifier of a trigger in the list of them of any type</span>
-<span class="sd">        mode -- processing mode of the trigger [UPPER, LOWER]</span>
-<span class="sd">        value -- threshold value</span>
-<span class="sd">        callback -- function or tuple of them calling at threshold value.</span>
-<span class="sd">        args -- additional positional arguments passed to the callback after</span>
-<span class="sd">                forced arguments by this class.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        id</span>
+<span class="sd">            Unique identifier of a trigger in the list of them of any type.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        mode : enum</span>
+<span class="sd">            Processing mode of the trigger. The argument is defined by one of</span>
+<span class="sd">            module&#39;s constants ``UPPER``, ``LOWER``.</span>
 
-<span class="sd">        Keyworded arguments:</span>
-<span class="sd">        --------------------</span>
-<span class="sd">        kwargs -- additional keyworded arguments passed to the callback.</span>
+<span class="sd">            - Upper trigger calls callback(s) when comparison value reaches or</span>
+<span class="sd">              exceeds the threshold value.</span>
+<span class="sd">            - Lower trigger calls callback(s) when comparison value sinks to</span>
+<span class="sd">              the threshold value or below.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
-<span class="sd">        Exception NameError - if identifier is not provided</span>
-<span class="sd">        Exception TypeError - if mode is not from the allowed enumeration</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Threshold value, which in comparison to an comparison value causes</span>
+<span class="sd">            running a callback function.</span>
+<span class="sd">        callback : function, tuple of functions</span>
+<span class="sd">            One of more functions in role of callbacks that the trigger calls</span>
+<span class="sd">            when threshold value is reached from direction corresponding to the</span>
+<span class="sd">            mode of the trigger.</span>
+<span class="sd">        args : tuple</span>
+<span class="sd">            Additional positional arguments passed to the callback(s) after</span>
+<span class="sd">            forced arguments by this class.</span>
 
-<span class="sd">        - The trigger method can be called multiple times. For the same</span>
-<span class="sd">          trigger value corresponding callback is updated including its</span>
-<span class="sd">          arguments. If None, the trigger is removed.</span>
-<span class="sd">        - For a particular threshold value only one trigger can be defined,</span>
-<span class="sd">          either upper or lower, but not both.</span>
+<span class="sd">        Keyword Arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyworded arguments passed to the callback(s).</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NameError</span>
+<span class="sd">            Identifier is not provided.</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            Mode is not from the expected enumeration.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The trigger method can be called multiple times.</span>
+<span class="sd">        - For the same trigger identifier corresponding callback is updated</span>
+<span class="sd">          including its arguments.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">mode_str</span><span class="p">(</span><span class="n">mod</span><span class="p">):</span>
@@ -255,21 +277,47 @@
                 <span class="n">callback</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Trigger.get_triggers"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.trigger.Trigger.get_triggers">[docs]</a>    <span class="k">def</span> <span class="nf">get_triggers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return list of triggers.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return list of triggers.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            Registered triggers with all their parameters.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span></div>
 
 <div class="viewcode-block" id="Trigger.exec_triggers"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.trigger.Trigger.exec_triggers">[docs]</a>    <span class="k">def</span> <span class="nf">exec_triggers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;Evaluate and execute all or listed triggers.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        value -- comparison value</span>
-<span class="sd">        ids -- list of trigger identifiers that should be evaluated</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Comparison value, which is compared to threshold values of triggers</span>
+<span class="sd">            in order to run callback(s) or not.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        ids : list</span>
+<span class="sd">            List of trigger identifiers that should be evaluated.</span>
 
-<span class="sd">        Injected keyworded arguments to callbacks:</span>
-<span class="sd">        ------------------------------------------</span>
-<span class="sd">        value -- comparison value</span>
-<span class="sd">        threshold -- threshold value</span>
+<span class="sd">            - If the input value is not a list, e.g., just string with</span>
+<span class="sd">              identifier of one trigger or string with tuple of identifiers,</span>
+<span class="sd">              it is converted to the list.</span>
+<span class="sd">            - If argument is not provided, all triggers are executed against</span>
+<span class="sd">              the comparison value.</span>
+
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        value : float</span>
+<span class="sd">            Comparison value.</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold value taken from definition of respective trigger.</span>
+
+<span class="sd">        Warning</span>
+<span class="sd">        -------</span>
+<span class="sd">        The method injects other parameters to each called callback function</span>
+<span class="sd">        as keyword arguments in order to inform those callbacks about values,</span>
+<span class="sd">        that caused  their invocation.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Sanitize arguments</span>
         <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -279,7 +327,7 @@
         <span class="c1"># Evaluate listed or all triggers</span>
         <span class="k">for</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span><span class="p">:</span>
             <span class="c1"># Detect not listed trigger</span>
-            <span class="k">if</span> <span class="n">trigger</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ids</span> <span class="ow">or</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">trigger</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">trigger</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">UPPER</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">trigger</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span> \
                <span class="ow">or</span> <span class="p">(</span><span class="n">trigger</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">LOWER</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">trigger</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]):</span>
@@ -305,9 +353,12 @@
 <div class="viewcode-block" id="Trigger.del_triggers"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.trigger.Trigger.del_triggers">[docs]</a>    <span class="k">def</span> <span class="nf">del_triggers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;Delete all or listed triggers.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">        ---------------------</span>
-<span class="sd">        ids -- list of trigger identifiers that should be Removed</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        ids : list</span>
+<span class="sd">            List of trigger identifiers that should be removed from class</span>
+<span class="sd">            instance regristration.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Sanitize arguments</span>
         <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
