@@ -8,7 +8,7 @@ ordinary python console applications and scripts. Those module are utilized as
 libraries.
 
 The documentation configuration for the package is located in the folder
-`docs/source`. It can be generated from this folder by the by command
+`docs/source`. It can be generated from the folder `docs` by the by command
 ``make html``.
 
 
