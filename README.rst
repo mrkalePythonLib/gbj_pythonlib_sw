@@ -7,9 +7,9 @@ The package ``gbj_pythonlib_sw`` contains a set of Python modules for supporting
 ordinary python console applications and scripts. Those module are utilized as
 libraries.
 
-The documentation to each module of the package is located in the folder
-`docs` and its subfolder `build` in form of HTML site. It contains detailed
-documentation of modules' interfaces.
+The documentation configuration for the package is located in the folder
+`docs/source`. It can be generated from this folder by the by command
+``make html``.
 
 
 Modules
