@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """Module for managing and executing triggers as value dependend callbacks."""
 __version__ = "0.2.0"

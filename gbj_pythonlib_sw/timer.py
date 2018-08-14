@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """Module for creating a timer and setting its prescalers.
 
@@ -174,6 +173,7 @@ class Timer(object):
 
         All the relevant timer's parameters are involved in the string, i.e.,
         period, mark, and instance number.
+
         """
         return "{}({}s-{}{}-{})".format(
             self._name,

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Module for communicating with MQTT brokers."""
 __version__ = "0.2.0"
@@ -287,7 +286,8 @@ class MqttBroker(MQTT):
           removed.
 
         """
-        for option, definition in kwargs.iteritems():
+        for option in kwargs:
+            definition = kwargs[option]
             if isinstance(definition, tuple):
                 callback = definition[0]
                 section = definition[1]
@@ -519,6 +519,7 @@ class ThingSpeak(MQTT):
     OPTION_PUBLISH_DELAY = "publish_delay"
     """float: Configuration option with minimal publish delay in seconds.
     Default value is 15.0 s.
+
     """
 
     def __init__(self, config):
@@ -607,7 +608,8 @@ class ThingSpeak(MQTT):
         no_status = status is None or len(status) == 0
         # Construct message payload
         msgParts = []
-        for field_num, field_value in fields.iteritems():
+        for field_num in fields:
+            field_value = fields[field_num]
             field_num = abs(int(field_num))
             if field_num < 1 or field_num > 8:
                 continue

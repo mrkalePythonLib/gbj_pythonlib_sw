@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """Module for statistical filtering and smoothing."""
 __version__ = "0.2.0"

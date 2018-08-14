@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Module for managing a configuration INI file."""
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __status__ = "Testing"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018, " + __author__
@@ -12,7 +11,10 @@ __email__ = "libor.gabaj@gmail.com"
 
 
 import logging
-from ConfigParser import SafeConfigParser
+try:
+    import configparser
+except Exception:
+    from six.moves import configparser
 
 
 ###############################################################################
@@ -40,7 +42,7 @@ class Config(object):
         """Create the class instance - constructor."""
         self._logger = logging.getLogger(" ".join([__name__, __version__]))
         self._logger.debug("Instance of %s created", self.__class__.__name__)
-        self._parser = SafeConfigParser()
+        self._parser = configparser.ConfigParser()
         self._file = None
 
         if isinstance(file, str):

@@ -6,13 +6,13 @@ from setuptools import setup
 
 setup(
   name='gbj_pythonlib_sw',
-  version='1.0.0',
+  version='1.1.0',
   description='Python libraries for software support.',
   long_description='Modules suitable for whatever python console application.',
   classifiers=[
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.5 :: 2.7',
     'Topic :: System :: Monitoring',
   ],
   keywords='configuration, mqtt, trigger, timer, statistics, filter',
