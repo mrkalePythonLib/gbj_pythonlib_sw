@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gbj_pythonlib_sw.timer &mdash; gbj_phytonlib_sw 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> gbj_phytonlib_sw
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Purpose of the package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Change log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gbj_phytonlib_sw</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gbj_pythonlib_sw.timer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gbj_pythonlib_sw.timer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Module for creating a timer and setting its prescalers.</span>
+
+<span class="sd">A prescaler can be considered as a timer period divider and can run its own</span>
+<span class="sd">callbacks separately from the timer&#39;s callbacks.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.2.0&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Testing&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Libor Gabaj&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2018, &quot;</span> <span class="o">+</span> <span class="n">__author__</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Kris Dorosz&quot;</span><span class="p">]</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="n">__author__</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;libor.gabaj@gmail.com&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Variables</span>
+<span class="c1">###############################################################################</span>
+<span class="n">timers</span> <span class="o">=</span> <span class="p">{}</span>     <span class="c1"># Dictionary of registered timers</span>
+<span class="sd">&quot;&quot;&quot;dict: Registration storage of timers.&quot;&quot;&quot;</span>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Functions</span>
+<span class="c1">###############################################################################</span>
+<div class="viewcode-block" id="register_timer"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.register_timer">[docs]</a><span class="k">def</span> <span class="nf">register_timer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Store a timer object in the registration dictionary.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of a timer that is used as a key in timers registration</span>
+<span class="sd">        dictionary, so that it has to be unique within all registered timers.</span>
+<span class="sd">        *The argument is mandatory and has no default value.*</span>
+
+<span class="sd">        - If name already exists in the dictionary, the timer is updated.</span>
+<span class="sd">        - If name is not correct dictionary key, the registration is ingored.</span>
+
+<span class="sd">    timer : object</span>
+<span class="sd">        Object of a timer that is used as a value in timers registration</span>
+<span class="sd">        dictionary.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Object is instance of the class ``Timer`` from the standard library</span>
+<span class="sd">      module ``threading``.</span>
+<span class="sd">    - If none object is provided and name already exists, the named timer</span>
+<span class="sd">      is stopped and removed from the dictionary.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">timer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">timer</span> <span class="o">=</span> <span class="n">timers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">timers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">timer</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="start_timers"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.start_timers">[docs]</a><span class="k">def</span> <span class="nf">start_timers</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Start all registered timers.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">timer_name</span> <span class="ow">in</span> <span class="n">timers</span><span class="p">:</span>
+        <span class="n">timers</span><span class="p">[</span><span class="n">timer_name</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="stop_timers"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.stop_timers">[docs]</a><span class="k">def</span> <span class="nf">stop_timers</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Stop all registered timers.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">timer_name</span> <span class="ow">in</span> <span class="n">timers</span><span class="p">:</span>
+        <span class="n">timers</span><span class="p">[</span><span class="n">timer_name</span><span class="p">]</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Classes</span>
+<span class="c1">###############################################################################</span>
+<div class="viewcode-block" id="Timer"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.Timer">[docs]</a><span class="k">class</span> <span class="nc">Timer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creating a timer.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    period : float</span>
+<span class="sd">        Positive float interval of the timer in seconds. If other type is</span>
+<span class="sd">        provided, it is converted to an absolute float.</span>
+<span class="sd">        *The argument is mandatory and has no default value.*</span>
+<span class="sd">    callback : function, tuple of functions</span>
+<span class="sd">        One of more functions in role of callbacks that the timer calls</span>
+<span class="sd">        when expires.</span>
+<span class="sd">        *The argument is mandatory and has no default value.*</span>
+
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    count : int</span>
+<span class="sd">        Positive integer number of desired shots of the timer. If other</span>
+<span class="sd">        type is provided, it is converted to absolute integer.</span>
+<span class="sd">        If it is not defined, the timer is processed as periodic one with</span>
+<span class="sd">        endless running.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the timer incorporated to its object. If none is provided,</span>
+<span class="sd">        the name of the class is used.</span>
+<span class="sd">        This name has nothing commong with registration name of the timer used</span>
+<span class="sd">        in the function `register_timer`. However, it is convinient to use</span>
+<span class="sd">        the same name for both purposes.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - If the timer is created without defined count of shots, it is a periodic</span>
+<span class="sd">      timer marked with ``R`` as ``repeating`` in the string instance</span>
+<span class="sd">      representation.</span>
+<span class="sd">    - If the timer is created with count greater than 1, it is a countdown</span>
+<span class="sd">      timer marked with ``C`` as ``countdown`` in the string instance</span>
+<span class="sd">      representation.</span>
+<span class="sd">    - If the timer is created with count equal 1, it is an one-shot timer</span>
+<span class="sd">      marked with ``O`` as ``oneshot`` in the string instance representation.</span>
+<span class="sd">    - Keyword arguments not listed here are passed to the callback function(s).</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    register_timer : Registration of timers under names.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_instances</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&quot;&quot;&quot;int: Number of class instances.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the class instance - constructor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">__version__</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_period</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">period</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prescalers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span>
+                                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_instances</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_instances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instance of </span><span class="si">%s</span><span class="s2"> no. </span><span class="si">%d</span><span class="s2"> created&quot;</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopping</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Flag about timer cancel request imposed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repeate</span> <span class="o">=</span> <span class="kc">True</span>    <span class="c1"># Flag about repeating timer</span>
+        <span class="c1"># Mark timer</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mark</span> <span class="o">=</span> <span class="s2">&quot;R&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mark</span> <span class="o">=</span> <span class="s2">&quot;C&quot;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mark</span> <span class="o">=</span> <span class="s2">&quot;O&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_repeate</span> <span class="o">=</span> <span class="kc">False</span>   <span class="c1"># Flag about on-shot timer</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clean after instance destroying - destructor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instance no.</span><span class="si">%d</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> deleted&quot;</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_instances</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represent instance object as a string.</span>
+
+<span class="sd">        All the relevant timer&#39;s parameters are involved in the string, i.e.,</span>
+<span class="sd">        period, mark, and instance number.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">s-</span><span class="si">{}{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+            <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_period</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mark</span><span class="p">,</span>
+            <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_order</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new timer object and start it.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopping</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_callback</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_run_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run external instance callback.</span>
+
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        exec_last : bool</span>
+<span class="sd">            Flag about last calling at countdown timers injected to all</span>
+<span class="sd">            callback function as a keyword argument.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_repeate</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Call basic timer callback</span>
+            <span class="n">callbacks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">callbacks</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">callbacks</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">callbacks</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Main callback </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> launched&quot;</span><span class="p">,</span>
+                    <span class="n">callback</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">callback</span><span class="p">(</span>
+                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span>
+                    <span class="n">exec_last</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeate</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span>
+                <span class="p">)</span>
+            <span class="c1"># Count down prescalers and call callbacks of expired ones</span>
+            <span class="k">for</span> <span class="n">prescaler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prescalers</span><span class="p">:</span>
+                <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;counter&quot;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;counter&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;counter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;factor&quot;</span><span class="p">]</span>
+                    <span class="n">callbacks</span> <span class="o">=</span> <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;callback&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">callbacks</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                        <span class="n">callbacks</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">callbacks</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                            <span class="s2">&quot;Prescaler </span><span class="si">%d</span><span class="s2"> callback </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> launched&quot;</span><span class="p">,</span>
+                            <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;factor&quot;</span><span class="p">],</span>
+                            <span class="n">callback</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="n">callback</span><span class="p">(</span>
+                            <span class="o">*</span><span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">],</span>
+                            <span class="n">exec_last</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeate</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Running callbacks of </span><span class="si">%s</span><span class="s2"> failed:&quot;</span><span class="p">,</span>
+                               <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeate</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_timer</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="Timer.start"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.Timer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create timer thread object and store it in the instance.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> not started&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> started&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_timer</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Timer.stop"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.Timer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Destroy timer thread object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopping</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> stopped&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Timer.prescaler"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.Timer.prescaler">[docs]</a>    <span class="k">def</span> <span class="nf">prescaler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Register a callback function called at each factor tick.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        factor : int</span>
+<span class="sd">            Positive integer as a divider of the timer&#39;s period. It is</span>
+<span class="sd">            truncated to an absolute integer and ignored, if it results to less</span>
+<span class="sd">            than 2. The factor is used as a key in registration dictionary of</span>
+<span class="sd">            prescalers.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        callback : function, tuple of functions</span>
+<span class="sd">            One or more functions calling by the timer at each factor-th</span>
+<span class="sd">            period.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        args : tuple</span>
+<span class="sd">            Additional positional arguments passed to the callback(s).</span>
+
+<span class="sd">        Keyword Arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyword arguments passed to the callback(s).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The prescaler method enables launching a specific callback or more</span>
+<span class="sd">          callback at multiple timer periods and acts as a frequency divider.</span>
+<span class="sd">        - Prescale factor equal 1 is useless, because it is equivalent to basic</span>
+<span class="sd">          timer callback. In this case it is ignored.</span>
+<span class="sd">        - The prescaler method can be called multiple times. For the same</span>
+<span class="sd">          factor the corresponding callback is updated including its arguments.</span>
+<span class="sd">          If none factor is provided, the prescaler is removed.</span>
+<span class="sd">        - None of prescalers is launched, if timer&#39;s callback is not defined or</span>
+<span class="sd">          timer is one-time one.</span>
+<span class="sd">        - All prescalers are called at random order, but usually in order of</span>
+<span class="sd">          their registration.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">factor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">factor</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1"># Find existing prescaler and remove or update it</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prescaler</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prescalers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;factor&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">factor</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_prescalers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;callback&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">callback</span>
+                    <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+                    <span class="n">prescaler</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="c1"># Create new prescaler</span>
+        <span class="k">if</span> <span class="n">new</span><span class="p">:</span>
+            <span class="n">prescaler</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;counter&quot;</span><span class="p">:</span> <span class="n">factor</span><span class="p">,</span>
+                <span class="s2">&quot;factor&quot;</span><span class="p">:</span> <span class="n">factor</span><span class="p">,</span>
+                <span class="s2">&quot;callback&quot;</span><span class="p">:</span> <span class="n">callback</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span>
+                <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prescalers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prescaler</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Timer.get_prescalers"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.timer.Timer.get_prescalers">[docs]</a>    <span class="k">def</span> <span class="nf">get_prescalers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return dictionary of prescalers.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_prescalers&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prescalers</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Libor Gabaj.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
