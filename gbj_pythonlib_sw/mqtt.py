@@ -1,6 +1,27 @@
 # -*- coding: utf-8 -*-
-"""Module for communicating with MQTT brokers."""
-__version__ = "0.2.0"
+"""Module for communicating with MQTT brokers.
+
+Notes
+-----
+- Connection to MQTT brokers is supposed to be over TCP.
+- All parameters for MQTT brokers and clients should be defined
+  in a configuration file utilized by a script or application employed this
+  package.
+- MQTT parameters are communicated with class instances of the module
+  indirectly in form of pair option-section from the configuration file.
+- Module constants are usual configuration options used at every form of MQTT
+  brokers. Those options can be considered as common names for common
+  identifiers either MQTT brokers or clients regardles of the configuration
+  sections.
+- Particular classed have their own class constants, which define specific
+  configuration options and sections utilized for that form of MQTT broker.
+- All module and class constants should be considered as default values.
+  At each calling of respective methods specific configuration options and
+  sections can be used. However, using in module standardized options and
+  sections is recommended.
+
+"""
+__version__ = "0.2.1"
 __status__ = "Testing"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018, " + __author__
@@ -29,7 +50,7 @@ OPTION_HOST = "host"
 """str: Configuration option with MQTT broker IP or URL."""
 
 OPTION_PORT = "port"
-"""int: Configuration option with MQTT broker HTTP port."""
+"""int: Configuration option with MQTT broker TCP port."""
 
 RESULTS = [
     "SUCCESS",
@@ -99,8 +120,11 @@ class MqttBroker(MQTT):
 
     Notes
     -----
-    - The client utilizes MQTT topics and filter definitions from
+    - The client utilizes MQTT topics and topic filters definitions from
       a configuration file.
+    - The authorization of an MQTT client is supposed to be with username and
+      password registered on connecting MQTT broker.
+    - The encrypted communication (SSL/TSL) is not used.
 
     """
 
@@ -495,7 +519,8 @@ class ThingSpeak(MQTT):
     - The class only provides single publishing to ThingSpeak, so that
       connecting and disconnecting to the ThingSpeak broker is automatic.
     - The class follows allowed delay between publishings set for free acounts
-      and buffers frequent messagge preferably with status.
+      and buffers frequent messagges preferably with status.
+    - The reading from ThingSpeak channels is not implemented.
 
     See Also
     --------
