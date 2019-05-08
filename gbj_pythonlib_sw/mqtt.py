@@ -1,9 +1,30 @@
 # -*- coding: utf-8 -*-
-"""Module for communicating with MQTT brokers."""
-__version__ = "0.2.0"
-__status__ = "Testing"
+"""Module for communicating with MQTT brokers.
+
+Notes
+-----
+- Connection to MQTT brokers is supposed to be over TCP.
+- All parameters for MQTT brokers and clients should be defined
+  in a configuration file utilized by a script or application employed this
+  package.
+- MQTT parameters are communicated with class instances of the module
+  indirectly in form of pair option-section from the configuration file.
+- Module constants are usual configuration options used at every form of MQTT
+  brokers. Those options can be considered as common names for common
+  identifiers either MQTT brokers or clients regardles of the configuration
+  sections.
+- Particular classed have their own class constants, which define specific
+  configuration options and sections utilized for that form of MQTT broker.
+- All module and class constants should be considered as default values.
+  At each calling of respective methods specific configuration options and
+  sections can be used. However, using in module standardized options and
+  sections is recommended.
+
+"""
+__version__ = "0.3.0"
+__status__ = "Beta"
 __author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018, " + __author__
+__copyright__ = "Copyright 2018-2019, " + __author__
 __credits__ = []
 __license__ = "MIT"
 __maintainer__ = __author__
@@ -24,6 +45,9 @@ import paho.mqtt.publish as mqttpublish
 ###############################################################################
 OPTION_CLIENTID = "clientid"
 """str: Configuration option with MQTT client identifier."""
+
+OPTION_USERDATA = "userdata"
+"""str: Configuration option with custom data for MQTT callbacks."""
 
 OPTION_HOST = "host"
 """str: Configuration option with MQTT broker IP or URL."""
@@ -269,9 +293,9 @@ class MqttBroker(MQTT):
             and ``section`` defining MQTT topic filter.
 
             - If section is `GROUP_FILTERS`, the argument value can be just
-              the callback  function.
+              the callback function.
             - If section is not `GROUP_FILTERS`, the argument value should be
-              a tuple::
+              a tuple:
 
                 server_test=mqtt_on_message_test
                 server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)
@@ -322,6 +346,22 @@ class MqttBroker(MQTT):
             Login name of the registered user at MQTT broker.
         password : str
             Password of the registered user at MQTT broker.
+        clean_session : boolean
+            A flag that determines the client type. If 'True', the broker will
+            remove all information about this client when it disconnects.
+            If 'False', the client is a durable client and subscription
+            information and queued messages will be retained when the client
+            disconnects.
+            Note that a client will never discard its own outgoing messages
+            on disconnect. Calling 'connect()' or 'reconnect()' will cause
+            the messages to be resent. Use 'reinitialise()' to reset a client
+            to its original state.
+        protocol : str
+            The version of the MQTT protocol to use for this client. Can be
+            either 'MQTTv31' or 'MQTTv311'.
+        transport : str
+            Set to 'websockets' to send MQTT over WebSockets. Leave at the
+            default of 'tcp' to use raw TCP.
 
         Notes
         -----
@@ -329,11 +369,24 @@ class MqttBroker(MQTT):
         callbacks without prefix ``on_``.
 
         """
+        # Client parameters
         self._clientid = self._config.option(
             OPTION_CLIENTID, self.GROUP_BROKER,
             socket.gethostname()
         )
-        self._client = mqttclient.Client(self._clientid)
+        self._userdata = self._config.option(
+            OPTION_USERDATA, self.GROUP_BROKER)
+        clean_session = bool(kwargs.pop("clean_session", True))
+        protocol = kwargs.pop("protocol", mqttclient.MQTTv311)
+        transport = kwargs.pop("transport", "tcp")
+
+        self._client = mqttclient.Client(
+            self._clientid,
+            clean_session,
+            self._userdata,
+            protocol,
+            transport
+            )
         # Credentials
         username = kwargs.pop("username", None)
         password = kwargs.pop("password", None)
