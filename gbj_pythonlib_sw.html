@@ -55,6 +55,10 @@
           
             
             
+              <div class="version">
+                1.0
+              </div>
+            
           
 
           
@@ -273,6 +277,25 @@ time for splitting the entire, composed option value.</li>
 <div class="section" id="module-gbj_pythonlib_sw.mqtt">
 <span id="gbj-pythonlib-sw-mqtt-module"></span><h2>gbj_pythonlib_sw.mqtt module<a class="headerlink" href="#module-gbj_pythonlib_sw.mqtt" title="Permalink to this headline">¶</a></h2>
 <p>Module for communicating with MQTT brokers.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li>Connection to MQTT brokers is supposed to be over TCP.</li>
+<li>All parameters for MQTT brokers and clients should be defined
+in a configuration file utilized by a script or application employed this
+package.</li>
+<li>MQTT parameters are communicated with class instances of the module
+indirectly in form of pair option-section from the configuration file.</li>
+<li>Module constants are usual configuration options used at every form of MQTT
+brokers. Those options can be considered as common names for common
+identifiers either MQTT brokers or clients regardles of the configuration
+sections.</li>
+<li>Particular classed have their own class constants, which define specific
+configuration options and sections utilized for that form of MQTT broker.</li>
+<li>All module and class constants should be considered as default values.
+At each calling of respective methods specific configuration options and
+sections can be used. However, using in module standardized options and
+sections is recommended.</li>
+</ul>
 <dl class="class">
 <dt id="gbj_pythonlib_sw.mqtt.MQTT">
 <em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MQTT</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MQTT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MQTT" title="Permalink to this definition">¶</a></dt>
@@ -321,7 +344,7 @@ a parent class for operational classes for particular MQTT brokers.</p>
 
 <dl class="class">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker">
-<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MqttBroker</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">MqttBroker</code><span class="sig-paren">(</span><em>config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gbj_pythonlib_sw.mqtt.MQTT" title="gbj_pythonlib_sw.mqtt.MQTT"><code class="xref py py-class docutils literal notranslate"><span class="pre">gbj_pythonlib_sw.mqtt.MQTT</span></code></a></p>
 <p>Managing an MQTT client connection to usually local MQTT broker.</p>
 <p class="rubric">Notes</p>
@@ -333,6 +356,12 @@ a configuration file.</li>
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER">
 <code class="descname">GROUP_BROKER</code><em class="property"> = 'MQTTbroker'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>str</em> – Predefined configuration section with MQTT broker parameters.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_DEFAULT">
+<code class="descname">GROUP_DEFAULT</code><em class="property"> = 'DEFAULT'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_DEFAULT" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Default configuration section with MQTT variables.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -363,12 +392,11 @@ defining a topic, to which a topic filter is related.</li>
 and <code class="docutils literal notranslate"><span class="pre">section</span></code> defining MQTT topic filter.</p>
 <ul>
 <li>If section is <cite>GROUP_FILTERS</cite>, the argument value can be just
-the callback  function.</li>
+the callback function.</li>
 <li>If section is not <cite>GROUP_FILTERS</cite>, the argument value should be
-a tuple:<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">server_test</span><span class="o">=</span><span class="n">mqtt_on_message_test</span>
-<span class="n">server_sensor_temp</span><span class="o">=</span><span class="p">(</span><span class="n">mqtt_on_temp</span><span class="p">,</span> <span class="n">ConfigMqtt</span><span class="o">.</span><span class="n">GROUP_TOPICS</span><span class="p">)</span>
-</pre></div>
-</div>
+a tuple:<blockquote>
+<div>server_test=mqtt_on_message_test
+server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)</div></blockquote>
 </li>
 </ul>
 </li>
@@ -390,18 +418,13 @@ removed.</li>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.connect">
-<code class="descname">connect</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Connect to MQTT broker and set callback functions and credentials.</p>
+<code class="descname">connect</code><span class="sig-paren">(</span><em>username=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to MQTT broker and set credentials.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
-<li><strong>connect</strong> (<em>function</em>) – Callback launched after connection to MQTT broker.</li>
-<li><strong>disconnect</strong> (<em>function</em>) – Callback launched after disconnection from MQTT broker.</li>
-<li><strong>subscribe</strong> (<em>function</em>) – Callback launched after subscription to MQTT topics.</li>
-<li><strong>message</strong> (<em>function</em>) – Callback launched after receiving message from MQTT topics.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>username</strong> (<em>str</em>) – Login name of the registered user at MQTT broker.</li>
 <li><strong>password</strong> (<em>str</em>) – Password of the registered user at MQTT broker.</li>
 </ul>
@@ -409,15 +432,39 @@ removed.</li>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Notes</p>
-<p>All keys for callback functions are root words from MQTT client
-callbacks without prefix <code class="docutils literal notranslate"><span class="pre">on_</span></code>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.disconnect">
 <code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnect from MQTT broker.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.lwt">
+<code class="descname">lwt</code><span class="sig-paren">(</span><em>message</em>, <em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.lwt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.lwt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set last will and testament.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>str</em>) – Data to be set as LWT payload.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic for LWT.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – If qos is not 0, 1 or 2, or if topic is None
+or has zero string length.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -444,6 +491,12 @@ configuration option should be searched.</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.reconnect">
+<code class="descname">reconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.reconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.reconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconnect to MQTT broker.</p>
 </dd></dl>
 
 <dl class="method">
@@ -501,18 +554,18 @@ configuration option should be searched.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Pair of MQTT topic parameters as <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">qos</span></code>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">MQTT topic parameters as <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">qos</span></code>, <code class="docutils literal notranslate"><span class="pre">retain</span></code>.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple of str</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple of str and boolean</p>
 </td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>The method appends <code class="docutils literal notranslate"><span class="pre">0</span></code> as the default <cite>qos</cite> to the read topic
-definition for cases, when no <cite>qos</cite> is defined in order to split
-the topic properly.</p>
+<p>The method appends <code class="docutils literal notranslate"><span class="pre">0</span></code> as the default <cite>qos</cite> and <code class="docutils literal notranslate"><span class="pre">0</span></code> as default
+<code class="docutils literal notranslate"><span class="pre">retain</span></code> to the read topic definition for cases, when no <cite>qos</cite> and
+<cite>retain</cite> is defined in order to split the topic properly.</p>
 </dd></dl>
 
 <dl class="method">
@@ -570,6 +623,34 @@ parameter of read topic definition.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="gbj_pythonlib_sw.mqtt.MqttBroker.topic_retain">
+<code class="descname">topic_retain</code><span class="sig-paren">(</span><em>option</em>, <em>section='MQTTtopics'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gbj_pythonlib_sw/mqtt.html#MqttBroker.topic_retain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.MqttBroker.topic_retain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return MQTT topic retain flag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>option</strong> (<em>str</em>) – Configuration option from attached configuration file with
+definition of an MQTT topic, which should be read.
+<em>The argument is mandatory and has no default value.</em></li>
+<li><strong>section</strong> (<em>str</em>) – Configuration section from attached configuration file, where
+configuration option should be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">MQTT topic <cite>retain</cite> as an logical value of third parameter of read
+topic definition.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="data">
@@ -588,6 +669,12 @@ parameter of read topic definition.</p>
 <dt id="gbj_pythonlib_sw.mqtt.OPTION_PORT">
 <code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">OPTION_PORT</code><em class="property"> = 'port'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.OPTION_PORT" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>int</em> – Configuration option with MQTT broker HTTP port.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="gbj_pythonlib_sw.mqtt.OPTION_USERDATA">
+<code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">OPTION_USERDATA</code><em class="property"> = 'userdata'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.OPTION_USERDATA" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Configuration option with custom data for MQTT callbacks.</p>
 </dd></dl>
 
 <dl class="class">

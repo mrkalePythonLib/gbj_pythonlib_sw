@@ -55,6 +55,10 @@
           
             
             
+              <div class="version">
+                1.0
+              </div>
+            
           
 
           
@@ -144,11 +148,32 @@
             
   <h1>Source code for gbj_pythonlib_sw.mqtt</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Module for communicating with MQTT brokers.&quot;&quot;&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.2.0&quot;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Testing&quot;</span>
+<span class="sd">&quot;&quot;&quot;Module for communicating with MQTT brokers.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">- Connection to MQTT brokers is supposed to be over TCP.</span>
+<span class="sd">- All parameters for MQTT brokers and clients should be defined</span>
+<span class="sd">  in a configuration file utilized by a script or application employed this</span>
+<span class="sd">  package.</span>
+<span class="sd">- MQTT parameters are communicated with class instances of the module</span>
+<span class="sd">  indirectly in form of pair option-section from the configuration file.</span>
+<span class="sd">- Module constants are usual configuration options used at every form of MQTT</span>
+<span class="sd">  brokers. Those options can be considered as common names for common</span>
+<span class="sd">  identifiers either MQTT brokers or clients regardles of the configuration</span>
+<span class="sd">  sections.</span>
+<span class="sd">- Particular classed have their own class constants, which define specific</span>
+<span class="sd">  configuration options and sections utilized for that form of MQTT broker.</span>
+<span class="sd">- All module and class constants should be considered as default values.</span>
+<span class="sd">  At each calling of respective methods specific configuration options and</span>
+<span class="sd">  sections can be used. However, using in module standardized options and</span>
+<span class="sd">  sections is recommended.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.4.0&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Libor Gabaj&quot;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2018, &quot;</span> <span class="o">+</span> <span class="n">__author__</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2018-2019, &quot;</span> <span class="o">+</span> <span class="n">__author__</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
 <span class="n">__maintainer__</span> <span class="o">=</span> <span class="n">__author__</span>
@@ -169,6 +194,9 @@
 <span class="c1">###############################################################################</span>
 <span class="n">OPTION_CLIENTID</span> <span class="o">=</span> <span class="s2">&quot;clientid&quot;</span>
 <span class="sd">&quot;&quot;&quot;str: Configuration option with MQTT client identifier.&quot;&quot;&quot;</span>
+
+<span class="n">OPTION_USERDATA</span> <span class="o">=</span> <span class="s2">&quot;userdata&quot;</span>
+<span class="sd">&quot;&quot;&quot;str: Configuration option with custom data for MQTT callbacks.&quot;&quot;&quot;</span>
 
 <span class="n">OPTION_HOST</span> <span class="o">=</span> <span class="s2">&quot;host&quot;</span>
 <span class="sd">&quot;&quot;&quot;str: Configuration option with MQTT broker IP or URL.&quot;&quot;&quot;</span>
@@ -259,6 +287,82 @@
     <span class="n">GROUP_FILTERS</span> <span class="o">=</span> <span class="s2">&quot;MQTTfilters&quot;</span>
     <span class="sd">&quot;&quot;&quot;str: Predefined configuration section with MQTT topic filters.&quot;&quot;&quot;</span>
 
+    <span class="n">GROUP_DEFAULT</span> <span class="o">=</span> <span class="s2">&quot;DEFAULT&quot;</span>
+    <span class="sd">&quot;&quot;&quot;str: Default configuration section with MQTT variables.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the class instance - constructor.</span>
+
+<span class="sd">        Keyword Arguments</span>
+<span class="sd">        -----------------</span>
+
+<span class="sd">        clean_session : boolean</span>
+<span class="sd">            A flag that determines the client type. If &#39;True&#39;, the broker will</span>
+<span class="sd">            remove all information about this client when it disconnects.</span>
+<span class="sd">            If &#39;False&#39;, the client is a durable client and subscription</span>
+<span class="sd">            information and queued messages will be retained when the client</span>
+<span class="sd">            disconnects.</span>
+<span class="sd">            Note that a client will never discard its own outgoing messages</span>
+<span class="sd">            on disconnect. Calling &#39;connect()&#39; or &#39;reconnect()&#39; will cause</span>
+<span class="sd">            the messages to be resent. Use &#39;reinitialise()&#39; to reset a client</span>
+<span class="sd">            to its original state.</span>
+<span class="sd">        userdata</span>
+<span class="sd">            User defined data of any type that is passed as the userdata</span>
+<span class="sd">            parameter to callbacks. It may be updated at a later point with</span>
+<span class="sd">            the &#39;user_data_set()&#39; function.</span>
+<span class="sd">        protocol : str</span>
+<span class="sd">            The version of the MQTT protocol to use for this client. Can be</span>
+<span class="sd">            either &#39;MQTTv31&#39; or &#39;MQTTv311&#39;.</span>
+<span class="sd">        transport : str</span>
+<span class="sd">            Set to &#39;websockets&#39; to send MQTT over WebSockets. Leave at the</span>
+<span class="sd">            default of &#39;tcp&#39; to use raw TCP.</span>
+<span class="sd">        connect : function</span>
+<span class="sd">            Callback launched after connection to MQTT broker.</span>
+<span class="sd">        disconnect : function</span>
+<span class="sd">            Callback launched after disconnection from MQTT broker.</span>
+<span class="sd">        subscribe : function</span>
+<span class="sd">            Callback launched after subscription to MQTT topics.</span>
+<span class="sd">        message : function</span>
+<span class="sd">            Callback launched after receiving message from MQTT topics.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        All keys for callback functions are root words from MQTT client</span>
+<span class="sd">        callbacks without prefix ``on_``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="c1"># Client parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+            <span class="n">OPTION_CLIENTID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_BROKER</span><span class="p">,</span>
+            <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_userdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+            <span class="n">OPTION_USERDATA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_BROKER</span><span class="p">)</span>
+        <span class="n">clean_session</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;clean_session&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;protocol&quot;</span><span class="p">,</span> <span class="n">mqttclient</span><span class="o">.</span><span class="n">MQTTv311</span><span class="p">)</span>
+        <span class="n">transport</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transport&quot;</span><span class="p">,</span> <span class="s2">&quot;tcp&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">mqttclient</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span><span class="p">,</span>
+            <span class="n">clean_session</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_userdata</span><span class="p">,</span>
+            <span class="n">protocol</span><span class="p">,</span>
+            <span class="n">transport</span>
+            <span class="p">)</span>
+        <span class="c1"># Callbacks definition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_connect</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_disconnect</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;disconnect&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_subscribe</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;subscribe&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_message</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Callbacks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_connect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_disconnect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_disconnect</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_subscribe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_subscribe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_subscribe</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_message</span>
+
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Represent instance object as a string.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_clientid&quot;</span><span class="p">):</span>
@@ -281,23 +385,26 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple of str</span>
-<span class="sd">            Pair of MQTT topic parameters as ``name``, ``qos``.</span>
+<span class="sd">        tuple of str and boolean</span>
+<span class="sd">            MQTT topic parameters as ``name``, ``qos``, ``retain``.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        The method appends ``0`` as the default `qos` to the read topic</span>
-<span class="sd">        definition for cases, when no `qos` is defined in order to split</span>
-<span class="sd">        the topic properly.</span>
+<span class="sd">        The method appends ``0`` as the default `qos` and ``0`` as default</span>
+<span class="sd">        ``retain`` to the read topic definition for cases, when no `qos` and</span>
+<span class="sd">        `retain` is defined in order to split the topic properly.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">name</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option_split</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">])</span>
-            <span class="n">qos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">qos</span><span class="p">)</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option_split</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">])</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">qos</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">retain</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">qos</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">qos</span><span class="p">)</span></div>
+            <span class="n">retain</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MqttBroker.topic_name"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.topic_name">[docs]</a>    <span class="k">def</span> <span class="nf">topic_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="n">GROUP_TOPICS</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return MQTT topic name.</span>
@@ -318,8 +425,8 @@
 <span class="sd">            MQTT topic name.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">name</span></div>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="MqttBroker.topic_qos"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.topic_qos">[docs]</a>    <span class="k">def</span> <span class="nf">topic_qos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="n">GROUP_TOPICS</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return MQTT topic QoS.</span>
@@ -341,8 +448,31 @@
 <span class="sd">            parameter of read topic definition.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">qos</span><span class="p">))</span></div>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="MqttBroker.topic_retain"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.topic_retain">[docs]</a>    <span class="k">def</span> <span class="nf">topic_retain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="n">GROUP_TOPICS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return MQTT topic retain flag.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        option : str</span>
+<span class="sd">            Configuration option from attached configuration file with</span>
+<span class="sd">            definition of an MQTT topic, which should be read.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        section : str</span>
+<span class="sd">            Configuration section from attached configuration file, where</span>
+<span class="sd">            configuration option should be searched.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        boolean</span>
+<span class="sd">            MQTT topic `retain` as an logical value of third parameter of read</span>
+<span class="sd">            topic definition.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">_on_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Process actions when MQTT broker responds to a connection request.</span>
@@ -414,9 +544,9 @@
 <span class="sd">            and ``section`` defining MQTT topic filter.</span>
 
 <span class="sd">            - If section is `GROUP_FILTERS`, the argument value can be just</span>
-<span class="sd">              the callback  function.</span>
+<span class="sd">              the callback function.</span>
 <span class="sd">            - If section is not `GROUP_FILTERS`, the argument value should be</span>
-<span class="sd">              a tuple::</span>
+<span class="sd">              a tuple:</span>
 
 <span class="sd">                server_test=mqtt_on_message_test</span>
 <span class="sd">                server_sensor_temp=(mqtt_on_temp, ConfigMqtt.GROUP_TOPICS)</span>
@@ -449,82 +579,83 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">message_callback_add</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MqttBroker.connect"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Connect to MQTT broker and set callback functions and credentials.</span>
+<div class="viewcode-block" id="MqttBroker.connect"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Connect to MQTT broker and set credentials.</span>
 
-<span class="sd">        Keyword Arguments</span>
-<span class="sd">        -----------------</span>
-
-<span class="sd">        connect : function</span>
-<span class="sd">            Callback launched after connection to MQTT broker.</span>
-<span class="sd">        disconnect : function</span>
-<span class="sd">            Callback launched after disconnection from MQTT broker.</span>
-<span class="sd">        subscribe : function</span>
-<span class="sd">            Callback launched after subscription to MQTT topics.</span>
-<span class="sd">        message : function</span>
-<span class="sd">            Callback launched after receiving message from MQTT topics.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
 <span class="sd">        username : str</span>
 <span class="sd">            Login name of the registered user at MQTT broker.</span>
 <span class="sd">        password : str</span>
 <span class="sd">            Password of the registered user at MQTT broker.</span>
 
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        All keys for callback functions are root words from MQTT client</span>
-<span class="sd">        callbacks without prefix ``on_``.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-            <span class="n">OPTION_CLIENTID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_BROKER</span><span class="p">,</span>
-            <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">mqttclient</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span><span class="p">)</span>
-        <span class="c1"># Credentials</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">password</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="c1"># Callbacks definition</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_connect</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_disconnect</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;disconnect&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_subscribe</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;subscribe&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_message</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="c1"># Callbacks</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_connect</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_disconnect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_disconnect</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_subscribe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_subscribe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_subscribe</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_on_message</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_client&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
         <span class="c1"># Broker parameters</span>
-        <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
             <span class="n">OPTION_HOST</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_BROKER</span><span class="p">,</span> <span class="s2">&quot;localhost&quot;</span><span class="p">)</span>
-        <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
             <span class="n">OPTION_PORT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_BROKER</span><span class="p">,</span> <span class="mi">1883</span><span class="p">))</span>
         <span class="c1"># Connect to broker</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s2">&quot;MQTT connection to broker </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> as client </span><span class="si">%s</span><span class="s2"> and user </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wating</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">loop_start</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">username</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">username_pw_set</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">errmsg</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">loop_stop</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s2">&quot;MQTT connection to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span>
                 <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">return</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
         <span class="c1"># Waiting for connection</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wating</span><span class="p">:</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MqttBroker.disconnect"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Disconnect from MQTT broker.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_client&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_client&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="c1"># Disconnect from broker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;MQTT disconnection from broker </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> as client </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">loop_stop</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">errmsg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;MQTT disconnection from </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span>
+                <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MqttBroker.reconnect"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.reconnect">[docs]</a>    <span class="k">def</span> <span class="nf">reconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reconnect to MQTT broker.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_client&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="c1"># Reconnect to broker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;MQTT reconnection to broker </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> as client </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clientid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wating</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">reconnect</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">errmsg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;MQTT reconnection to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span>
+                <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
+        <span class="c1"># Waiting for connection</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wating</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MqttBroker.subscribe_filters"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.subscribe_filters">[docs]</a>    <span class="k">def</span> <span class="nf">subscribe_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Subscribe to all MQTT topic filters.</span>
@@ -538,7 +669,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connected</span><span class="p">():</span>
             <span class="k">return</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GROUP_FILTERS</span><span class="p">):</span>
-            <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_FILTERS</span><span class="p">)</span>
+            <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_FILTERS</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mqttclient</span><span class="o">.</span><span class="n">MQTT_ERR_SUCCESS</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
@@ -572,7 +703,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connected</span><span class="p">():</span>
             <span class="k">return</span>
-        <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_TOPICS</span><span class="p">)</span>
+        <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_TOPICS</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mqttclient</span><span class="o">.</span><span class="n">MQTT_ERR_SUCCESS</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
@@ -609,17 +740,54 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connected</span><span class="p">():</span>
             <span class="k">return</span>
-        <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">topic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">qos</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="s2">&quot;MQTT publishing to topic </span><span class="si">%s</span><span class="s2">, </span><span class="si">%d</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+                <span class="s2">&quot;MQTT publishing to topic </span><span class="si">%s</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s2">&quot;Publishing to MQTT topic option </span><span class="si">%s</span><span class="s2">:[</span><span class="si">%s</span><span class="s2">] failed&quot;</span><span class="p">,</span>
                 <span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown option or section&quot;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown option or section&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MqttBroker.lwt"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.MqttBroker.lwt">[docs]</a>    <span class="k">def</span> <span class="nf">lwt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="n">GROUP_TOPICS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set last will and testament.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        message : str</span>
+<span class="sd">            Data to be set as LWT payload.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        option : str</span>
+<span class="sd">            Configuration option from attached configuration file with</span>
+<span class="sd">            definition of an MQTT topic for LWT.</span>
+<span class="sd">            *The argument is mandatory and has no default value.*</span>
+<span class="sd">        section : str</span>
+<span class="sd">            Configuration section from attached configuration file, where</span>
+<span class="sd">            configuration option should be searched.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        -------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            If qos is not 0, 1 or 2, or if topic is None</span>
+<span class="sd">            or has zero string length.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_client&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_def</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">will_set</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;MQTT LWT to topic </span><span class="si">%s</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">topic</span><span class="p">,</span> <span class="n">qos</span><span class="p">,</span> <span class="n">retain</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;LWT to MQTT topic option </span><span class="si">%s</span><span class="s2">:[</span><span class="si">%s</span><span class="s2">] failed&quot;</span><span class="p">,</span>
+                <span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown option, section, or topic parameters&quot;</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ThingSpeak"><a class="viewcode-back" href="../../gbj_pythonlib_sw.html#gbj_pythonlib_sw.mqtt.ThingSpeak">[docs]</a><span class="k">class</span> <span class="nc">ThingSpeak</span><span class="p">(</span><span class="n">MQTT</span><span class="p">):</span>
