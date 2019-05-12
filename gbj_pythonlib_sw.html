@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gbj_pythonlib_sw package &mdash; gbj_phytonlib_sw 1.0.0 documentation</title>
+  <title>gbj_pythonlib_sw package &mdash; gbj_phytonlib_sw 1.1.0 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -349,8 +349,11 @@ a parent class for operational classes for particular MQTT brokers.</p>
 <p>Managing an MQTT client connection to usually local MQTT broker.</p>
 <p class="rubric">Notes</p>
 <ul class="simple">
-<li>The client utilizes MQTT topics and filter definitions from
+<li>The client utilizes MQTT topics and topic filters definitions from
 a configuration file.</li>
+<li>The authorization of an MQTT client is supposed to be with username and
+password registered on connecting MQTT broker.</li>
+<li>The encrypted communication (SSL/TSL) is not used.</li>
 </ul>
 <dl class="attribute">
 <dt id="gbj_pythonlib_sw.mqtt.MqttBroker.GROUP_BROKER">
@@ -668,7 +671,7 @@ topic definition.</p>
 <dl class="data">
 <dt id="gbj_pythonlib_sw.mqtt.OPTION_PORT">
 <code class="descclassname">gbj_pythonlib_sw.mqtt.</code><code class="descname">OPTION_PORT</code><em class="property"> = 'port'</em><a class="headerlink" href="#gbj_pythonlib_sw.mqtt.OPTION_PORT" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>int</em> – Configuration option with MQTT broker HTTP port.</p>
+<dd><p><em>int</em> – Configuration option with MQTT broker TCP port.</p>
 </dd></dl>
 
 <dl class="data">
@@ -700,7 +703,8 @@ of attaching that file to this object.</td>
 <li>The class only provides single publishing to ThingSpeak, so that
 connecting and disconnecting to the ThingSpeak broker is automatic.</li>
 <li>The class follows allowed delay between publishings set for free acounts
-and buffers frequent messagge preferably with status.</li>
+and buffers frequent messagges preferably with status.</li>
+<li>The reading from ThingSpeak channels is not implemented.</li>
 </ul>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
@@ -1593,7 +1597,7 @@ including its arguments.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Libor Gabaj.
+        &copy; Copyright 2018-2019, Libor Gabaj.
 
     </p>
   </div>
@@ -1615,7 +1619,7 @@ including its arguments.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
