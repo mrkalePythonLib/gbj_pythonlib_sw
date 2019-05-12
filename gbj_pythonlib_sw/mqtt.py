@@ -21,8 +21,8 @@ Notes
   sections is recommended.
 
 """
-__version__ = "0.4.0"
-__status__ = "Beta"
+__version__ = "0.2.1"
+__status__ = "Testing"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018-2019, " + __author__
 __credits__ = []
@@ -53,7 +53,7 @@ OPTION_HOST = "host"
 """str: Configuration option with MQTT broker IP or URL."""
 
 OPTION_PORT = "port"
-"""int: Configuration option with MQTT broker HTTP port."""
+"""int: Configuration option with MQTT broker TCP port."""
 
 RESULTS = [
     "SUCCESS",
@@ -123,8 +123,11 @@ class MqttBroker(MQTT):
 
     Notes
     -----
-    - The client utilizes MQTT topics and filter definitions from
+    - The client utilizes MQTT topics and topic filters definitions from
       a configuration file.
+    - The authorization of an MQTT client is supposed to be with username and
+      password registered on connecting MQTT broker.
+    - The encrypted communication (SSL/TSL) is not used.
 
     """
 
@@ -659,7 +662,8 @@ class ThingSpeak(MQTT):
     - The class only provides single publishing to ThingSpeak, so that
       connecting and disconnecting to the ThingSpeak broker is automatic.
     - The class follows allowed delay between publishings set for free acounts
-      and buffers frequent messagge preferably with status.
+      and buffers frequent messagges preferably with status.
+    - The reading from ThingSpeak channels is not implemented.
 
     See Also
     --------
