@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = u'gbj_phytonlib_sw'
-copyright = u'2018, Libor Gabaj'
+copyright = u'2018-2019, Libor Gabaj'
 author = u'Libor Gabaj'
 
 # The short X.Y version
-version = u'1.0'
+version = u'1.1'
 # The full version, including alpha/beta/rc tags
-release = u'1.0.0'
+release = u'1.1.0'
 
 
 # -- General configuration ---------------------------------------------------
