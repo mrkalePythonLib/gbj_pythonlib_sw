@@ -5,10 +5,10 @@ A prescaler can be considered as a timer period divider and can run its own
 callbacks separately from the timer's callbacks.
 
 """
-__version__ = "0.2.0"
-__status__ = "Testing"
+__version__ = "0.3.0"
+__status__ = "Beta"
 __author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018, " + __author__
+__copyright__ = "Copyright 2018-2019, " + __author__
 __credits__ = ["Kris Dorosz"]
 __license__ = "MIT"
 __maintainer__ = __author__
@@ -163,9 +163,14 @@ class Timer(object):
                 self._repeate = False   # Flag about on-shot timer
 
     def __del__(self):
-        """Clean after instance destroying - destructor."""
-        self._logger.debug("Instance no.%d of %s deleted",
-                           self._order, self.__class__.__name__)
+        """Clean after instance destroying - destructor.
+
+        Notes
+        -----
+        In this method the object self._logger does not already exist, so that
+        logging is not possible.
+
+        """
         type(self)._instances -= 1
 
     def __str__(self):

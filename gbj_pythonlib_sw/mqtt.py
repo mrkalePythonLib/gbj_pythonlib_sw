@@ -21,7 +21,7 @@ Notes
   sections is recommended.
 
 """
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __status__ = "Beta"
 __author__ = "Libor Gabaj"
 __copyright__ = "Copyright 2018-2019, " + __author__
@@ -138,6 +138,82 @@ class MqttBroker(MQTT):
     GROUP_FILTERS = "MQTTfilters"
     """str: Predefined configuration section with MQTT topic filters."""
 
+    GROUP_DEFAULT = "DEFAULT"
+    """str: Default configuration section with MQTT variables."""
+
+    def __init__(self, config, **kwargs):
+        """Create the class instance - constructor.
+
+        Keyword Arguments
+        -----------------
+
+        clean_session : boolean
+            A flag that determines the client type. If 'True', the broker will
+            remove all information about this client when it disconnects.
+            If 'False', the client is a durable client and subscription
+            information and queued messages will be retained when the client
+            disconnects.
+            Note that a client will never discard its own outgoing messages
+            on disconnect. Calling 'connect()' or 'reconnect()' will cause
+            the messages to be resent. Use 'reinitialise()' to reset a client
+            to its original state.
+        userdata
+            User defined data of any type that is passed as the userdata
+            parameter to callbacks. It may be updated at a later point with
+            the 'user_data_set()' function.
+        protocol : str
+            The version of the MQTT protocol to use for this client. Can be
+            either 'MQTTv31' or 'MQTTv311'.
+        transport : str
+            Set to 'websockets' to send MQTT over WebSockets. Leave at the
+            default of 'tcp' to use raw TCP.
+        connect : function
+            Callback launched after connection to MQTT broker.
+        disconnect : function
+            Callback launched after disconnection from MQTT broker.
+        subscribe : function
+            Callback launched after subscription to MQTT topics.
+        message : function
+            Callback launched after receiving message from MQTT topics.
+
+        Notes
+        -----
+        All keys for callback functions are root words from MQTT client
+        callbacks without prefix ``on_``.
+
+        """
+        super(type(self), self).__init__(config)
+        # Client parameters
+        self._clientid = self._config.option(
+            OPTION_CLIENTID, self.GROUP_BROKER,
+            socket.gethostname()
+        )
+        self._userdata = self._config.option(
+            OPTION_USERDATA, self.GROUP_BROKER)
+        clean_session = bool(kwargs.pop("clean_session", True))
+        protocol = kwargs.pop("protocol", mqttclient.MQTTv311)
+        transport = kwargs.pop("transport", "tcp")
+
+        self._client = mqttclient.Client(
+            self._clientid,
+            clean_session,
+            self._userdata,
+            protocol,
+            transport
+            )
+        # Callbacks definition
+        self._cb_on_connect = kwargs.pop("connect", None)
+        self._cb_on_disconnect = kwargs.pop("disconnect", None)
+        self._cb_on_subscribe = kwargs.pop("subscribe", None)
+        self._cb_on_message = kwargs.pop("message", None)
+        # Callbacks
+        self._client.on_connect = self._on_connect
+        self._client.on_disconnect = self._on_disconnect
+        if self._cb_on_subscribe is not None:
+            self._client.on_subscribe = self._cb_on_subscribe
+        if self._cb_on_message is not None:
+            self._client.on_message = self._cb_on_message
+
     def __str__(self):
         """Represent instance object as a string."""
         if hasattr(self, "_clientid"):
@@ -160,23 +236,26 @@ class MqttBroker(MQTT):
 
         Returns
         -------
-        tuple of str
-            Pair of MQTT topic parameters as ``name``, ``qos``.
+        tuple of str and boolean
+            MQTT topic parameters as ``name``, ``qos``, ``retain``.
 
         Notes
         -----
-        The method appends ``0`` as the default `qos` to the read topic
-        definition for cases, when no `qos` is defined in order to split
-        the topic properly.
+        The method appends ``0`` as the default `qos` and ``0`` as default
+        ``retain`` to the read topic definition for cases, when no `qos` and
+        `retain` is defined in order to split the topic properly.
 
         """
         try:
-            name, qos = self._config.option_split(option, section, ['0'])
-            qos = int(qos)
+            params = self._config.option_split(option, section, ['0', '0'])
+            name = params[0]
+            qos = abs(int(params[1]))
+            retain = bool(abs(int(params[2])))
         except TypeError:
             name = None
             qos = None
-        return (name, qos)
+            retain = None
+        return (name, qos, retain)
 
     def topic_name(self, option, section=GROUP_TOPICS):
         """Return MQTT topic name.
@@ -197,8 +276,8 @@ class MqttBroker(MQTT):
             MQTT topic name.
 
         """
-        name, _ = self.topic_def(option, section)
-        return name
+        params = self.topic_def(option, section)
+        return params[0]
 
     def topic_qos(self, option, section=GROUP_TOPICS):
         """Return MQTT topic QoS.
@@ -220,8 +299,31 @@ class MqttBroker(MQTT):
             parameter of read topic definition.
 
         """
-        _, qos = self.topic_def(option, section)
-        return abs(int(qos))
+        params = self.topic_def(option, section)
+        return params[1]
+
+    def topic_retain(self, option, section=GROUP_TOPICS):
+        """Return MQTT topic retain flag.
+
+        Arguments
+        ---------
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic, which should be read.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
+
+        Returns
+        -------
+        boolean
+            MQTT topic `retain` as an logical value of third parameter of read
+            topic definition.
+
+        """
+        params = self.topic_def(option, section)
+        return params[2]
 
     def _on_connect(self, client, userdata, flags, rc):
         """Process actions when MQTT broker responds to a connection request.
@@ -328,111 +430,83 @@ class MqttBroker(MQTT):
                 else:
                     self._client.message_callback_add(topic, callback)
 
-    def connect(self, **kwargs):
-        """Connect to MQTT broker and set callback functions and credentials.
+    def connect(self, username=None, password=None):
+        """Connect to MQTT broker and set credentials.
 
-        Keyword Arguments
-        -----------------
-
-        connect : function
-            Callback launched after connection to MQTT broker.
-        disconnect : function
-            Callback launched after disconnection from MQTT broker.
-        subscribe : function
-            Callback launched after subscription to MQTT topics.
-        message : function
-            Callback launched after receiving message from MQTT topics.
+        Arguments
+        ---------
         username : str
             Login name of the registered user at MQTT broker.
         password : str
             Password of the registered user at MQTT broker.
-        clean_session : boolean
-            A flag that determines the client type. If 'True', the broker will
-            remove all information about this client when it disconnects.
-            If 'False', the client is a durable client and subscription
-            information and queued messages will be retained when the client
-            disconnects.
-            Note that a client will never discard its own outgoing messages
-            on disconnect. Calling 'connect()' or 'reconnect()' will cause
-            the messages to be resent. Use 'reinitialise()' to reset a client
-            to its original state.
-        protocol : str
-            The version of the MQTT protocol to use for this client. Can be
-            either 'MQTTv31' or 'MQTTv311'.
-        transport : str
-            Set to 'websockets' to send MQTT over WebSockets. Leave at the
-            default of 'tcp' to use raw TCP.
-
-        Notes
-        -----
-        All keys for callback functions are root words from MQTT client
-        callbacks without prefix ``on_``.
 
         """
-        # Client parameters
-        self._clientid = self._config.option(
-            OPTION_CLIENTID, self.GROUP_BROKER,
-            socket.gethostname()
-        )
-        self._userdata = self._config.option(
-            OPTION_USERDATA, self.GROUP_BROKER)
-        clean_session = bool(kwargs.pop("clean_session", True))
-        protocol = kwargs.pop("protocol", mqttclient.MQTTv311)
-        transport = kwargs.pop("transport", "tcp")
-
-        self._client = mqttclient.Client(
-            self._clientid,
-            clean_session,
-            self._userdata,
-            protocol,
-            transport
-            )
-        # Credentials
-        username = kwargs.pop("username", None)
-        password = kwargs.pop("password", None)
-        # Callbacks definition
-        self._cb_on_connect = kwargs.pop("connect", None)
-        self._cb_on_disconnect = kwargs.pop("disconnect", None)
-        self._cb_on_subscribe = kwargs.pop("subscribe", None)
-        self._cb_on_message = kwargs.pop("message", None)
-        # Callbacks
-        self._client.on_connect = self._on_connect
-        self._client.on_disconnect = self._on_disconnect
-        if self._cb_on_subscribe is not None:
-            self._client.on_subscribe = self._cb_on_subscribe
-        if self._cb_on_message is not None:
-            self._client.on_message = self._cb_on_message
+        if not hasattr(self, "_client"):
+            return
         # Broker parameters
-        host = self._config.option(
+        self._host = self._config.option(
             OPTION_HOST, self.GROUP_BROKER, "localhost")
-        port = int(self._config.option(
+        self._port = int(self._config.option(
             OPTION_PORT, self.GROUP_BROKER, 1883))
         # Connect to broker
-        self._logger.debug(
+        self._logger.info(
             "MQTT connection to broker %s:%s as client %s and user %s",
-            host, port, self._clientid, username)
+            self._host, self._port, self._clientid, username)
         self._wating = True
         try:
             self._client.loop_start()
             if username is not None:
                 self._client.username_pw_set(username, password)
-            self._client.connect(host, port)
+            self._client.connect(self._host, self._port)
         except Exception as errmsg:
             self._client.loop_stop()
             self._logger.error(
                 "MQTT connection to %s:%s failed: %s",
-                host, port, errmsg,
+                self._host, self._port, errmsg,
                 exc_info=True)
-            return
+            raise Exception(errmsg)
         # Waiting for connection
         while self._wating:
             time.sleep(0.2)
 
     def disconnect(self):
         """Disconnect from MQTT broker."""
-        if hasattr(self, "_client"):
+        if not hasattr(self, "_client"):
+            return
+        # Disconnect from broker
+        self._logger.info(
+            "MQTT disconnection from broker %s:%s as client %s",
+            self._host, self._port, self._clientid)
+        try:
             self._client.loop_stop()
             self._client.disconnect()
+        except Exception as errmsg:
+            self._logger.error(
+                "MQTT disconnection from %s:%s failed: %s",
+                self._host, self._port, errmsg,
+                exc_info=True)
+            raise Exception(errmsg)
+
+    def reconnect(self):
+        """Reconnect to MQTT broker."""
+        if not hasattr(self, "_client"):
+            return
+        # Reconnect to broker
+        self._logger.info(
+            "MQTT reconnection to broker %s:%s as client %s",
+            self._host, self._port, self._clientid)
+        self._wating = True
+        try:
+            self._client.reconnect()
+        except Exception as errmsg:
+            self._logger.error(
+                "MQTT reconnection to %s:%s failed: %s",
+                self._host, self._port, errmsg,
+                exc_info=True)
+            raise Exception(errmsg)
+        # Waiting for connection
+        while self._wating:
+            time.sleep(0.2)
 
     def subscribe_filters(self):
         """Subscribe to all MQTT topic filters.
@@ -446,7 +520,7 @@ class MqttBroker(MQTT):
         if not self.get_connected():
             return
         for option in self._config.options(self.GROUP_FILTERS):
-            topic, qos = self.topic_def(option, self.GROUP_FILTERS)
+            topic, qos, retain = self.topic_def(option, self.GROUP_FILTERS)
             result = self._client.subscribe(topic, qos)
             if result[0] == mqttclient.MQTT_ERR_SUCCESS:
                 self._logger.debug(
@@ -480,7 +554,7 @@ class MqttBroker(MQTT):
         """
         if not self.get_connected():
             return
-        topic, qos = self.topic_def(option, self.GROUP_TOPICS)
+        topic, qos, retain = self.topic_def(option, self.GROUP_TOPICS)
         result = self._client.subscribe(topic, qos)
         if result[0] == mqttclient.MQTT_ERR_SUCCESS:
             self._logger.debug(
@@ -517,17 +591,54 @@ class MqttBroker(MQTT):
         """
         if not self.get_connected():
             return
-        topic, qos = self.topic_def(option, section)
+        topic, qos, retain = self.topic_def(option, section)
         if topic is not None:
-            self._client.publish(topic, message, qos)
+            self._client.publish(topic, message, qos, retain)
             self._logger.debug(
-                "MQTT publishing to topic %s, %d: %s",
-                topic, qos, message)
+                "MQTT publishing to topic %s, %d, %s: %s",
+                topic, qos, retain, message)
         else:
             self._logger.error(
                 "Publishing to MQTT topic option %s:[%s] failed",
                 option, section)
             raise Exception("Unknown option or section")
+
+    def lwt(self, message, option, section=GROUP_TOPICS):
+        """Set last will and testament.
+
+        Arguments
+        ---------
+        message : str
+            Data to be set as LWT payload.
+            *The argument is mandatory and has no default value.*
+        option : str
+            Configuration option from attached configuration file with
+            definition of an MQTT topic for LWT.
+            *The argument is mandatory and has no default value.*
+        section : str
+            Configuration section from attached configuration file, where
+            configuration option should be searched.
+
+        Raises
+        -------
+        Exception
+            If qos is not 0, 1 or 2, or if topic is None
+            or has zero string length.
+
+        """
+        if not hasattr(self, "_client"):
+            return
+        topic, qos, retain = self.topic_def(option, section)
+        try:
+            self._client.will_set(topic, message, qos, retain)
+            self._logger.debug(
+                "MQTT LWT to topic %s, %d, %s: %s",
+                topic, qos, retain, message)
+        except ValueError:
+            self._logger.error(
+                "LWT to MQTT topic option %s:[%s] failed",
+                option, section)
+            raise Exception("Unknown option, section, or topic parameters")
 
 
 class ThingSpeak(MQTT):
