@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
   name='gbj_pythonlib_sw',
-  version='1.2.0',
+  version='1.3.0',
   description='Python libraries for software support.',
   long_description='Modules suitable for whatever python console application.',
   classifiers=[
@@ -15,13 +15,13 @@ setup(
     'Programming Language :: Python :: 3.5 :: 2.7',
     'Topic :: System :: Monitoring',
   ],
-  keywords='configuration, mqtt, trigger, timer, statistics, filter',
+  keywords='configuration, mqtt, trigger, timer, statistics, filter, utils',
   url='http://github.com/mrkalePythonLib/gbj_pythonlib_sw',
   author='Libor Gabaj',
   author_email='libor.gabaj@gmail.com',
   license='MIT',
   packages=['gbj_pythonlib_sw'],
-  install_requires=['paho-mqtt'],
+  install_requires=['paho-mqtt', 'psutil'],
   include_package_data=True,
   zip_safe=False
 )

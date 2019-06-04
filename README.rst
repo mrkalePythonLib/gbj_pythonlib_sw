@@ -43,3 +43,6 @@ trigger
   Lower trigger
     It calls callback function(s) when the comparison value sinks to the
     threshold value or below.
+
+utils
+  Auxilliary utilities and functions.
