@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Module for statistical filtering and smoothing."""
-__version__ = "0.2.0"
-__status__ = "Testing"
-__author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018, " + __author__
+__version__ = '0.2.0'
+__status__ = 'Testing'
+__author__ = 'Libor Gabaj'
+__copyright__ = 'Copyright 2018, ' + __author__
 __credits__ = []
-__license__ = "MIT"
+__license__ = 'MIT'
 __maintainer__ = __author__
-__email__ = "libor.gabaj@gmail.com"
+__email__ = 'libor.gabaj@gmail.com'
 
 
 import logging
@@ -62,7 +62,7 @@ class StatFilter(object):
     def __init__(self, value_max=None, value_min=None, buffer_len=5,
                  decimals=None):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(" ".join([__name__, __version__]))
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
         self._value_max = None
         self._value_min = None
         try:
@@ -76,7 +76,7 @@ class StatFilter(object):
 
     def __str__(self):
         """Represent instance object as a string."""
-        return "Data {}-{}[{}]".format(self._value_min or 'na',
+        return 'Data {}-{}[{}]'.format(self._value_min or 'na',
                                        self._value_max or 'na',
                                        len(self._buffer))
 
@@ -103,11 +103,11 @@ class StatFilter(object):
         if value is None:
             return None
         if self._value_max is not None and value > self._value_max:
-            self._logger.warning("Rejected value %f greater than %f",
+            self._logger.warning('Rejected value %f greater than %f',
                                  value, self._value_max)
             return None
         if self._value_min is not None and value < self._value_min:
-            self._logger.warning("Rejected value %f less than %f",
+            self._logger.warning('Rejected value %f less than %f',
                                  value, self._value_min)
             return None
         return value
@@ -132,7 +132,7 @@ class StatFilter(object):
             r = round(value, self._decimals)
         except TypeError:
             r = value
-        self._logger.debug("Result %s rounded to %d decimal(s)",
+        self._logger.debug('Result %s rounded to %d decimal(s)',
                            r, self._decimals)
         return r
 
@@ -155,8 +155,8 @@ class StatFilter(object):
         - Use just that argument, which you need to changing.
 
         """
-        self._value_max = kwargs.pop("value_max", self._value_max)
-        self._value_min = kwargs.pop("value_min", self._value_min)
+        self._value_max = kwargs.pop('value_max', self._value_max)
+        self._value_min = kwargs.pop('value_min', self._value_min)
 
         if self._value_max is None or self._value_min is None:
             return
@@ -283,8 +283,8 @@ class StatFilterExponential(StatFilter):
             1,
             decimals,
         )
-        self._logger.debug("Instance of %s created", self.__class__.__name__)
-        self._logger.debug("Smoothing factor %.2f", self._factor)
+        self._logger.debug('Instance of %s created', self.__class__.__name__)
+        self._logger.debug('Smoothing factor %.2f', self._factor)
 
     def result(self, value=None):
         """Calculate statistically smoothed value.
@@ -317,7 +317,7 @@ class StatFilterExponential(StatFilter):
             else:
                 self._buffer[0] = value
             self._logger.debug(
-                "Value %s, Statistic %s",
+                'Value %s, Statistic %s',
                 value, self._buffer[0]
             )
         return super(type(self), self).result(self._buffer[0])
@@ -376,7 +376,7 @@ class StatFilterRunning(StatFilter):
             buffer_len,
             decimals,
         )
-        self._logger.debug("Instance of %s created", type(self).__name__)
+        self._logger.debug('Instance of %s created', type(self).__name__)
 
     def _register_value(self, value):
         """Filter and register new value to the data buffer.
@@ -520,7 +520,7 @@ class StatFilterRunning(StatFilter):
           previously stored sample values in the class instance object.
 
         """
-        self._logger.debug("Default statistic: %s",
+        self._logger.debug('Default statistic: %s',
                            STAT_TYPES[self.get_stat_type()])
         if self._stat_type == AVERAGE:
             return self.result_avg(value)

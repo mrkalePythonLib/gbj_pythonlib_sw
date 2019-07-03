@@ -5,14 +5,14 @@ A prescaler can be considered as a timer period divider and can run its own
 callbacks separately from the timer's callbacks.
 
 """
-__version__ = "0.3.0"
-__status__ = "Beta"
-__author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018-2019, " + __author__
-__credits__ = ["Kris Dorosz"]
-__license__ = "MIT"
+__version__ = '0.3.0'
+__status__ = 'Beta'
+__author__ = 'Libor Gabaj'
+__copyright__ = 'Copyright 2018-2019, ' + __author__
+__credits__ = ['Kris Dorosz']
+__license__ = 'MIT'
 __maintainer__ = __author__
-__email__ = "libor.gabaj@gmail.com"
+__email__ = 'libor.gabaj@gmail.com'
 
 
 import threading
@@ -135,31 +135,31 @@ class Timer(object):
 
     def __init__(self, period, callback, *args, **kwargs):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(" ".join([__name__, __version__]))
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
         self._period = abs(float(period))
         self._callback = callback
         self._prescalers = []
         self._args = args
         self._kwargs = kwargs
-        self._count = self._kwargs.pop("count", None)
-        self._name = self._kwargs.pop("name", "{}"
+        self._count = self._kwargs.pop('count', None)
+        self._name = self._kwargs.pop('name', '{}'
                                       .format(self.__class__.__name__))
         type(self)._instances += 1
         self._order = type(self)._instances
-        self._logger.debug("Instance of %s no. %d created",
+        self._logger.debug('Instance of %s no. %d created',
                            self.__class__.__name__, self._order)
         self._timer = None
         self._stopping = False  # Flag about timer cancel request imposed
         self._repeate = True    # Flag about repeating timer
         # Mark timer
         if self._count is None:
-            self._mark = "R"
+            self._mark = 'R'
         else:
             self._count = abs(int(self._count))
             if self._count > 1:
-                self._mark = "C"
+                self._mark = 'C'
             elif self._count == 1:
-                self._mark = "O"
+                self._mark = 'O'
                 self._repeate = False   # Flag about on-shot timer
 
     def __del__(self):
@@ -180,7 +180,7 @@ class Timer(object):
         period, mark, and instance number.
 
         """
-        return "{}({}s-{}{}-{})".format(
+        return '{}({}s-{}{}-{})'.format(
             self._name,
             float(self._period),
             self._mark,
@@ -219,7 +219,7 @@ class Timer(object):
                 callbacks = tuple([callbacks])
             for callback in callbacks:
                 self._logger.debug(
-                    "Main callback %s of %s launched",
+                    'Main callback %s of %s launched',
                     callback.__name__, str(self)
                 )
                 callback(
@@ -229,25 +229,25 @@ class Timer(object):
                 )
             # Count down prescalers and call callbacks of expired ones
             for prescaler in self._prescalers:
-                prescaler["counter"] -= 1
-                if prescaler["counter"] <= 0:
-                    prescaler["counter"] = prescaler["factor"]
-                    callbacks = prescaler["callback"]
+                prescaler['counter'] -= 1
+                if prescaler['counter'] <= 0:
+                    prescaler['counter'] = prescaler['factor']
+                    callbacks = prescaler['callback']
                     if not isinstance(callbacks, tuple):
                         callbacks = tuple([callbacks])
                     for callback in callbacks:
                         self._logger.debug(
-                            "Prescaler %d callback %s of %s launched",
-                            prescaler["factor"],
+                            'Prescaler %d callback %s of %s launched',
+                            prescaler['factor'],
                             callback.__name__, str(self)
                         )
                         callback(
-                            *prescaler["args"],
+                            *prescaler['args'],
                             exec_last=not self._repeate,
-                            **prescaler["kwargs"]
+                            **prescaler['kwargs']
                         )
         except Exception:
-            self._logger.error("Running callbacks of %s failed:",
+            self._logger.error('Running callbacks of %s failed:',
                                str(self), exc_info=True)
         finally:
             if self._repeate:
@@ -258,17 +258,17 @@ class Timer(object):
     def start(self):
         """Create timer thread object and store it in the instance."""
         if (self._count or 1) <= 0:
-            self._logger.debug("%s not started", str(self))
+            self._logger.debug('%s not started', str(self))
             return
         else:
-            self._logger.debug("%s started", str(self))
+            self._logger.debug('%s started', str(self))
             self._create_timer()
 
     def stop(self):
         """Destroy timer thread object."""
         self._stopping = True
         if self._timer is not None:
-            self._logger.debug("%s stopped", str(self))
+            self._logger.debug('%s stopped', str(self))
             self._timer.cancel()
 
     def prescaler(self, factor, callback, *args, **kwargs):
@@ -315,27 +315,27 @@ class Timer(object):
         # Find existing prescaler and remove or update it
         new = True
         for i, prescaler in enumerate(self._prescalers):
-            if prescaler["factor"] == factor:
+            if prescaler['factor'] == factor:
                 if callback is None:
                     self._prescalers.pop(i)
                 else:
-                    prescaler["callback"] = callback
-                    prescaler["args"] = args
-                    prescaler["kwargs"] = kwargs
+                    prescaler['callback'] = callback
+                    prescaler['args'] = args
+                    prescaler['kwargs'] = kwargs
                 new = False
                 break
         # Create new prescaler
         if new:
             prescaler = {
-                "counter": factor,
-                "factor": factor,
-                "callback": callback,
-                "args": args,
-                "kwargs": kwargs,
+                'counter': factor,
+                'factor': factor,
+                'callback': callback,
+                'args': args,
+                'kwargs': kwargs,
             }
             self._prescalers.append(prescaler)
 
     def get_prescalers(self):
         """Return dictionary of prescalers."""
-        if hasattr(self, "_prescalers"):
+        if hasattr(self, '_prescalers'):
             return self._prescalers

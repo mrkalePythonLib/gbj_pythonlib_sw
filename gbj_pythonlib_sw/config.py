@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Module for managing a configuration INI file."""
-__version__ = "0.3.0"
-__status__ = "Testing"
-__author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018, " + __author__
+__version__ = '0.3.0'
+__status__ = 'Testing'
+__author__ = 'Libor Gabaj'
+__copyright__ = 'Copyright 2018, ' + __author__
 __credits__ = []
-__license__ = "MIT"
+__license__ = 'MIT'
 __maintainer__ = __author__
-__email__ = "libor.gabaj@gmail.com"
+__email__ = 'libor.gabaj@gmail.com'
 
 
 import logging
@@ -40,8 +40,8 @@ class Config(object):
 
     def __init__(self, file):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(" ".join([__name__, __version__]))
-        self._logger.debug("Instance of %s created", self.__class__.__name__)
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug('Instance of %s created', self.__class__.__name__)
         self._parser = configparser.ConfigParser()
         self._file = None
 
@@ -55,9 +55,9 @@ class Config(object):
     def __str__(self):
         """Represent instance object as a string."""
         if self._file is None:
-            return "No object of type '{}'".format(self.__class__.__name__)
+            return 'No object of type "{}"'.format(self.__class__.__name__)
         else:
-            return "Config file '{}'".format(self._file)
+            return 'Config file "{}"'.format(self._file)
 
     def option(self, option, section, default=None):
         """Read configuration option's value.
@@ -84,7 +84,7 @@ class Config(object):
             return default
         return self._parser.get(section, option) or default
 
-    def option_split(self, option, section, appendix=[], separator=","):
+    def option_split(self, option, section, appendix=[], separator=','):
         """Read configuration option, append to it, and split its value.
 
         Arguments
@@ -114,7 +114,7 @@ class Config(object):
         if value is None:
             return value
         # Append list to option
-        separator = str(separator or "")
+        separator = str(separator or '')
         if not isinstance(appendix, list):
             tmp = appendix
             appendix = []
@@ -168,11 +168,11 @@ class Config(object):
         All section and options are listed including from ``DEFAULT`` section.
 
         """
-        pattern = "\n\n---CONGIGURATION - {}---"
-        content = pattern.format("BOF")
+        pattern = '\n\n---CONGIGURATION - {}---'
+        content = pattern.format('BOF')
         for section in self._parser.sections():
-            content += "\n\n[{}]".format(section)
+            content += '\n\n[{}]'.format(section)
             for name, value in self._parser.items(section):
-                content += "\n{} = {}".format(name, value)
-        content += pattern.format("EOF")
+                content += '\n{} = {}'.format(name, value)
+        content += pattern.format('EOF')
         return content

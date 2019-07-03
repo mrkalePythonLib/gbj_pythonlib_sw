@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Module for auxilliary constants, utilities, and functions."""
-__version__ = "0.2.0"
-__status__ = "Beta"
-__author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2019, " + __author__
+__version__ = '0.2.0'
+__status__ = 'Beta'
+__author__ = 'Libor Gabaj'
+__copyright__ = 'Copyright 2019, ' + __author__
 __credits__ = []
-__license__ = "MIT"
+__license__ = 'MIT'
 __maintainer__ = __author__
-__email__ = "libor.gabaj@gmail.com"
+__email__ = 'libor.gabaj@gmail.com'
 
 
 import psutil
@@ -36,16 +36,3 @@ def check_service(script):
         if p.info['name'] == script:
             ls.append(p)
     return len(ls) > 0
-
-
-###############################################################################
-# Classes
-###############################################################################
-class Status:
-    """Constants related to status values in MQTT topics."""
-
-    (
-        ONLINE, OFFLINE, RUNNING, IDLE,
-    ) = (
-            "Online", "Offline", "Running", "Idle",
-        )

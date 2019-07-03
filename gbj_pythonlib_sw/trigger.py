@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Module for managing and executing triggers as value dependend callbacks."""
-__version__ = "0.2.0"
-__status__ = "Testing"
-__author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018, " + __author__
+__version__ = '0.2.0'
+__status__ = 'Testing'
+__author__ = 'Libor Gabaj'
+__copyright__ = 'Copyright 2018, ' + __author__
 __credits__ = []
-__license__ = "MIT"
+__license__ = 'MIT'
 __maintainer__ = __author__
-__email__ = "libor.gabaj@gmail.com"
+__email__ = 'libor.gabaj@gmail.com'
 
 
 import logging
@@ -31,13 +31,13 @@ class Trigger(object):
 
     def __init__(self):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(" ".join([__name__, __version__]))
-        self._logger.debug("Instance of %s created", self.__class__.__name__)
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug('Instance of %s created', self.__class__.__name__)
         self.del_triggers()
 
     def __str__(self):
         """Represent instance object as a string."""
-        return "Triggers {}".format(len(self._triggers))
+        return 'Triggers {}'.format(len(self._triggers))
 
     def set_trigger(self, id, mode=None, value=None, callback=None,
                     *args, **kwargs):
@@ -88,46 +88,46 @@ class Trigger(object):
 
         """
         def mode_str(mod):
-            return "upper" if mode == UPPER else "lower"
+            return 'upper' if mode == UPPER else 'lower'
 
         # Sanitize arguments
         if id is None:
-            errmsg = "No id provided"
+            errmsg = 'No id provided'
             self._logger.error(errmsg)
             raise NameError(errmsg)
         if mode is not None and mode not in [UPPER, LOWER]:
-            errmsg = "Unknown mode {}".format(mode)
+            errmsg = 'Unknown mode {}'.format(mode)
             self._logger.error(errmsg)
             raise TypeError(errmsg)
-        debug_str = " %s trigger %s with callback %s for value %s"
+        debug_str = ' %s trigger %s with callback %s for value %s'
         # Update trigger
         new = True
         for i, trigger in enumerate(self._triggers):
-            if trigger["id"] == id:
-                trigger["callback"] = callback or trigger["callback"]
-                trigger["value"] = value or trigger["value"]
-                trigger["mode"] = mode or trigger["mode"]
-                trigger["args"] = args or trigger["args"]
-                trigger["kwargs"] = kwargs or trigger["kwargs"]
+            if trigger['id'] == id:
+                trigger['callback'] = callback or trigger['callback']
+                trigger['value'] = value or trigger['value']
+                trigger['mode'] = mode or trigger['mode']
+                trigger['args'] = args or trigger['args']
+                trigger['kwargs'] = kwargs or trigger['kwargs']
                 self._triggers[i] = trigger
                 self._logger.debug(
-                    "Updated" + debug_str, mode_str(trigger["mode"]), id,
-                    trigger["callback"].__name__, trigger["value"])
+                    'Updated' + debug_str, mode_str(trigger['mode']), id,
+                    trigger['callback'].__name__, trigger['value'])
                 new = False
                 break
         # Create new trigger
         if new:
             trigger = {
-                "id": id,
-                "value": value,
-                "callback": callback,
-                "mode": mode,
-                "args": args,
-                "kwargs": kwargs,
+                'id': id,
+                'value': value,
+                'callback': callback,
+                'mode': mode,
+                'args': args,
+                'kwargs': kwargs,
             }
             self._triggers.append(trigger)
             self._logger.debug(
-                "Created" + debug_str, mode_str(mode), id,
+                'Created' + debug_str, mode_str(mode), id,
                 callback.__name__, value)
 
     def get_triggers(self):
@@ -181,27 +181,27 @@ class Trigger(object):
         # Evaluate listed or all triggers
         for trigger in self._triggers:
             # Detect not listed trigger
-            if ids is not None and trigger["id"] not in ids:
+            if ids is not None and trigger['id'] not in ids:
                 continue
-            if (trigger["mode"] == UPPER and value > trigger["value"]) \
-               or (trigger["mode"] == LOWER and value < trigger["value"]):
-                    callbacks = trigger["callback"]
+            if (trigger['mode'] == UPPER and value > trigger['value']) \
+               or (trigger['mode'] == LOWER and value < trigger['value']):
+                    callbacks = trigger['callback']
                     if not isinstance(callbacks, tuple):
                         callbacks = tuple([callbacks])
                     for callback in callbacks:
                         self._logger.debug(
-                            "%s trigger callback %s for threshold value %f"
-                            + " at current value %f",
-                            "Upper" if trigger["mode"] == UPPER else "Lower",
+                            '%s trigger callback %s for threshold value %f'
+                            + ' at current value %f',
+                            'Upper' if trigger['mode'] == UPPER else 'Lower',
                             callback.__name__,
-                            trigger["value"],
+                            trigger['value'],
                             value
                         )
                         callback(
-                            *trigger["args"],
+                            *trigger['args'],
                             value=value,
-                            threshold=trigger["value"],
-                            **trigger["kwargs"]
+                            threshold=trigger['value'],
+                            **trigger['kwargs']
                         )
 
     def del_triggers(self, ids=[]):
@@ -223,6 +223,6 @@ class Trigger(object):
             return
         # Remove listed triggers
         for i, trigger in enumerate(self._triggers):
-            if trigger["id"] in ids:
+            if trigger['id'] in ids:
                 self._triggers.pop(i)
-                self._logger.debug("Removed trigger %s", trigger["id"])
+                self._logger.debug('Removed trigger %s', trigger['id'])

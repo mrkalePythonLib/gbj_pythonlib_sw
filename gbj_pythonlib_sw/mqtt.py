@@ -21,14 +21,14 @@ Notes
   sections is recommended.
 
 """
-__version__ = "0.2.1"
-__status__ = "Testing"
-__author__ = "Libor Gabaj"
-__copyright__ = "Copyright 2018-2019, " + __author__
+__version__ = '0.2.1'
+__status__ = 'Testing'
+__author__ = 'Libor Gabaj'
+__copyright__ = 'Copyright 2018-2019, ' + __author__
 __credits__ = []
-__license__ = "MIT"
+__license__ = 'MIT'
 __maintainer__ = __author__
-__email__ = "libor.gabaj@gmail.com"
+__email__ = 'libor.gabaj@gmail.com'
 
 
 # Standard library modules
@@ -43,25 +43,25 @@ import paho.mqtt.publish as mqttpublish
 ###############################################################################
 # Module constants
 ###############################################################################
-OPTION_CLIENTID = "clientid"
+OPTION_CLIENTID = 'clientid'
 """str: Configuration option with MQTT client identifier."""
 
-OPTION_USERDATA = "userdata"
+OPTION_USERDATA = 'userdata'
 """str: Configuration option with custom data for MQTT callbacks."""
 
-OPTION_HOST = "host"
+OPTION_HOST = 'host'
 """str: Configuration option with MQTT broker IP or URL."""
 
-OPTION_PORT = "port"
+OPTION_PORT = 'port'
 """int: Configuration option with MQTT broker TCP port."""
 
 RESULTS = [
-    "SUCCESS",
-    "BAD PROTOCOL",
-    "BAD CLIENT ID",
-    "NO SERVER",
-    "BAD CREDENTIALS",
-    "NOT AUTHORISED",
+    'SUCCESS',
+    'BAD PROTOCOL',
+    'BAD CLIENT ID',
+    'NO SERVER',
+    'BAD CREDENTIALS',
+    'NOT AUTHORISED',
 ]
 
 
@@ -94,17 +94,17 @@ class MQTT(object):
 
     def __init__(self, config):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(" ".join([__name__, __version__]))
-        self._logger.debug("Instance of %s created", self.__class__.__name__)
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug('Instance of %s created', self.__class__.__name__)
         self._config = config
         self._connected = False
 
     def __str__(self):
         """Represent instance object as a string."""
         if self._config is None:
-            return "Void configuration"
+            return 'Void configuration'
         else:
-            return "Config file '{}'".format(self._config._file)
+            return 'Config file "{}"'.format(self._config._file)
 
     def get_connected(self):
         """Return connection flag.
@@ -132,16 +132,16 @@ class MqttBroker(MQTT):
     """
 
     # Predefined configuration file sections related to MQTT
-    GROUP_BROKER = "MQTTbroker"
+    GROUP_BROKER = 'MQTTbroker'
     """str: Predefined configuration section with MQTT broker parameters."""
 
-    GROUP_TOPICS = "MQTTtopics"
+    GROUP_TOPICS = 'MQTTtopics'
     """str: Predefined configuration section with MQTT topics."""
 
-    GROUP_FILTERS = "MQTTfilters"
+    GROUP_FILTERS = 'MQTTfilters'
     """str: Predefined configuration section with MQTT topic filters."""
 
-    GROUP_DEFAULT = "DEFAULT"
+    GROUP_DEFAULT = 'DEFAULT'
     """str: Default configuration section with MQTT variables."""
 
     def __init__(self, config, **kwargs):
@@ -193,9 +193,9 @@ class MqttBroker(MQTT):
         )
         self._userdata = self._config.option(
             OPTION_USERDATA, self.GROUP_BROKER)
-        clean_session = bool(kwargs.pop("clean_session", True))
-        protocol = kwargs.pop("protocol", mqttclient.MQTTv311)
-        transport = kwargs.pop("transport", "tcp")
+        clean_session = bool(kwargs.pop('clean_session', True))
+        protocol = kwargs.pop('protocol', mqttclient.MQTTv311)
+        transport = kwargs.pop('transport', 'tcp')
 
         self._client = mqttclient.Client(
             self._clientid,
@@ -205,10 +205,10 @@ class MqttBroker(MQTT):
             transport
             )
         # Callbacks definition
-        self._cb_on_connect = kwargs.pop("connect", None)
-        self._cb_on_disconnect = kwargs.pop("disconnect", None)
-        self._cb_on_subscribe = kwargs.pop("subscribe", None)
-        self._cb_on_message = kwargs.pop("message", None)
+        self._cb_on_connect = kwargs.pop('connect', None)
+        self._cb_on_disconnect = kwargs.pop('disconnect', None)
+        self._cb_on_subscribe = kwargs.pop('subscribe', None)
+        self._cb_on_message = kwargs.pop('message', None)
         # Callbacks
         self._client.on_connect = self._on_connect
         self._client.on_disconnect = self._on_disconnect
@@ -219,10 +219,10 @@ class MqttBroker(MQTT):
 
     def __str__(self):
         """Represent instance object as a string."""
-        if hasattr(self, "_clientid"):
-            return "MQTT client {}".format(self._clientid)
+        if hasattr(self, '_clientid'):
+            return 'MQTT client {}'.format(self._clientid)
         else:
-            return "No MQTT client active"
+            return 'No MQTT client active'
 
     def topic_def(self, option, section=GROUP_TOPICS):
         """Return MQTT topic definition parameters.
@@ -362,7 +362,7 @@ class MqttBroker(MQTT):
 
         """
         self._wating = False
-        self._logger.debug("MQTT connect result %s: %s", rc, RESULTS[rc])
+        self._logger.debug('MQTT connect result %s: %s', rc, RESULTS[rc])
         if rc == 0:
             self._connected = True
         if self._cb_on_connect is not None:
@@ -379,7 +379,7 @@ class MqttBroker(MQTT):
             The private user data as set in Client() or user_data_set().
 
         """
-        self._logger.debug("MQTT disconnect result %s: %s", rc, RESULTS[rc])
+        self._logger.debug('MQTT disconnect result %s: %s', rc, RESULTS[rc])
         if self._cb_on_disconnect is not None:
             self._cb_on_disconnect(client, RESULTS[rc], rc)
         self._client.loop_stop()
@@ -425,7 +425,7 @@ class MqttBroker(MQTT):
                 section = self.GROUP_FILTERS
             topic = self.topic_name(option, section)
             self._logger.debug(
-                "MQTT filter callback %s for topic %s",
+                'MQTT filter callback %s for topic %s',
                 callback.__name__, topic)
             if topic is not None:
                 if callback is None:
@@ -444,16 +444,16 @@ class MqttBroker(MQTT):
             Password of the registered user at MQTT broker.
 
         """
-        if not hasattr(self, "_client"):
+        if not hasattr(self, '_client'):
             return
         # Broker parameters
         self._host = self._config.option(
-            OPTION_HOST, self.GROUP_BROKER, "localhost")
+            OPTION_HOST, self.GROUP_BROKER, 'localhost')
         self._port = int(self._config.option(
             OPTION_PORT, self.GROUP_BROKER, 1883))
         # Connect to broker
         self._logger.info(
-            "MQTT connection to broker %s:%s as client %s and user %s",
+            'MQTT connection to broker %s:%s as client %s and user %s',
             self._host, self._port, self._clientid, username)
         self._wating = True
         try:
@@ -464,7 +464,7 @@ class MqttBroker(MQTT):
         except Exception as errmsg:
             self._client.loop_stop()
             self._logger.error(
-                "MQTT connection to %s:%s failed: %s",
+                'MQTT connection to %s:%s failed: %s',
                 self._host, self._port, errmsg,
                 exc_info=True)
             raise Exception(errmsg)
@@ -474,36 +474,36 @@ class MqttBroker(MQTT):
 
     def disconnect(self):
         """Disconnect from MQTT broker."""
-        if not hasattr(self, "_client"):
+        if not hasattr(self, '_client'):
             return
         # Disconnect from broker
         self._logger.info(
-            "MQTT disconnection from broker %s:%s as client %s",
+            'MQTT disconnection from broker %s:%s as client %s',
             self._host, self._port, self._clientid)
         try:
             self._client.loop_stop()
             self._client.disconnect()
         except Exception as errmsg:
             self._logger.error(
-                "MQTT disconnection from %s:%s failed: %s",
+                'MQTT disconnection from %s:%s failed: %s',
                 self._host, self._port, errmsg,
                 exc_info=True)
             raise Exception(errmsg)
 
     def reconnect(self):
         """Reconnect to MQTT broker."""
-        if not hasattr(self, "_client"):
+        if not hasattr(self, '_client'):
             return
         # Reconnect to broker
         self._logger.info(
-            "MQTT reconnection to broker %s:%s as client %s",
+            'MQTT reconnection to broker %s:%s as client %s',
             self._host, self._port, self._clientid)
         self._wating = True
         try:
             self._client.reconnect()
         except Exception as errmsg:
             self._logger.error(
-                "MQTT reconnection to %s:%s failed: %s",
+                'MQTT reconnection to %s:%s failed: %s',
                 self._host, self._port, errmsg,
                 exc_info=True)
             raise Exception(errmsg)
@@ -527,12 +527,12 @@ class MqttBroker(MQTT):
             result = self._client.subscribe(topic, qos)
             if result[0] == mqttclient.MQTT_ERR_SUCCESS:
                 self._logger.debug(
-                    "MQTT subscribe to filter %s, %s",
+                    'MQTT subscribe to filter %s, %s',
                     topic, qos)
             # elif result[0] == mqttclient.MQTT_ERR_NO_CONN:
             else:
                 self._logger.error(
-                    "MQTT filter subscribe result %s",
+                    'MQTT filter subscribe result %s',
                     result[0])
                 raise Exception(str(result[0]))
 
@@ -561,12 +561,12 @@ class MqttBroker(MQTT):
         result = self._client.subscribe(topic, qos)
         if result[0] == mqttclient.MQTT_ERR_SUCCESS:
             self._logger.debug(
-                "MQTT subscribe to topic %s, %d",
+                'MQTT subscribe to topic %s, %d',
                 topic, qos)
         # elif result[0] == mqttclient.MQTT_ERR_NO_CONN:
         else:
             self._logger.error(
-                "MQTT topic subscribe result %d",
+                'MQTT topic subscribe result %d',
                 result[0])
             raise Exception(str(result[0]))
 
@@ -598,13 +598,13 @@ class MqttBroker(MQTT):
         if topic is not None:
             self._client.publish(topic, message, qos, retain)
             self._logger.debug(
-                "MQTT publishing to topic %s, %d, %s: %s",
+                'MQTT publishing to topic %s, %d, %s: %s',
                 topic, qos, retain, message)
         else:
             self._logger.error(
-                "Publishing to MQTT topic option %s:[%s] failed",
+                'Publishing to MQTT topic option %s:[%s] failed',
                 option, section)
-            raise Exception("Unknown option or section")
+            raise Exception('Unknown option or section')
 
     def lwt(self, message, option, section=GROUP_TOPICS):
         """Set last will and testament.
@@ -629,19 +629,19 @@ class MqttBroker(MQTT):
             or has zero string length.
 
         """
-        if not hasattr(self, "_client"):
+        if not hasattr(self, '_client'):
             return
         topic, qos, retain = self.topic_def(option, section)
         try:
             self._client.will_set(topic, message, qos, retain)
             self._logger.debug(
-                "MQTT LWT to topic %s, %d, %s: %s",
+                'MQTT LWT to topic %s, %d, %s: %s',
                 topic, qos, retain, message)
         except ValueError:
             self._logger.error(
-                "LWT to MQTT topic option %s:[%s] failed",
+                'LWT to MQTT topic option %s:[%s] failed',
                 option, section)
-            raise Exception("Unknown option, section, or topic parameters")
+            raise Exception('Unknown option, section, or topic parameters')
 
 
 class ThingSpeak(MQTT):
@@ -672,19 +672,19 @@ class ThingSpeak(MQTT):
     """
 
     # Predefined configuration file sections and options related to ThingSpeak
-    GROUP_BROKER = "ThingSpeak"
+    GROUP_BROKER = 'ThingSpeak'
     """str: Configuration section with ThingSpeak parameters."""
 
-    OPTION_MQTT_API_KEY = "mqtt_api_key"
+    OPTION_MQTT_API_KEY = 'mqtt_api_key'
     """str: Configuration option with ThingSpeak MQTT API key."""
 
-    OPTION_CHANNEL_ID = "channel_id"
+    OPTION_CHANNEL_ID = 'channel_id'
     """int: Configuration option with ThingSpeak channel id."""
 
-    OPTION_WRITE_API_KEY = "write_api_key"
+    OPTION_WRITE_API_KEY = 'write_api_key'
     """str: Configuration option with ThingSpeak write key."""
 
-    OPTION_PUBLISH_DELAY = "publish_delay"
+    OPTION_PUBLISH_DELAY = 'publish_delay'
     """float: Configuration option with minimal publish delay in seconds.
     Default value is 15.0 s.
 
@@ -703,7 +703,7 @@ class ThingSpeak(MQTT):
         self._port = int(self._config.option(
             OPTION_PORT, self.GROUP_BROKER, 1883))
         # Configuration parameters without default value
-        errtxt = "Undefined ThingSpeak config option {}"
+        errtxt = 'Undefined ThingSpeak config option {}'
         #
         self._host = self._config.option(OPTION_HOST, self.GROUP_BROKER)
         if self._host is None:
@@ -712,7 +712,7 @@ class ThingSpeak(MQTT):
             raise TypeError(errmsg)
         else:
             self._logger.debug(
-                "ThingSpeak connection to broker %s:%s as client %s",
+                'ThingSpeak connection to broker %s:%s as client %s',
                 self._host, self._port, self._clientid)
         #
         self._mqtt_api_key = self._config.option(
@@ -738,10 +738,10 @@ class ThingSpeak(MQTT):
 
     def __str__(self):
         """Represent instance object as a string."""
-        if hasattr(self, "_clientid"):
-            return "ThingSpeak client {}".format(self._clientid)
+        if hasattr(self, '_clientid'):
+            return 'ThingSpeak client {}'.format(self._clientid)
         else:
-            return "No ThingSpeak client active"
+            return 'No ThingSpeak client active'
 
     def publish(self, fields={}, status=None):
         """Publish single message to ThingSpeak.
@@ -783,21 +783,21 @@ class ThingSpeak(MQTT):
                 continue
             if field_value is None:
                 continue
-            msgParts.append("field{}={}".format(field_num, field_value))
+            msgParts.append('field{}={}'.format(field_num, field_value))
         if status is not None and len(status) > 0:
-            msgParts.append("status={}".format(status))
-        msgPayload = "&".join(msgParts)
+            msgParts.append('status={}'.format(status))
+        msgPayload = '&'.join(msgParts)
         # Process frequent message
         if (time.time() - self._timestamp_publish_last) \
            < self._publish_delay:
             # Ignore message without status
             if no_status:
                 self._logger.debug(
-                    "Ignored frequent publishing to ThingSpeak")
+                    'Ignored frequent publishing to ThingSpeak')
             # Store message with status to buffer
             else:
                 self._logger.debug(
-                    "Buffered status message %s", msgPayload)
+                    'Buffered status message %s', msgPayload)
                 self._msgbuffer.append(msgPayload)
             return False
         # Replace current message without status by stored message if any
@@ -805,34 +805,34 @@ class ThingSpeak(MQTT):
             if len(self._msgbuffer) > 0:
                 msgPayload = self._msgbuffer.pop(0)
                 self._logger.debug(
-                    "Retrieved buffered message %s", msgPayload)
+                    'Retrieved buffered message %s', msgPayload)
         # Publish current message and throw away all stored ones
         else:
             self._msgbuffer = list()
         # Construct topic
-        topicParts = ["channels", self._channel_id, "publish",
+        topicParts = ['channels', self._channel_id, 'publish',
                       self._write_api_key]
-        topic = "/".join(topicParts)
+        topic = '/'.join(topicParts)
         # Publish payload
         if len(msgPayload) == 0:
-            self._logger.debug("Nothing to publish to ThingSpeak")
+            self._logger.debug('Nothing to publish to ThingSpeak')
             return False
         try:
-            self._logger.debug("Publishing to ThingSpeak channel %s",
+            self._logger.debug('Publishing to ThingSpeak channel %s',
                                self._channel_id)
             mqttpublish.single(
                 topic,
                 payload=msgPayload,
                 hostname=self._host,
                 port=self._port,
-                auth={"username": self._clientid,
+                auth={'username': self._clientid,
                       'password': self._mqtt_api_key}
             )
             self._timestamp_publish_last = time.time()
-            self._logger.debug("Published ThingSpeak message %s", msgPayload)
+            self._logger.debug('Published ThingSpeak message %s', msgPayload)
         except Exception as errmsg:
             self._logger.error(
-                "Publishing to ThingSpeak failed with error %s:",
+                'Publishing to ThingSpeak failed with error %s:',
                 errmsg, exc_info=True)
             return False
         return True
