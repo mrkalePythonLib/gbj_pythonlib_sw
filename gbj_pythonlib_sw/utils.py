@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Module for auxilliary constants, utilities, and functions."""
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __status__ = 'Beta'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2019, ' + __author__
@@ -11,6 +11,7 @@ __email__ = 'libor.gabaj@gmail.com'
 
 
 import psutil
+import platform
 
 
 ###############################################################################
@@ -36,3 +37,13 @@ def check_service(script):
         if p.info['name'] == script:
             ls.append(p)
     return len(ls) > 0
+
+
+def linux():
+    """Return flag about running on Linux platform."""
+    return platform.system() == 'Linux'
+
+
+def windows():
+    """Return flag about running on Windows platform."""
+    return platform.system() == 'Windows'
