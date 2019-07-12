@@ -128,13 +128,17 @@ class StatFilter(object):
             input value.
 
         """
-        try:
-            r = round(value, self._decimals)
-        except TypeError:
-            r = value
-        self._logger.debug('Result %s rounded to %d decimal(s)',
-                           r, self._decimals)
-        return r
+        if self._decimals is not None:
+            try:
+                value = round(value, self._decimals)
+                self._logger.debug(
+                    'Result %s rounded to %s decimal(s)',
+                    value,
+                    self._decimals
+                    )
+            except TypeError:
+                pass
+        return value
 
     # -------------------------------------------------------------------------
     # Setters
@@ -257,9 +261,10 @@ class StatFilterExponential(StatFilter):
         Positive smoothing factor for exponential filtering.
         It is converted to absolute value provided.
 
-        - Default value ``0.5`` means ``runnig average``.
         - Acceptable value range is ``0.0 ~ 1.0`` and input value is limited
           to it.
+        - Default value ``0.5`` means ``runnig average``.
+        - Value ``1.0`` means ``no smoothing``.
 
     value_max : float
         Maximal measuring value acceptable for filtering.
@@ -271,20 +276,31 @@ class StatFilterExponential(StatFilter):
 
     """
 
-    def __init__(self, factor=0.5, value_max=None, value_min=None,
-                 decimals=None):
+    def __init__(self,
+                 factor=0.5,
+                 value_max=None,
+                 value_min=None,
+                 decimals=None,
+                 ):
         """Create the class instance - constructor."""
-        self._factor = abs(factor or 0.5)
-        self._factor = min(self._factor, 1.0)
-        self._factor = max(self._factor, 0.0)
+        self._factor = max(min(abs(factor or 0.5), 1.0), 0.0)
         super(type(self), self).__init__(
             value_max,
             value_min,
             1,
             decimals,
         )
-        self._logger.debug('Instance of %s created', self.__class__.__name__)
-        self._logger.debug('Smoothing factor %.2f', self._factor)
+        # Logging
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__,
+            str(self)
+            )
+
+    def __str__(self):
+        """Represent instance object as a string."""
+        return 'Exponential filter ({:.2f})'.format(self._factor)
 
     def result(self, value=None):
         """Calculate statistically smoothed value.
