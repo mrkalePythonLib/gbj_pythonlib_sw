@@ -21,8 +21,8 @@ Notes
   sections is recommended.
 
 """
-__version__ = '0.2.1'
-__status__ = 'Testing'
+__version__ = '0.3.0'
+__status__ = 'Beta'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2018-2019, ' + __author__
 __credits__ = []
@@ -465,8 +465,8 @@ class MqttBroker(MQTT):
             self._client.loop_stop()
             self._logger.error(
                 'MQTT connection to %s:%s failed: %s',
-                self._host, self._port, errmsg,
-                exc_info=True)
+                self._host, self._port, errmsg,  # exc_info=True
+                )
             raise Exception(errmsg)
         # Waiting for connection
         while self._wating:
@@ -504,8 +504,8 @@ class MqttBroker(MQTT):
         except Exception as errmsg:
             self._logger.error(
                 'MQTT reconnection to %s:%s failed: %s',
-                self._host, self._port, errmsg,
-                exc_info=True)
+                self._host, self._port, errmsg,  # exc_info=True
+                )
             raise Exception(errmsg)
         # Waiting for connection
         while self._wating:
