@@ -779,12 +779,10 @@ class ThingSpeak(MQTT):
         for field_num in fields:
             field_value = fields[field_num]
             field_num = abs(int(field_num))
-            if field_num < 1 or field_num > 8:
-                continue
-            if field_value is None:
+            if field_num < 1 or field_num > 8 or field_value is None:
                 continue
             msgParts.append('field{}={}'.format(field_num, field_value))
-        if status is not None and len(status) > 0:
+        if not no_status:
             msgParts.append('status={}'.format(status))
         msgPayload = '&'.join(msgParts)
         # Process frequent message
