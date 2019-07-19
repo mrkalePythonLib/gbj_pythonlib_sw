@@ -94,10 +94,15 @@ class MQTT(object):
 
     def __init__(self, config):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug('Instance of %s created', self.__class__.__name__)
         self._config = config
         self._connected = False
+        # Logging
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__,
+            str(self)
+            )
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -657,6 +662,11 @@ class ThingSpeak(MQTT):
         Injection of the config file object to this class instance it a form
         of attaching that file to this object.
 
+    Raises
+    -------
+    TypeError
+        Configuration parameters without value in configuration file.
+
     Notes
     -----
     - The class only provides single publishing to ThingSpeak, so that
@@ -686,34 +696,34 @@ class ThingSpeak(MQTT):
 
     OPTION_PUBLISH_DELAY = 'publish_delay'
     """float: Configuration option with minimal publish delay in seconds.
-    Default value is 15.0 s.
-
+    Default value is PUBLISH_DELAY_MIN.
     """
+
+    PUBLISH_DELAY_MIN = 15.0
+    """float: Minimal allowed publish delay in seconds."""
 
     def __init__(self, config):
         """Create the class instance - constructor."""
         super(type(self), self).__init__(config)
         self._timestamp_publish_last = 0.0
-        self._msgbuffer = []
         # Defaulted configuration parameters
-        self._publish_delay = float(self._config.option(
-            self.OPTION_PUBLISH_DELAY, self.GROUP_BROKER, 15.0))
+        self._publish_delay = max(float(self._config.option(
+            self.OPTION_PUBLISH_DELAY, self.GROUP_BROKER,
+            self.PUBLISH_DELAY_MIN)), self.PUBLISH_DELAY_MIN)
         self._clientid = self._config.option(
             OPTION_CLIENTID, self.GROUP_BROKER, socket.gethostname())
         self._port = int(self._config.option(
             OPTION_PORT, self.GROUP_BROKER, 1883))
+        self._host = self._config.option(
+            OPTION_HOST, self.GROUP_BROKER, 'mqtt.thingspeak.com')
+        self._logger.debug(
+            'ThingSpeak connection to broker %s:%s as client %s',
+            self._host,
+            self._port,
+            self._clientid
+        )
         # Configuration parameters without default value
         errtxt = 'Undefined ThingSpeak config option {}'
-        #
-        self._host = self._config.option(OPTION_HOST, self.GROUP_BROKER)
-        if self._host is None:
-            errmsg = errtxt.format(OPTION_HOST)
-            self._logger.error(errmsg)
-            raise TypeError(errmsg)
-        else:
-            self._logger.debug(
-                'ThingSpeak connection to broker %s:%s as client %s',
-                self._host, self._port, self._clientid)
         #
         self._mqtt_api_key = self._config.option(
             self.OPTION_MQTT_API_KEY, self.GROUP_BROKER)
@@ -761,6 +771,8 @@ class ThingSpeak(MQTT):
           is ignored.
         - If a value is none or empty, the corresponding field or status
           is ignored.
+        - If publishing is earlier than minimal allowed publishing period,
+          the publishing is ignored.
 
         Returns
         -------
@@ -773,7 +785,11 @@ class ThingSpeak(MQTT):
             General exception with error message from ThingSpeak.
 
         """
-        no_status = status is None or len(status) == 0
+        # Check publishing period
+        if (time.time() - self._timestamp_publish_last) \
+           < self._publish_delay:
+            self._logger.warning('Ignored frequent publishing to ThingSpeak')
+            return False
         # Construct message payload
         msgParts = []
         for field_num in fields:
@@ -782,58 +798,42 @@ class ThingSpeak(MQTT):
             if field_num < 1 or field_num > 8 or field_value is None:
                 continue
             msgParts.append('field{}={}'.format(field_num, field_value))
-        if not no_status:
+        if status:
             msgParts.append('status={}'.format(status))
         msgPayload = '&'.join(msgParts)
-        # Process frequent message
-        if (time.time() - self._timestamp_publish_last) \
-           < self._publish_delay:
-            # Ignore message without status
-            if no_status:
-                self._logger.debug(
-                    'Ignored frequent publishing to ThingSpeak')
-            # Store message with status to buffer
-            else:
-                self._logger.debug(
-                    'Buffered status message %s', msgPayload)
-                self._msgbuffer.append(msgPayload)
-            return False
-        # Replace current message without status by stored message if any
-        elif no_status:
-            if len(self._msgbuffer) > 0:
-                msgPayload = self._msgbuffer.pop(0)
-                self._logger.debug(
-                    'Retrieved buffered message %s', msgPayload)
-        # Publish current message and throw away all stored ones
-        else:
-            self._msgbuffer = list()
         # Construct topic
-        topicParts = ['channels', self._channel_id, 'publish',
-                      self._write_api_key]
+        topicParts = [
+            'channels', self._channel_id,
+            'publish', self._write_api_key
+        ]
         topic = '/'.join(topicParts)
         # Publish payload
-        if len(msgPayload) == 0:
-            self._logger.debug('Nothing to publish to ThingSpeak')
-            return False
-        try:
-            self._logger.debug('Publishing to ThingSpeak channel %s',
-                               self._channel_id)
-            mqttpublish.single(
-                topic,
-                payload=msgPayload,
-                hostname=self._host,
-                port=self._port,
-                auth={'username': self._clientid,
-                      'password': self._mqtt_api_key}
-            )
-            self._timestamp_publish_last = time.time()
-            self._logger.debug('Published ThingSpeak message %s', msgPayload)
-        except Exception as errmsg:
-            self._logger.error(
-                'Publishing to ThingSpeak failed with error %s:',
-                errmsg, exc_info=True)
-            return False
-        return True
+        if msgPayload:
+            try:
+                self._logger.debug('Publishing to ThingSpeak channel %s',
+                                   self._channel_id)
+                mqttpublish.single(
+                    topic,
+                    payload=msgPayload,
+                    hostname=self._host,
+                    port=self._port,
+                    auth={'username': self._clientid,
+                          'password': self._mqtt_api_key,
+                          }
+                )
+                self._timestamp_publish_last = time.time()
+                self._logger.debug(
+                    'Published ThingSpeak message %s',
+                    msgPayload
+                )
+                return True
+            except Exception as errmsg:
+                self._logger.error(
+                    'Publishing to ThingSpeak failed with error %s:',
+                    errmsg, exc_info=True)
+        else:
+            self._logger.debug('Nothing published to ThingSpeak')
+        return False
 
     def get_publish_delay(self):
         """Return minimal publish delay in seconds.
