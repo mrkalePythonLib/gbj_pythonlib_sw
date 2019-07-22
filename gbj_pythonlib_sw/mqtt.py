@@ -694,22 +694,20 @@ class ThingSpeak(MQTT):
     OPTION_WRITE_API_KEY = 'write_api_key'
     """str: Configuration option with ThingSpeak write key."""
 
-    OPTION_PUBLISH_DELAY = 'publish_delay'
-    """float: Configuration option with minimal publish delay in seconds.
-    Default value is PUBLISH_DELAY_MIN.
-    """
-
     PUBLISH_DELAY_MIN = 15.0
     """float: Minimal allowed publish delay in seconds."""
+
+    FIELD_MIN = 1
+    """int: Minimal channel field number."""
+
+    FIELD_MAX = 8
+    """int: Maximal channel field number."""
 
     def __init__(self, config):
         """Create the class instance - constructor."""
         super(type(self), self).__init__(config)
         self._timestamp_publish_last = 0.0
         # Defaulted configuration parameters
-        self._publish_delay = max(float(self._config.option(
-            self.OPTION_PUBLISH_DELAY, self.GROUP_BROKER,
-            self.PUBLISH_DELAY_MIN)), self.PUBLISH_DELAY_MIN)
         self._clientid = self._config.option(
             OPTION_CLIENTID, self.GROUP_BROKER, socket.gethostname())
         self._port = int(self._config.option(
@@ -745,6 +743,9 @@ class ThingSpeak(MQTT):
             errmsg = errtxt.format(self.OPTION_WRITE_API_KEY)
             self._logger.error(errmsg)
             raise TypeError(errmsg)
+        # Initialize data buffer
+        self._buffer = {}
+        self.reset()
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -753,24 +754,13 @@ class ThingSpeak(MQTT):
         else:
             return 'No ThingSpeak client active'
 
-    def publish(self, fields={}, status=None):
-        """Publish single message to ThingSpeak.
-
-        Arguments
-        ---------
-        fields : dict
-            Dictionary with ThingSpeak channel pairs
-            ``field number: field value``, e.g., `{1: 23.4, 2: 1}`, where
-            `field number` is integer in the range ``1 ~ 8``.
-        status : str
-            Text to be published in the ThingSpeak channel as a status.
+    def publish(self):
+        """Publish single message to ThingSpeak with buffered values.
 
         Notes
         -----
-        - If a field number is outside the expected range, this field
-          is ignored.
-        - If a value is none or empty, the corresponding field or status
-          is ignored.
+        - All buffered fields with values other than None are published.
+        - Buffered status is published, if its value is other than None.
         - If publishing is earlier than minimal allowed publishing period,
           the publishing is ignored.
 
@@ -787,28 +777,28 @@ class ThingSpeak(MQTT):
         """
         # Check publishing period
         if (time.time() - self._timestamp_publish_last) \
-           < self._publish_delay:
+           < self.PUBLISH_DELAY_MIN:
             self._logger.warning('Ignored frequent publishing to ThingSpeak')
             return False
         # Construct message payload
         msgParts = []
-        for field_num in fields:
-            field_value = fields[field_num]
-            field_num = abs(int(field_num))
-            if field_num < 1 or field_num > 8 or field_value is None:
+        for field_num in range(self.FIELD_MIN, self.FIELD_MAX + 1):
+            field_key = 'field' + str(field_num)
+            field_value = self._buffer[field_key]
+            if field_value is None:
                 continue
-            msgParts.append('field{}={}'.format(field_num, field_value))
-        if status:
-            msgParts.append('status={}'.format(status))
+            msgParts.append('{}={}'.format(field_key, field_value))
+        if self._buffer['status'] is not None:
+            msgParts.append('status={}'.format(self._buffer['status']))
         msgPayload = '&'.join(msgParts)
-        # Construct topic
-        topicParts = [
-            'channels', self._channel_id,
-            'publish', self._write_api_key
-        ]
-        topic = '/'.join(topicParts)
         # Publish payload
         if msgPayload:
+            # Construct topic
+            topicParts = [
+                'channels', self._channel_id,
+                'publish', self._write_api_key
+            ]
+            topic = '/'.join(topicParts)
             try:
                 self._logger.debug('Publishing to ThingSpeak channel %s',
                                    self._channel_id)
@@ -835,13 +825,40 @@ class ThingSpeak(MQTT):
             self._logger.debug('Nothing published to ThingSpeak')
         return False
 
-    def get_publish_delay(self):
-        """Return minimal publish delay in seconds.
+    def reset(self):
+        """Reset all buffered fields and status."""
+        self._buffer['status'] = None
+        for field in range(self.FIELD_MIN, self.FIELD_MAX + 1):
+            self._buffer['field' + str(field)] = None
 
-        Returns
-        -------
-        float
-            Minimal ThinsgSpeak publish delay in seconds.
+    # -------------------------------------------------------------------------
+    # Setters
+    # -------------------------------------------------------------------------
+    def set_field(self, field_num, field_value=None):
+        """Store value to a channel field or reset it.
+
+        Arguments
+        ---------
+        field_num : int
+            Number of a field, which a values is targeted to.
+            If it is not in expected range, nothing is stored and false flag
+            is returned.
+        field_value : float
+            Value to be published in the field with provided number.
+            If not provided the value is reset.
 
         """
-        return self._publish_delay
+        if field_num in range(self.FIELD_MIN, self.FIELD_MAX + 1):
+            self._buffer['field' + str(field_num)] = field_value
+
+    def set_status(self, status=None):
+        """Store status to a channel status or reset it.
+
+        Arguments
+        ---------
+        status : str | float | int
+            Status value to be published in the status.
+            If not provided the value is reset.
+
+        """
+        self._buffer['status'] = status
