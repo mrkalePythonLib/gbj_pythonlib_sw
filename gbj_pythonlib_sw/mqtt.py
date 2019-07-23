@@ -99,9 +99,8 @@ class MQTT(object):
         # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
         self._logger.debug(
-            'Instance of %s created: %s',
+            'Instance of %s created',
             self.__class__.__name__,
-            str(self)
             )
 
     def __str__(self):
@@ -201,7 +200,6 @@ class MqttBroker(MQTT):
         clean_session = bool(kwargs.pop('clean_session', True))
         protocol = kwargs.pop('protocol', mqttclient.MQTTv311)
         transport = kwargs.pop('transport', 'tcp')
-
         self._client = mqttclient.Client(
             self._clientid,
             clean_session,
@@ -491,8 +489,8 @@ class MqttBroker(MQTT):
         except Exception as errmsg:
             self._logger.error(
                 'MQTT disconnection from %s:%s failed: %s',
-                self._host, self._port, errmsg,
-                exc_info=True)
+                self._host, self._port, errmsg,  # exc_info=True
+                )
             raise Exception(errmsg)
 
     def reconnect(self):
@@ -714,6 +712,7 @@ class ThingSpeak(MQTT):
             OPTION_PORT, self.GROUP_BROKER, 1883))
         self._host = self._config.option(
             OPTION_HOST, self.GROUP_BROKER, 'mqtt.thingspeak.com')
+        # Logging
         self._logger.debug(
             'ThingSpeak connection to broker %s:%s as client %s',
             self._host,
@@ -754,8 +753,75 @@ class ThingSpeak(MQTT):
         else:
             return 'No ThingSpeak client active'
 
-    def publish(self):
+    def _fieldname(self, field_num):
+        """Construct field name from field number."""
+        if field_num in range(self.FIELD_MIN, self.FIELD_MAX + 1):
+            field_name = 'field{}'.format(field_num)
+        else:
+            field_name = None
+        return field_name
+
+    # -------------------------------------------------------------------------
+    # Setters
+    # -------------------------------------------------------------------------
+    def set_field(self, field_num, field_value=None):
+        """Store value to a channel field or reset it.
+
+        Arguments
+        ---------
+        field_num : int
+            Number of a field, which a values is targeted to.
+            If it is not in expected range, nothing is stored and false flag
+            is returned.
+        field_value : float
+            Value to be published in the field with provided number.
+            If not provided the value is reset.
+
+        """
+        field_name = self._fieldname(field_num)
+        if field_name is not None:
+            self._buffer[field_name] = field_value
+            self._logger.debug(
+                'Buffered ThingSpeak field%d with value %s',
+                field_num, field_value)
+
+    def set_status(self, status=None):
+        """Store status to a channel status or reset it.
+
+        Arguments
+        ---------
+        status : str | float | int
+            Status value to be published in the status.
+            If not provided the value is reset.
+
+        """
+        self._buffer['status'] = status
+        self._logger.debug(
+            'Buffered ThingSpeak status %s',
+            status)
+
+    # -------------------------------------------------------------------------
+    # Core functions
+    # -------------------------------------------------------------------------
+    def reset(self):
+        """Reset all buffered fields and status."""
+        self._buffer['status'] = None
+        for field in range(self.FIELD_MIN, self.FIELD_MAX + 1):
+            self._buffer[self._fieldname(field)] = None
+        self._logger.debug('Reset all ThingSpeak data')
+
+    def publish(self, *arg, **kwargs):
         """Publish single message to ThingSpeak with buffered values.
+
+        Arguments
+        ---------
+        Unused arguments just in case the method is called directly from
+        a timer.
+
+        Keyword Arguments
+        -----------------
+        Unused arguments just in case the method is called directly from
+        a timer.
 
         Notes
         -----
@@ -783,11 +849,11 @@ class ThingSpeak(MQTT):
         # Construct message payload
         msgParts = []
         for field_num in range(self.FIELD_MIN, self.FIELD_MAX + 1):
-            field_key = 'field' + str(field_num)
-            field_value = self._buffer[field_key]
+            field_name = self._fieldname(field_num)
+            field_value = self._buffer[field_name]
             if field_value is None:
                 continue
-            msgParts.append('{}={}'.format(field_key, field_value))
+            msgParts.append('{}={}'.format(field_name, field_value))
         if self._buffer['status'] is not None:
             msgParts.append('status={}'.format(self._buffer['status']))
         msgPayload = '&'.join(msgParts)
@@ -820,45 +886,8 @@ class ThingSpeak(MQTT):
             except Exception as errmsg:
                 self._logger.error(
                     'Publishing to ThingSpeak failed with error %s:',
-                    errmsg, exc_info=True)
+                    errmsg,   # exc_info=True
+                    )
         else:
             self._logger.debug('Nothing published to ThingSpeak')
         return False
-
-    def reset(self):
-        """Reset all buffered fields and status."""
-        self._buffer['status'] = None
-        for field in range(self.FIELD_MIN, self.FIELD_MAX + 1):
-            self._buffer['field' + str(field)] = None
-
-    # -------------------------------------------------------------------------
-    # Setters
-    # -------------------------------------------------------------------------
-    def set_field(self, field_num, field_value=None):
-        """Store value to a channel field or reset it.
-
-        Arguments
-        ---------
-        field_num : int
-            Number of a field, which a values is targeted to.
-            If it is not in expected range, nothing is stored and false flag
-            is returned.
-        field_value : float
-            Value to be published in the field with provided number.
-            If not provided the value is reset.
-
-        """
-        if field_num in range(self.FIELD_MIN, self.FIELD_MAX + 1):
-            self._buffer['field' + str(field_num)] = field_value
-
-    def set_status(self, status=None):
-        """Store status to a channel status or reset it.
-
-        Arguments
-        ---------
-        status : str | float | int
-            Status value to be published in the status.
-            If not provided the value is reset.
-
-        """
-        self._buffer['status'] = status
