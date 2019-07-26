@@ -83,7 +83,7 @@ class MQTT(object):
 
     Notes
     -----
-    This class should not be instanciated. It servers as a abstract class and
+    This class should not be instanciated. It serves as a abstract class and
     a parent class for operational classes for particular MQTT brokers.
 
     See Also
@@ -189,7 +189,8 @@ class MqttBroker(MQTT):
         callbacks without prefix ``on_``.
 
         """
-        super(type(self), self).__init__(config)
+        # super(type(self), self).__init__(config)
+        super().__init__(config)
         # Client parameters
         self._clientid = self._config.option(
             OPTION_CLIENTID, self.GROUP_BROKER,
@@ -526,7 +527,7 @@ class MqttBroker(MQTT):
         if not self.get_connected():
             return
         for option in self._config.options(self.GROUP_FILTERS):
-            topic, qos, retain = self.topic_def(option, self.GROUP_FILTERS)
+            topic, qos, _ = self.topic_def(option, self.GROUP_FILTERS)
             result = self._client.subscribe(topic, qos)
             if result[0] == mqttclient.MQTT_ERR_SUCCESS:
                 self._logger.debug(
@@ -560,7 +561,7 @@ class MqttBroker(MQTT):
         """
         if not self.get_connected():
             return
-        topic, qos, retain = self.topic_def(option, self.GROUP_TOPICS)
+        topic, qos, _ = self.topic_def(option, self.GROUP_TOPICS)
         result = self._client.subscribe(topic, qos)
         if result[0] == mqttclient.MQTT_ERR_SUCCESS:
             self._logger.debug(
@@ -703,7 +704,8 @@ class ThingSpeak(MQTT):
 
     def __init__(self, config):
         """Create the class instance - constructor."""
-        super(type(self), self).__init__(config)
+        # super(type(self), self).__init__(config)
+        super().__init__(config)
         self._timestamp_publish_last = 0.0
         # Defaulted configuration parameters
         self._clientid = self._config.option(
