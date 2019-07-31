@@ -110,8 +110,6 @@ class BlynkProtocol:
             'Instance of %s created',
             self.__class__.__name__,
         )
-        msg = f'Init -- server={self.server}'
-        print(msg)
         # self.connect()
 
     def __str__(self):
@@ -342,8 +340,8 @@ class BlynkProtocol:
 
 
 
-class BlynkClient(BlynkProtocol):
-    """Common Blynk management.
+class BlynkDevice(BlynkProtocol):
+    """Acting as a hardware device controlled by Blynk.
 
     Arguments
     ---------
@@ -354,6 +352,23 @@ class BlynkClient(BlynkProtocol):
         Particular configuration file is already open.
         Injection of the config file object to this class instance is a form
         of attaching that file to this object.
+
+
+    Keyword Arguments
+    -----------------
+    server : str
+        Blynk server address either in the cloude or local one.
+        Default is cloude Blynk server.
+    port : int
+        TCP port at which the Blynk server listens.
+        Default is 80 for plain HTTP without security.
+    auth : str
+        Authorization token taken from a Blynk mobile project.
+    heartbeat : int
+        Heartbeat interval in seconds for checking connection.
+    buffin : int
+        Input buffer length in bytes for receiving messaged from the cloud.
+
 
     Notes
     -----
@@ -377,9 +392,9 @@ class BlynkClient(BlynkProtocol):
             'Instance of %s created',
             self.__class__.__name__,
             )
-        api_key = self._config.option(OPTION_API_KEY, GROUP_BROKER)
-        super().__init__(api_key, **kwargs)
-
+        if type(self._config) is object:
+            api_key = self._config.option(OPTION_API_KEY, GROUP_BROKER)
+            super().__init__(api_key, **kwargs)
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -387,3 +402,9 @@ class BlynkClient(BlynkProtocol):
             return 'Void configuration'
         else:
             return 'Config file "{}"'.format(self._config._file)
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        return 'BlynkDevice({})'.format(
+            repr(self._config),
+        )

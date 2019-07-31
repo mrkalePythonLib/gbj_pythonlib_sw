@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Module for statistical filtering and smoothing."""
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __status__ = 'Testing'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2018, ' + __author__
@@ -16,19 +16,8 @@ import logging
 ###############################################################################
 # Constants
 ###############################################################################
-AVERAGE = 0
-"""int: Enumeration for statistical type ``average``."""
-
-MEDIAN = 1
-"""int: Enumeration for statistical type ``median``."""
-
-MINIMUM = 2
-"""int: Enumeration for statistical type ``minimum``."""
-
-MAXIMUM = 3
-"""int: Enumeration for statistical type ``maximum``."""
-
-STAT_TYPES = ['Average', 'Median', 'Minimum', 'Maximum']
+AVERAGE, MEDIAN, MINIMUM, MAXIMUM = range(4)
+"""int: Enumeration for statistical types."""
 
 
 ###############################################################################
@@ -79,6 +68,16 @@ class StatFilter(object):
         return 'Data {}-{}[{}]'.format(self._value_min or 'na',
                                        self._value_max or 'na',
                                        len(self._buffer))
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = \
+            f'StatFilter(' \
+            f'value_max={repr(self._value_max)}, ' \
+            f'value_min={repr(self._value_min)}, ' \
+            f'buffer_len={repr(self.get_buffer_len())}, ' \
+            f'decimals={repr(self._decimals)})'
+        return msg
 
     def reset(self):
         """Reset instance object to initial state."""
@@ -166,16 +165,13 @@ class StatFilter(object):
             return
 
         if self._value_max < self._value_min:
-            t = self._value_max
-            self._value_max = self._value_min
-            self._value_min = t
+            self._value_max, self._value_min = self._value_min, self._value_max
 
     def set_buffer(self, buffer_len=5):
-        """Adjust data buffer length for staticital smoothing."""
+        """Adjust data buffer length for statistical smoothing."""
         buffer_len = abs(int(buffer_len)) | 1  # Make odd number and minimum 1
         if self.get_buffer_len() < buffer_len:
-            for i in range(buffer_len - self.get_buffer_len()):
-                self._buffer.append(None)
+            self._buffer.extend([None] * (buffer_len - self.get_buffer_len()))
         elif self.get_buffer_len() > buffer_len:
             for i in range(self.get_buffer_len() - buffer_len):
                 self._buffer.pop(i)
@@ -263,7 +259,7 @@ class StatFilterExponential(StatFilter):
 
         - Acceptable value range is ``0.0 ~ 1.0`` and input value is limited
           to it.
-        - Default value ``0.5`` means ``runnig average``.
+        - Default value ``0.5`` means ``running average``.
         - Value ``1.0`` means ``no smoothing``.
 
     value_max : float
@@ -328,7 +324,7 @@ class StatFilterExponential(StatFilter):
         value = self.filter(value)
         if value is not None:
             if self.get_readings():
-                self._buffer[0] += self.get_factor()\
+                self._buffer[0] += self.get_factor() \
                                  * (value - self._buffer[0])
             else:
                 self._buffer[0] = value
@@ -336,7 +332,7 @@ class StatFilterExponential(StatFilter):
                 'Value %s, Statistic %s',
                 value, self._buffer[0]
             )
-        return super(type(self), self).result(self._buffer[0])
+        return super().result(self._buffer[0])
 
     # -------------------------------------------------------------------------
     # Getters
@@ -514,7 +510,7 @@ class StatFilterRunning(StatFilter):
             statistic = self._buffer[0]
             for i in range(1, readings):
                 statistic = max(statistic, self._buffer[i])
-        return super(type(self), self).result(statistic)
+        return super().result(statistic)
 
     def result(self, value=None):
         """Register new value and calculate default running statistic.
@@ -536,8 +532,6 @@ class StatFilterRunning(StatFilter):
           previously stored sample values in the class instance object.
 
         """
-        self._logger.debug('Default statistic: %s',
-                           STAT_TYPES[self.get_stat_type()])
         if self._stat_type == AVERAGE:
             return self.result_avg(value)
         elif self._stat_type == MEDIAN:
