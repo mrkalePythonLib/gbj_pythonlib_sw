@@ -52,8 +52,8 @@ class Msg:
     """Message types."""
 
     (
-        RSP, LOGIN, PING, TWEET, EMAIL, NOTIFY, BRIDGE, HW_SYNC, INTERNAL, 
-        PROPERTY, HW, HW_LOGIN, EVENT_LOG, 
+        RSP, LOGIN, PING, TWEET, EMAIL, NOTIFY, BRIDGE, HW_SYNC, INTERNAL,
+        PROPERTY, HW, HW_LOGIN, EVENT_LOG,
     ) = (0, 2, 6, 12, 13, 14, 15, 16, 17, 19, 20, 29, 64,)
 
 
@@ -84,14 +84,14 @@ class BlynkProtocol:
         Authorization token taken from a Blynk mobile project.
     heartbeat : int
         Heartbeat interval in seconds for checking connection.
-    buffin : int
+    buffin : into
         Input buffer length in bytes for receiving messaged from the cloud.
 
     """
-    
+
     VERSION = '0.2.0'
     """str: Version of the Blynk."""
-    
+
     CONN_TIMEOUT = 0.05
     """float: Connection timeout in seconds."""
 
@@ -110,7 +110,7 @@ class BlynkProtocol:
             'Instance of %s created',
             self.__class__.__name__,
         )
-        # self.connect()
+        self.connect()
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -118,11 +118,14 @@ class BlynkProtocol:
 
     def __repr__(self):
         """Represent instance object officially."""
-        return 'BlynkProtocol({}, {}, {})'.format(
-                repr(self.auth),
-                repr(self.heartbeat),
-                repr(self.buffin)
-            )
+        msg = \
+            f'BlynkProtocol(' \
+            f'auth={repr(self.auth)}, ' \
+            f'server={repr(self.server)}, ' \
+            f'port={repr(self.port)}, ' \
+            f'heartbeat={repr(self.heartbeat)}, ' \
+            f'buffin={repr(self.buffin)})'
+        return msg
 
     def _gettime(self):
         """Provide current time in milliseconds."""
@@ -169,13 +172,9 @@ class BlynkProtocol:
             self.state = Status.CONNECTING
             self._send(Msg.HW_LOGIN, self.auth)
         except:
-            self._logger.error(
-                'Connection with the Blynk server %s:%d failed',
-                self.server,
-                self.port
-                )
             errmsg = f'Connection with the Blynk server' \
                      '{self.server}:{self.port} failed'
+            self._logger.error(errmsg)
             raise ValueError(errmsg)
 
     def run(self):
