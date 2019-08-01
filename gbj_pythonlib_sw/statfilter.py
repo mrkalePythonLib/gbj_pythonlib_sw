@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Module for statistical filtering and smoothing."""
-__version__ = '0.3.0'
-__status__ = 'Testing'
+__version__ = '0.4.0'
+__status__ = 'Beta'
 __author__ = 'Libor Gabaj'
-__copyright__ = 'Copyright 2018, ' + __author__
+__copyright__ = 'Copyright 2018-2019, ' + __author__
 __credits__ = []
 __license__ = 'MIT'
 __maintainer__ = __author__
@@ -16,9 +16,6 @@ import logging
 ###############################################################################
 # Constants
 ###############################################################################
-AVERAGE, MEDIAN, MINIMUM, MAXIMUM = range(4)
-"""int: Enumeration for statistical types."""
-
 BUFFER_LEN_DEF = 5
 """int: Default buffer length."""
 
@@ -39,9 +36,6 @@ class StatFilter(object):
         Positive integer number of values held in the data buffer used for
         statistical smoothing. It should be an odd number, otherwise it is
         extended to the nearest odd one.
-    decimals : int
-        Positive integer number of decimal places for rounding statistical
-        results. If None is provided, no rounding occures.
 
     Notes
     -----
@@ -55,15 +49,11 @@ class StatFilter(object):
                  value_max=None,
                  value_min=None,
                  buffer_len=BUFFER_LEN_DEF,
-                 decimals=None,
                  ):
         """Create the class instance - constructor."""
         self._value_max = None
         self._value_min = None
         self.set_filter(value_max=value_max, value_min=value_min)
-        #
-        self._decimals = None
-        self.set_decimals(decimals)
         #
         self._buffer = []
         self.set_buffer(buffer_len)
@@ -73,28 +63,46 @@ class StatFilter(object):
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
         self._logger.debug(
             'Instance of %s created: %s',
-            self.__class__.__name__,
-            str(self)
+            self.__class__.__name__, str(self)
         )
-
-    def __str__(self):
-        """Represent instance object as a string."""
-        msg = \
-            f'Smoothing data from ' \
-            f'{repr(self.get_value_min() or "na")} to ' \
-            f'{repr(self.get_value_max() or "na")} over ' \
-            f'{repr(self.get_buffer_len())} samples'
-        return msg
 
     def __repr__(self):
         """Represent instance object officially."""
         msg = \
-            f'StatFilter(' \
+            f'{self.__class__.__name__}(' \
             f'value_max={repr(self.get_value_max())}, ' \
             f'value_min={repr(self.get_value_min())}, ' \
-            f'buffer_len={repr(self.get_buffer_len())}, ' \
-            f'decimals={repr(self._decimals)})'
+            f'buffer_len={repr(self.get_buffer_len())})'
         return msg
+
+    def _register(self, value):
+        """Filter and register new value to the data buffer.
+
+        Arguments
+        ---------
+        value : float
+            Sample value to be registered in the data buffer and use for
+            statistical smoothing if succesfully filtered.
+            *The argument is mandatory and has no default value.*
+
+        Notes
+        -----
+        - If new value does not fit to the filter range, it is ignored.
+        - The most recent (fresh) sample value is always in the 0 index of the
+          data buffer.
+        - Sample values are shifted to the right in the data buffer (to higher
+          indices), so that the most recent value is lost.
+
+        """
+        value = self.filter(value)
+        if value is not None:
+            # Shift if any real value is stored
+            if self.get_readings():
+                for i in range(self.get_buffer_len() - 1, 0, -1):
+                    self._buffer[i] = self._buffer[i - 1]
+            # Storing just real value
+            self._buffer[0] = value
+        return value
 
     def reset(self):
         """Reset instance object to initial state."""
@@ -126,33 +134,6 @@ class StatFilter(object):
             self._logger.warning('Rejected value %f less than %f',
                                  value, self.get_value_min())
             return
-        return value
-
-    def result(self, value):
-        """Round value if needed and possible.
-
-        Arguments
-        ---------
-        value : float
-            Value to be processed.
-            *The argument is mandatory and has no default value.*
-
-        Returns
-        -------
-        float
-            Rouded value, if number of decimal places is defined, otherwise the
-            input value.
-
-        """
-        if self.get_decimals() is not None:
-            try:
-                value = round(value, self.get_decimals())
-                self._logger.debug(
-                    'Result %s rounded to %s decimal(s)',
-                    value, self.get_decimals()
-                    )
-            except TypeError:
-                pass
         return value
 
     #--------------------------------------------------------------------------
@@ -196,13 +177,6 @@ class StatFilter(object):
         elif self.get_buffer_len() > buffer_len:
             for i in range(self.get_buffer_len() - buffer_len):
                 self._buffer.pop(i)
-
-    def set_decimals(self, decimals=None):
-        """Sanitize and store number of decimals for rounding if is correct."""
-        try:
-            self._decimals = round(abs(float(decimals)))
-        except ValueError:
-            pass
 
     #--------------------------------------------------------------------------
     # Getters
@@ -250,17 +224,6 @@ class StatFilter(object):
         """
         return self._value_max
 
-    def get_decimals(self):
-        """Return number of decimal digit for rounding.
-
-        Returns
-        -------
-        int
-            Current number of decimals at rounding.
-
-        """
-        return self._decimals
-
     def get_readings(self):
         """Return current number of values in data buffer.
 
@@ -305,37 +268,53 @@ class StatFilterExponential(StatFilter):
         Maximal measuring value acceptable for filtering.
     value_min : float
         Minimal measuring value acceptable for filtering.
-    decimals : int
-        Positive integer number of decimal places for rounding statistical
-        results. If None is provided, no rounding occures.
 
     """
 
+    FACTOR_DEF = 0.5
+    FACTOR_MIN = 0.0
+    FACTOR_MAX = 1.0
+
     def __init__(self,
-                 factor=0.5,
+                 factor=FACTOR_DEF,
                  value_max=None,
                  value_min=None,
-                 decimals=None,
                  ):
         """Create the class instance - constructor."""
-        self._factor = max(min(abs(factor or 0.5), 1.0), 0.0)
+        try:
+            self._factor = float(factor or self.FACTOR_DEF)
+        except TypeError:
+            self._factor = FACTOR_DEF
+        self._factor = max(min(abs(self._factor),
+                        self.FACTOR_MAX), self.FACTOR_MIN)
         super().__init__(
             value_max,
             value_min,
-            1,
-            decimals,
+            1
         )
         # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug(
-            'Instance of %s created: %s',
-            self.__class__.__name__,
-            str(self)
+        self._logger.debug('Instance of %s created: %s',
+            self.__class__.__name__, str(self)
             )
 
     def __str__(self):
         """Represent instance object as a string."""
-        return 'Exponential filter ({:.2f})'.format(self._factor)
+        msg = \
+            f'Exponential filter with factor ' \
+            f'{repr(self.get_factor())} for data range ' \
+            f'{repr(self.get_value_min())} ~ ' \
+            f'{repr(self.get_value_max())}'
+        return msg
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = \
+            f'{self.__class__.__name__}(' \
+            f'factor={repr(self.get_factor())}, ' \
+            f'value_max={repr(self.get_value_max())}, ' \
+            f'value_min={repr(self.get_value_min())})'
+        return msg
 
     def result(self, value=None):
         """Calculate statistically smoothed value.
@@ -371,7 +350,7 @@ class StatFilterExponential(StatFilter):
                 'Value %s, Statistic %s',
                 value, self._buffer[0]
             )
-        return super().result(self._buffer[0])
+        return self._buffer[0]
 
     #--------------------------------------------------------------------------
     # Getters
@@ -396,13 +375,6 @@ class StatFilterRunning(StatFilter):
 
     Arguments
     ---------
-    stat_type : enum
-        Enumerated type of a statistic calculated from registered running
-        values. The argument is defined by one of module's constants
-        ``AVERAGE``, ``MEDIAN``, ``MINIMUM``, ``MAXIMUM``.
-        Statistical type enables dynamically change statistical method for
-        smoothing input values without changing program code when just
-        one smoothing method is used.
     value_max : float
         Maximal measuring value acceptable for filtering.
     value_min : float
@@ -411,52 +383,17 @@ class StatFilterRunning(StatFilter):
         Positive integer number of values held in the data buffer used for
         statistical smoothing. It should be an odd number, otherwise it is
         extended to the nearest odd one.
-    decimals : int
-        Positive integer number of decimal places for rounding statistical
-        results. If None is provided, no rounding occures.
 
     """
 
-    def __init__(self, stat_type=AVERAGE, value_max=None, value_min=None,
-                 buffer_len=5, decimals=None):
-        """Create the class instance - constructor."""
-        self.set_stat_type(stat_type or AVERAGE)
-        super(type(self), self).__init__(
-            value_max,
-            value_min,
-            buffer_len,
-            decimals,
-        )
-        self._logger.debug('Instance of %s created', type(self).__name__)
-
-    def _register_value(self, value):
-        """Filter and register new value to the data buffer.
-
-        Arguments
-        ---------
-        value : float
-            Sample value to be registered in the data buffer and use for
-            statistical smoothing if succesfully filtered.
-            *The argument is mandatory and has no default value.*
-
-        Notes
-        -----
-        - If new value does not fit to the filter range, it is ignored.
-        - The most recent (fresh) sample value is always in the 0 index of the
-          data buffer.
-        - Sample values are shifted to the right in the data buffer (to higher
-          indices), so that the most recent value is lost.
-
-        """
-        value = self.filter(value)
-        if value is not None:
-            # Shift if any real value is stored
-            if self.get_readings():
-                for i in range(self.get_buffer_len() - 1, 0, -1):
-                    self._buffer[i] = self._buffer[i - 1]
-            # Storing just real value
-            self._buffer[0] = value
-        return value
+    def __str__(self):
+        """Represent instance object as a string."""
+        msg = \
+            f'Running filter for data range ' \
+            f'{repr(self.get_value_min())} ~ ' \
+            f'{repr(self.get_value_max())} over ' \
+            f'{repr(self.get_buffer_len())} samples'
+        return msg
 
     def result_avg(self, value=None):
         """Register new value and calculate running average.
@@ -473,14 +410,14 @@ class StatFilterRunning(StatFilter):
         stored sample values in the class instance object.
 
         """
-        statistic = self._register_value(value)
+        statistic = self._register(value)
         readings = self.get_readings()
         if readings:
             statistic = 0
             for i in range(readings):
                 statistic += self._buffer[i]
             statistic /= readings
-        return super(type(self), self).result(statistic)
+        return statistic
 
     def result_med(self, value=None):
         """Register new value and calculate running median.
@@ -499,11 +436,11 @@ class StatFilterRunning(StatFilter):
           at even readings in the buffer.
 
         """
-        statistic = self._register_value(value)
+        statistic = self._register(value)
         readings = self.get_readings()
         if readings:
             statistic = self._buffer[readings // 2]
-        return super(type(self), self).result(statistic)
+        return statistic
 
     def result_min(self, value=None):
         """Register new value and calculate running minimum.
@@ -520,13 +457,13 @@ class StatFilterRunning(StatFilter):
         stored sample values in the class instance object.
 
         """
-        statistic = self._register_value(value)
+        statistic = self._register(value)
         readings = self.get_readings()
         if readings:
             statistic = self._buffer[0]
             for i in range(1, readings):
                 statistic = min(statistic, self._buffer[i])
-        return super(type(self), self).result(statistic)
+        return statistic
 
     def result_max(self, value=None):
         """Register new value and calculate running maximum.
@@ -543,81 +480,10 @@ class StatFilterRunning(StatFilter):
         stored sample values in the class instance object.
 
         """
-        statistic = self._register_value(value)
+        statistic = self._register(value)
         readings = self.get_readings()
         if readings:
             statistic = self._buffer[0]
             for i in range(1, readings):
                 statistic = max(statistic, self._buffer[i])
-        return super().result(statistic)
-
-    def result(self, value=None):
-        """Register new value and calculate default running statistic.
-
-        Arguments
-        ---------
-        value : float
-            Sample value to be filtered.
-
-        Returns
-        -------
-        float
-            If None input value is provided, the statistic is calculated from
-            current content of the data buffer.
-
-        Notes
-        -----
-        - The method calculates a new filtered value from the input value and
-          previously stored sample values in the class instance object.
-
-        """
-        if self._stat_type == AVERAGE:
-            return self.result_avg(value)
-        elif self._stat_type == MEDIAN:
-            return self.result_med(value)
-        elif self._stat_type == MINIMUM:
-            return self.result_min(value)
-        elif self._stat_type == MAXIMUM:
-            return self.result_max(value)
-        else:
-            return None
-
-    # -------------------------------------------------------------------------
-    # Setters
-    # -------------------------------------------------------------------------
-    def set_stat_type(self, stat_type):
-        """Set running statistics type as a default for resulting.
-
-        Arguments
-        ---------
-        stat_type : enum
-            Enumerated type of a statistic calculated from registered running
-            values by default in the method `result`.
-            The argument is defined by one of module's constants
-            ``AVERAGE``, ``MEDIAN``, ``MINIMUM``, ``MAXIMUM``.
-            If none from allowed enumerations is provided, nothing changes and
-            statistical calculation is executed by current type.
-            *The argument is mandatory and has no default value.*
-
-        """
-        if stat_type in [
-            AVERAGE,
-            MEDIAN,
-            MINIMUM,
-            MAXIMUM,
-        ]:
-            self._stat_type = stat_type
-
-    # -------------------------------------------------------------------------
-    # Getters
-    # -------------------------------------------------------------------------
-    def get_stat_type(self):
-        """Return default running statistics type.
-
-        Returns
-        -------
-        int
-            Numerical representation of current default statistical type.
-
-        """
-        return self._stat_type
+        return statistic
