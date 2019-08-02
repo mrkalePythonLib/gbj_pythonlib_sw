@@ -241,10 +241,7 @@ class StatFilter(object):
           buffer at the end of a measurement cycle.
 
         """
-        for i, value in enumerate(self._buffer):
-            if value is None:
-                return i
-        return self.get_buffer_len()
+        return len([i for i in self._buffer if i is not None])
 
 
 ###############################################################################
@@ -292,11 +289,6 @@ class StatFilterExponential(StatFilter):
             value_min,
             1
         )
-        # Logging
-        self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug('Instance of %s created: %s',
-            self.__class__.__name__, str(self)
-            )
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -395,95 +387,39 @@ class StatFilterRunning(StatFilter):
             f'{repr(self.get_buffer_len())} samples'
         return msg
 
-    def result_avg(self, value=None):
-        """Register new value and calculate running average.
+    def _REGISTER(func):
+        """Decorate statistical function by registering its value."""
+        def _decorator(self, value):
+            value = self._register(value)
+            if self.get_readings():
+                value = func(self, value)
+            self._logger.debug(
+                'Value %s, Statistic %s',
+                self._buffer[0], value
+            )
+            return value
+        return _decorator
 
-        Arguments
-        ---------
-        value : float
-            New sample value. If None is provided, statistic is calculated from
-            current content of the data buffer.
-
-        Notes
-        -----
-        The method calculates new statistic from the input value and previously
-        stored sample values in the class instance object.
-
-        """
-        statistic = self._register(value)
-        readings = self.get_readings()
-        if readings:
-            statistic = 0
-            for i in range(readings):
-                statistic += self._buffer[i]
-            statistic /= readings
-        return statistic
-
-    def result_med(self, value=None):
-        """Register new value and calculate running median.
-
-        Arguments
-        ---------
-        value : float
-            New sample value. If None is provided, statistic is calculated from
-            current content of the data buffer.
-
-        Notes
-        -----
-        - The method calculates new statistic from the input value and
-          previously stored sample values in the class instance object.
-        - Until the data buffer is full, the method calculates high median
-          at even readings in the buffer.
-
-        """
-        statistic = self._register(value)
-        readings = self.get_readings()
-        if readings:
-            statistic = self._buffer[readings // 2]
-        return statistic
-
+    @_REGISTER
     def result_min(self, value=None):
-        """Register new value and calculate running minimum.
+        """Calculate minimum from data buffer"""
+        return min([i for i in self._buffer if i is not None])
 
-        Arguments
-        ---------
-        value : float
-            New sample value. If None is provided, statistic is calculated from
-            current content of the data buffer.
-
-        Notes
-        -----
-        The method calculates new statistic from the input value and previously
-        stored sample values in the class instance object.
-
-        """
-        statistic = self._register(value)
-        readings = self.get_readings()
-        if readings:
-            statistic = self._buffer[0]
-            for i in range(1, readings):
-                statistic = min(statistic, self._buffer[i])
-        return statistic
-
+    @_REGISTER
     def result_max(self, value=None):
-        """Register new value and calculate running maximum.
+        """Calculate maximum from data buffer"""
+        return max([i for i in self._buffer if i is not None])
 
-        Arguments
-        ---------
-        value : float
-            New sample value. If None is provided, statistic is calculated from
-            current content of the data buffer.
+    @_REGISTER
+    def result_avg(self, value=None):
+        """Calculate mean from data buffer"""
+        l = [i for i in self._buffer if i is not None]
+        if len(l):
+            return sum(l) / len(l)
 
-        Notes
-        -----
-        The method calculates new statistic from the input value and previously
-        stored sample values in the class instance object.
-
-        """
-        statistic = self._register(value)
-        readings = self.get_readings()
-        if readings:
-            statistic = self._buffer[0]
-            for i in range(1, readings):
-                statistic = max(statistic, self._buffer[i])
-        return statistic
+    @_REGISTER
+    def result_med(self, value=None):
+        """Calculate median from data buffer"""
+        l = self.get_readings()
+        if l:
+            return self._buffer[l // 2]

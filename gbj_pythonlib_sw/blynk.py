@@ -172,8 +172,9 @@ class BlynkProtocol:
             self.state = Status.CONNECTING
             self._send(Msg.HW_LOGIN, self.auth)
         except:
-            errmsg = f'Connection with the Blynk server' \
-                     '{self.server}:{self.port} failed'
+            errmsg = \
+                f'Connection with the Blynk server ' \
+                f'{self.server}:{self.port} failed'
             self._logger.error(errmsg)
             raise ValueError(errmsg)
 
