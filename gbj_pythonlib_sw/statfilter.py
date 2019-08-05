@@ -293,10 +293,10 @@ class StatFilterExponential(StatFilter):
     def __str__(self):
         """Represent instance object as a string."""
         msg = \
-            f'Exponential filter with factor ' \
-            f'{repr(self.get_factor())} for data range ' \
-            f'{repr(self.get_value_min())} ~ ' \
-            f'{repr(self.get_value_max())}'
+            f'ExpFilter(' \
+            f'{repr(self.get_factor())}/' \
+            f'{repr(self.get_value_min())}~' \
+            f'{repr(self.get_value_max())})'
         return msg
 
     def __repr__(self):
@@ -375,51 +375,95 @@ class StatFilterRunning(StatFilter):
         Positive integer number of values held in the data buffer used for
         statistical smoothing. It should be an odd number, otherwise it is
         extended to the nearest odd one.
+    def_stat : str
+        Default available statistic type for general result from the list
+        'AVG', 'MED', 'MAX', 'MIN'.
 
     """
+
+    STAT_TYPE = ['AVG', 'MED', 'MAX', 'MIN']
+    """list of str: Available statistical types."""
+
+    def __init__(self,
+                 value_max=None,
+                 value_min=None,
+                 buffer_len=BUFFER_LEN_DEF,
+                 def_stat=STAT_TYPE[0],
+                 ):
+        self.set_result(def_stat)
+        super().__init__(
+            value_max,
+            value_min,
+            buffer_len,
+        )
 
     def __str__(self):
         """Represent instance object as a string."""
         msg = \
-            f'Running filter for data range ' \
-            f'{repr(self.get_value_min())} ~ ' \
-            f'{repr(self.get_value_max())} over ' \
-            f'{repr(self.get_buffer_len())} samples'
+            f'RunFilter(' \
+            f'{self._def_stat}-' \
+            f'{self.get_buffer_len()}/' \
+            f'{self.get_value_min()}~' \
+            f'{self.get_value_max()})'
         return msg
 
     def _REGISTER(func):
         """Decorate statistical function by registering its value."""
+
         def _decorator(self, value):
             value = self._register(value)
             if self.get_readings():
-                value = func(self, value)
-            self._logger.debug(
-                'Value %s, Statistic %s',
-                self._buffer[0], value
-            )
-            return value
+                result = func(self, value)
+            if value is not None:
+                self._logger.debug(
+                    'Value %s, Statistic %s',
+                    value, result
+                )
+            return result
         return _decorator
 
     @_REGISTER
     def result_min(self, value=None):
-        """Calculate minimum from data buffer"""
+        """Calculate minimum from data buffer."""
         return min([i for i in self._buffer if i is not None])
 
     @_REGISTER
     def result_max(self, value=None):
-        """Calculate maximum from data buffer"""
+        """Calculate maximum from data buffer."""
         return max([i for i in self._buffer if i is not None])
 
     @_REGISTER
     def result_avg(self, value=None):
-        """Calculate mean from data buffer"""
+        """Calculate mean from data buffer."""
         l = [i for i in self._buffer if i is not None]
         if len(l):
             return sum(l) / len(l)
 
     @_REGISTER
     def result_med(self, value=None):
-        """Calculate median from data buffer"""
+        """Calculate median from data buffer."""
         l = self.get_readings()
         if l:
             return self._buffer[l // 2]
+
+    def result(self, value=None):
+        """Calculate default statistic from data buffer."""
+        func = eval('self.result_' + self._def_stat.lower())
+        return func(value)
+
+    #--------------------------------------------------------------------------
+    # Setters
+    #--------------------------------------------------------------------------
+    def set_result(self, def_stat=STAT_TYPE[0]):
+        """Set default statistic type for general result."
+
+        Arguments
+        ---------
+        def_stat : str
+            Enumerated abbreviation from available statistic types.
+
+        """
+        def_stat = str(def_stat).upper()
+        if def_stat not in self.STAT_TYPE:
+            def_stat = self.STAT_TYPE[0]
+        self._def_stat = def_stat

@@ -5,7 +5,7 @@ A prescaler can be considered as a timer period divider and can run its own
 callbacks separately from the timer's callbacks.
 
 """
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 __status__ = 'Beta'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2018-2019, ' + __author__
@@ -35,16 +35,14 @@ def register_timer(name, timer=None):
     Arguments
     ---------
     name : str
-        Name of a timer that is used as a key in timers registration
+        Mandatory name of a timer that is used as a key in timers registration
         dictionary, so that it has to be unique within all registered timers.
-        *The argument is mandatory and has no default value.*
-
         - If name already exists in the dictionary, the timer is updated.
         - If name is not correct dictionary key, the registration is ingored.
-
     timer : object
         Object of a timer that is used as a value in timers registration
         dictionary.
+        - If None is provided, the timer is unregistered.
 
     Notes
     -----
@@ -54,19 +52,17 @@ def register_timer(name, timer=None):
       is stopped and removed from the dictionary.
 
     """
-    if not name:
+    if name is None:
         return
-    if timer is None:
-        try:
+    name = str(name)
+    try:
+        if timer is None:
             timer = timers.pop(name)
             timer.stop()
-        except KeyError:
-            pass
-    else:
-        try:
+        else:
             timers[name] = timer
-        except KeyError:
-            pass
+    except KeyError:
+        pass
 
 
 def start_timers():
@@ -85,18 +81,16 @@ def stop_timers():
 # Classes
 ###############################################################################
 class Timer(object):
-    """Creating a timer.
+    """Creating and registering a timer.
 
     Arguments
     ---------
     period : float
-        Positive float interval of the timer in seconds. If other type is
-        provided, it is converted to an absolute float.
-        *The argument is mandatory and has no default value.*
-    callback : function, tuple of functions
-        One of more functions in role of callbacks that the timer calls
-        when expires.
-        *The argument is mandatory and has no default value.*
+        Mandatory positive float interval of the timer in seconds. If other
+        type is provided, it is converted to an absolute float.
+    callback : function or tuple of functions
+        Mandatory one or more functions in role of callbacks that the timer
+        calls when expires.
 
     Keyword Arguments
     -----------------
@@ -107,10 +101,7 @@ class Timer(object):
         endless running.
     name : str
         Name of the timer incorporated to its object. If none is provided,
-        the name of the class is used.
-        This name has nothing commong with registration name of the timer used
-        in the function `register_timer`. However, it is convinient to use
-        the same name for both purposes.
+        the concatenation of its class name and order is used.
 
     Notes
     -----
@@ -126,7 +117,7 @@ class Timer(object):
 
     See Also
     --------
-    register_timer : Registration of timers under names.
+    register_timer : Registration of timers.
 
     """
 
@@ -138,16 +129,15 @@ class Timer(object):
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
         self._period = abs(float(period))
         self._callback = callback
-        self._prescalers = []
         self._args = args
         self._kwargs = kwargs
-        self._count = self._kwargs.pop('count', None)
-        self._name = self._kwargs.pop('name', '{}'
-                                      .format(self.__class__.__name__))
+        # Timer order and default name
         type(self)._instances += 1
         self._order = type(self)._instances
-        self._logger.debug('Instance of %s no. %d created',
-                           self.__class__.__name__, self._order)
+        self._count = self._kwargs.pop('count', None)
+        self._name = self._kwargs.pop('name',
+                                    f'{self.__class__.__name__}{self._order}')
+        self._prescalers = []
         self._timer = None
         self._stopping = False  # Flag about timer cancel request imposed
         self._repeate = True    # Flag about repeating timer
@@ -161,14 +151,22 @@ class Timer(object):
             elif self._count == 1:
                 self._mark = 'O'
                 self._repeate = False   # Flag about on-shot timer
+        # Register timer
+        register_timer(self._name, self)
+        # Logging
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+        )
 
     def __del__(self):
         """Clean after instance destroying - destructor.
 
         Notes
         -----
-        In this method the object self._logger does not already exist, so that
-        logging is not possible.
+        - In this method the object self._logger does not already exist,
+          so that logging is not possible.
 
         """
         type(self)._instances -= 1
@@ -180,13 +178,25 @@ class Timer(object):
         period, mark, and instance number.
 
         """
-        return '{}({}s-{}{}-{})'.format(
-            self._name,
-            float(self._period),
-            self._mark,
-            '' if self._count is None else str(self._count),
-            self._order
-        )
+        msg = \
+            f'{self._name}('\
+            f'{float(self._period)}s-' \
+            f'{self._mark}' \
+            f'{"" if self._count is None else str(self._count)}-' \
+            f'{self._order})'
+        return msg
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = \
+            f'{self.__class__.__name__}(' \
+            f'period={repr(self._period)}, ' \
+            f'callback={self._callback.__name__}, ' \
+            f'count={self._count}, ' \
+            f'name={self._name}, ' \
+            f'args={repr(self._args)}, ' \
+            f'kwargs={repr(self._kwargs)})'
+        return msg
 
     def _create_timer(self):
         """Create new timer object and start it."""
@@ -261,15 +271,15 @@ class Timer(object):
             self._logger.debug('%s not started', str(self))
             return
         else:
-            self._logger.debug('%s started', str(self))
             self._create_timer()
+            self._logger.debug('%s started', str(self))
 
     def stop(self):
         """Destroy timer thread object."""
         self._stopping = True
         if self._timer is not None:
-            self._logger.debug('%s stopped', str(self))
             self._timer.cancel()
+            self._logger.debug('%s stopped', str(self))
 
     def prescaler(self, factor, callback, *args, **kwargs):
         """Register a callback function called at each factor tick.
@@ -277,15 +287,13 @@ class Timer(object):
         Arguments
         ---------
         factor : int
-            Positive integer as a divider of the timer's period. It is
-            truncated to an absolute integer and ignored, if it results to less
-            than 2. The factor is used as a key in registration dictionary of
-            prescalers.
-            *The argument is mandatory and has no default value.*
-        callback : function, tuple of functions
-            One or more functions calling by the timer at each factor-th
-            period.
-            *The argument is mandatory and has no default value.*
+            Mandatory positive integer as a divider of the timer's period.
+            It is truncated to an absolute integer and ignored, if it results
+            to less than 2. The factor is used as a key in registration
+            dictionary of prescalers.
+        callback : function or tuple of functions
+            Mandatory one or more functions calling by the timer at each
+            factor-th period.
         args : tuple
             Additional positional arguments passed to the callback(s).
 
@@ -297,9 +305,9 @@ class Timer(object):
         Notes
         -----
         - The prescaler method enables launching a specific callback or more
-          callback at multiple timer periods and acts as a frequency divider.
+          callbacks at multiple timer periods and acts as a frequency divider.
         - Prescale factor equal 1 is useless, because it is equivalent to basic
-          timer callback. In this case it is ignored.
+          timer callback or tuple of them. In this case it is ignored.
         - The prescaler method can be called multiple times. For the same
           factor the corresponding callback is updated including its arguments.
           If none factor is provided, the prescaler is removed.

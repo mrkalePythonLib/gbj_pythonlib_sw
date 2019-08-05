@@ -12,6 +12,7 @@ __email__ = 'libor.gabaj@gmail.com'
 
 import psutil
 import platform
+import os
 
 
 ###############################################################################
@@ -47,3 +48,10 @@ def linux():
 def windows():
     """Return flag about running on Windows platform."""
     return platform.system() == 'Windows'
+
+def root():
+    """Return flag about running on Linux as root."""
+    if hasattr(os, 'getegid'):
+        return os.getegid() == 0  # pylint: disable=no-member
+    else:
+        return True
