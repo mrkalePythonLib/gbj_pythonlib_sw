@@ -22,59 +22,52 @@ import logging
 ###############################################################################
 # Variables
 ###############################################################################
-timers = {}     # Dictionary of registered timers
+timers = {}
 """dict: Registration storage of timers."""
 
 
 ###############################################################################
 # Functions
 ###############################################################################
-def register_timer(name, timer=None):
+def register(timer):
     """Store a timer object in the registration dictionary.
 
     Arguments
     ---------
-    name : str
-        Mandatory name of a timer that is used as a key in timers registration
-        dictionary, so that it has to be unique within all registered timers.
-        - If name already exists in the dictionary, the timer is updated.
-        - If name is not correct dictionary key, the registration is ingored.
     timer : object
         Object of a timer that is used as a value in timers registration
         dictionary.
-        - If None is provided, the timer is unregistered.
-
-    Notes
-    -----
-    - Object is instance of the class ``Timer`` from the standard library
-      module ``threading``.
-    - If none object is provided and name already exists, the named timer
-      is stopped and removed from the dictionary.
+        - The ``name`` attribute of the object is used as a timer name.
+        - If name already exists in the dictionary, the timer is updated.
 
     """
+    if timer is None or not isinstance(timer, Timer):
+        return
+    timers[timer.name] = timer
+
+
+def unregister(name):
+    """Remove a timer with provided name from the registration dictionary."""
     if name is None:
         return
     name = str(name)
     try:
-        if timer is None:
-            timer = timers.pop(name)
-            timer.stop()
-        else:
-            timers[name] = timer
+        timer = timers.pop(name)
+        timer.stop()
     except KeyError:
         pass
 
 
-def start_timers():
+def start_all():
     """Start all registered timers."""
-    for timer_name in timers:
-        timers[timer_name].start()
+    for timer in timers:
+        timers[timer].start()
 
 
-def stop_timers():
+def stop_all():
     """Stop all registered timers."""
-    for timer_name in timers:
-        timers[timer_name].stop()
+    for timer in timers:
+        timers[timer].stop()
 
 
 ###############################################################################
@@ -126,21 +119,25 @@ class Timer(object):
 
     def __init__(self, period, callback, *args, **kwargs):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._period = abs(float(period))
-        self._callback = callback
+        type(self)._instances += 1
         self._args = args
         self._kwargs = kwargs
-        # Timer order and default name
-        type(self)._instances += 1
+        #
+        self._period = abs(float(period))
+        # Sanitize callbacks
+        if not isinstance(callback, tuple):
+            callback = tuple([callback])
+        self._callbacks = callback
+        # Sanitize name
         self._order = type(self)._instances
         self._count = self._kwargs.pop('count', None)
-        self._name = self._kwargs.pop('name',
-                                    f'{self.__class__.__name__}{self._order}')
+        self.__name = self._kwargs.pop('name',
+            f'{self.__class__.__name__}{self._order}')
+        #
         self._prescalers = []
         self._timer = None
-        self._stopping = False  # Flag about timer cancel request imposed
-        self._repeate = True    # Flag about repeating timer
+        self._stopping = False
+        self._repeate = True
         # Mark timer
         if self._count is None:
             self._mark = 'R'
@@ -152,7 +149,7 @@ class Timer(object):
                 self._mark = 'O'
                 self._repeate = False   # Flag about on-shot timer
         # Register timer
-        register_timer(self._name, self)
+        register(self)
         # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
         self._logger.debug(
@@ -179,7 +176,7 @@ class Timer(object):
 
         """
         msg = \
-            f'{self._name}('\
+            f'{self.__name}(' \
             f'{float(self._period)}s-' \
             f'{self._mark}' \
             f'{"" if self._count is None else str(self._count)}-' \
@@ -188,21 +185,37 @@ class Timer(object):
 
     def __repr__(self):
         """Represent instance object officially."""
+        if len(self._callbacks) > 1:
+            cblist = [c.__name__ for c in self._callbacks]
+            cb = f'({", ".join(cblist)})'
+        else:
+            cb = self._callbacks[0].__name__
         msg = \
             f'{self.__class__.__name__}(' \
             f'period={repr(self._period)}, ' \
-            f'callback={self._callback.__name__}, ' \
-            f'count={self._count}, ' \
-            f'name={self._name}, ' \
+            f'callback={cb}, ' \
+            f'count={repr(self._count)}, ' \
+            f'name={repr(self.__name)}, ' \
             f'args={repr(self._args)}, ' \
             f'kwargs={repr(self._kwargs)})'
         return msg
+
+    @property
+    def name(self):
+        """Name of the timer."""
+        return self.__name
+
+    @property
+    def prescalers(self):
+        """Dictionary of prescalers."""
+        if hasattr(self, '_prescalers'):
+            return self._prescalers
 
     def _create_timer(self):
         """Create new timer object and start it."""
         if not self._stopping:
             self._timer = threading.Timer(self._period, self._run_callback)
-            self._timer.name = self._name
+            self._timer.name = self.__name
             self._timer.start()
 
     def _run_callback(self):
@@ -215,7 +228,7 @@ class Timer(object):
             callback function as a keyword argument.
 
         """
-        if self._callback is None:
+        if self._callbacks is None:
             return
         if self._count is not None:
             if self._count <= 0:
@@ -224,10 +237,7 @@ class Timer(object):
                 self._repeate = False
         try:
             # Call basic timer callback
-            callbacks = self._callback
-            if not isinstance(callbacks, tuple):
-                callbacks = tuple([callbacks])
-            for callback in callbacks:
+            for callback in self._callbacks:
                 self._logger.debug(
                     'Main callback %s of %s launched',
                     callback.__name__, str(self)
@@ -242,9 +252,7 @@ class Timer(object):
                 prescaler['counter'] -= 1
                 if prescaler['counter'] <= 0:
                     prescaler['counter'] = prescaler['factor']
-                    callbacks = prescaler['callback']
-                    if not isinstance(callbacks, tuple):
-                        callbacks = tuple([callbacks])
+                    callbacks = prescaler['callbacks']
                     for callback in callbacks:
                         self._logger.debug(
                             'Prescaler %d callback %s of %s launched',
@@ -320,6 +328,9 @@ class Timer(object):
         factor = abs(int(factor))
         if factor < 2:
             return
+        # Sanitize callbacks
+        if not isinstance(callback, tuple):
+            callback = tuple([callback])
         # Find existing prescaler and remove or update it
         new = True
         for i, prescaler in enumerate(self._prescalers):
@@ -327,7 +338,7 @@ class Timer(object):
                 if callback is None:
                     self._prescalers.pop(i)
                 else:
-                    prescaler['callback'] = callback
+                    prescaler['callbacks'] = callback
                     prescaler['args'] = args
                     prescaler['kwargs'] = kwargs
                 new = False
@@ -337,13 +348,8 @@ class Timer(object):
             prescaler = {
                 'counter': factor,
                 'factor': factor,
-                'callback': callback,
+                'callbacks': callback,
                 'args': args,
                 'kwargs': kwargs,
             }
             self._prescalers.append(prescaler)
-
-    def get_prescalers(self):
-        """Return dictionary of prescalers."""
-        if hasattr(self, '_prescalers'):
-            return self._prescalers

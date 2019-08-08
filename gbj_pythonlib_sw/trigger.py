@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Module for managing and executing triggers as value dependend callbacks."""
-__version__ = '0.2.0'
-__status__ = 'Testing'
+__version__ = '0.3.0'
+__status__ = 'Beta'
 __author__ = 'Libor Gabaj'
-__copyright__ = 'Copyright 2018, ' + __author__
+__copyright__ = 'Copyright 2018-2019, ' + __author__
 __credits__ = []
 __license__ = 'MIT'
 __maintainer__ = __author__
@@ -14,215 +14,328 @@ import logging
 
 
 ###############################################################################
-# Constants
+# Variables
 ###############################################################################
-UPPER = 0
-"""int: Enumeration for upper trigger mode."""
+triggers = {}
+"""dict: Registration storage of triggers."""
 
-LOWER = 1
-"""int: Enumeration for lower trigger mode."""
+
+###############################################################################
+# Functions
+###############################################################################
+def register(trigger):
+    """Store a trigger object in the registration dictionary.
+
+    Arguments
+    ---------
+    trigger : object
+        Object of a trigger that is used as a value in triggers registration
+        dictionary.
+        - The ``name`` attribute of the object is used as a trigger name.
+        - If name already exists in the dictionary, the trigger is updated.
+
+    """
+    if trigger is None or not isinstance(trigger, Trigger):
+        return
+    triggers[trigger.name] = trigger
+
+
+def unregister(name):
+    """Remove a trigger with provided name from the registration dictionary."""
+    if name is None:
+        return
+    name = str(name)
+    try:
+        triggers.pop(name)
+    except KeyError:
+        pass
+
+
+def run_all(value):
+    """Run all registered triggers with comparison value."""
+    for trigger in triggers:
+        triggers[trigger].run(value)
 
 
 ###############################################################################
 # Classes
 ###############################################################################
 class Trigger(object):
-    """Creating a trigger manager."""
+    """Creating and registering a trigger.
 
-    def __init__(self):
+    Arguments
+    ---------
+    threshold : float
+        Mandatory threshold value, which in comparison to an provided value
+        causes running a callback function(s).
+    callback : function or tuple of functions
+        Mandatory one or more functions in role of callbacks that the trigger
+        calls when value crosses threshold.
+
+    Keyword Arguments
+    -----------------
+    mode : str
+        Processing mode of the trigger. The argument is defined by one of
+        following class's constants
+        - ``UPPER``: Callback is run in either case when execution
+            of the trigger is called and provided comparison value reaches or
+            exceeds the threshold.
+        - ``UPPER1``: Callback is run at execution of the trigger only if
+            provided comparison value reaches or exceeds
+            the threshold while at previous execution it was bellow the
+            threshold. So that the callback is run only once by exceeding
+            threshold. In order to call it again, the comparison value should
+            sink bellow the threshold at first.
+        - ``LOWER``: Callback is run in either case when execution
+            of the trigger is called and provided comparison value sinks
+            to the threshold or bellow.
+        - ``LOWER1``: Callback is run at execution of the trigger only if
+            provided comparison value sinks to threshold or bellow while
+            at previous execution it was over the threshold. So that the
+            callback is run only once by sinking under the threshold. In order
+            to call it again, the comparison value should exceed the threshold
+            at first.
+        Default mode is the first one in mentioned list of constants.
+    name : str
+        Name of the trigger incorporated to its object. If none is provided,
+        the concatenation of its class name and order is used.
+
+    See Also
+    --------
+    register_trigger : Registration of triggers.
+
+    """
+
+    MODE = ['UPPER', 'UPPER1', 'LOWER', 'LOWER1']
+    """list of str: Available trigger types."""
+
+    _instances = 0
+    """int: Number of class instances."""
+
+    def __init__(self, threshold, callback, *args, **kwargs):
         """Create the class instance - constructor."""
+        type(self)._instances += 1
+        self._args = args
+        self._kwargs = kwargs
+        #
+        self.__threshold = abs(float(threshold))
+        # Sanitize callbacks
+        if not isinstance(callback, tuple):
+            callback = tuple([callback])
+        self._callbacks = callback
+        # Sanitize name
+        self._order = type(self)._instances
+        self.__name = self._kwargs.pop('name',
+            f'{self.__class__.__name__}{self._order}')
+        # Sanitize mode
+        self._mode = str(self._kwargs.pop('mode', self.MODE[0])).upper()
+        if self._mode not in self.MODE:
+            self._mode = self.MODE[0]
+        # Register trigger
+        self._value = None
+        register(self)
+        # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug('Instance of %s created', self.__class__.__name__)
-        self.del_triggers()
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+        )
 
-    def __str__(self):
-        """Represent instance object as a string."""
-        return 'Triggers {}'.format(len(self._triggers))
-
-    def set_trigger(self, id, mode=None, value=None, callback=None,
-                    *args, **kwargs):
-        """Create or update trigger and register it to class instance.
-
-        Arguments
-        ---------
-        id
-            Unique identifier of a trigger in the list of them of any type.
-            *The argument is mandatory and has no default value.*
-        mode : enum
-            Processing mode of the trigger. The argument is defined by one of
-            module's constants ``UPPER``, ``LOWER``.
-
-            - Upper trigger calls callback(s) when comparison value reaches or
-              exceeds the threshold value.
-            - Lower trigger calls callback(s) when comparison value sinks to
-              the threshold value or below.
-
-        value : float
-            Threshold value, which in comparison to an comparison value causes
-            running a callback function.
-        callback : function, tuple of functions
-            One of more functions in role of callbacks that the trigger calls
-            when threshold value is reached from direction corresponding to the
-            mode of the trigger.
-        args : tuple
-            Additional positional arguments passed to the callback(s) after
-            forced arguments by this class.
-
-        Keyword Arguments
-        -----------------
-        kwargs : dict
-            Additional keyworded arguments passed to the callback(s).
-
-        Raises
-        ------
-        NameError
-            Identifier is not provided.
-        TypeError
-            Mode is not from the expected enumeration.
+    def __del__(self):
+        """Clean after instance destroying - destructor.
 
         Notes
         -----
-        - The trigger method can be called multiple times.
-        - For the same trigger identifier corresponding callback is updated
-          including its arguments.
+        - In this method the object self._logger does not already exist,
+          so that logging is not possible.
 
         """
-        def mode_str(mod):
-            return 'upper' if mode == UPPER else 'lower'
+        type(self)._instances -= 1
 
-        # Sanitize arguments
-        if id is None:
-            errmsg = 'No id provided'
-            self._logger.error(errmsg)
-            raise NameError(errmsg)
-        if mode is not None and mode not in [UPPER, LOWER]:
-            errmsg = 'Unknown mode {}'.format(mode)
-            self._logger.error(errmsg)
-            raise TypeError(errmsg)
-        debug_str = ' %s trigger %s with callback %s for value %s'
-        # Update trigger
-        new = True
-        for i, trigger in enumerate(self._triggers):
-            if trigger['id'] == id:
-                trigger['callback'] = callback or trigger['callback']
-                trigger['value'] = value or trigger['value']
-                trigger['mode'] = mode or trigger['mode']
-                trigger['args'] = args or trigger['args']
-                trigger['kwargs'] = kwargs or trigger['kwargs']
-                self._triggers[i] = trigger
-                self._logger.debug(
-                    'Updated' + debug_str, mode_str(trigger['mode']), id,
-                    trigger['callback'].__name__, trigger['value'])
-                new = False
-                break
-        # Create new trigger
-        if new:
-            trigger = {
-                'id': id,
-                'value': value,
-                'callback': callback,
-                'mode': mode,
-                'args': args,
-                'kwargs': kwargs,
-            }
-            self._triggers.append(trigger)
-            self._logger.debug(
-                'Created' + debug_str, mode_str(mode), id,
-                callback.__name__, value)
+    def __str__(self):
+        """Represent instance object as a string."""
+        msg = \
+            f'{self.name}(' \
+            f'{float(self.__threshold)}-' \
+            f'{self._order})'
+        return msg
 
-    def get_triggers(self):
-        """Return list of triggers.
+    def __repr__(self):
+        """Represent instance object officially."""
+        if len(self._callbacks) > 1:
+            cblist = [c.__name__ for c in self._callbacks]
+            cb = f'({", ".join(cblist)})'
+        else:
+            cb = self._callbacks[0].__name__
+        msg = \
+            f'{self.__class__.__name__}(' \
+            f'threshold={repr(self.__threshold)}, ' \
+            f'callback={cb}, ' \
+            f'name={repr(self.name)}, ' \
+            f'args={repr(self._args)}, ' \
+            f'kwargs={repr(self._kwargs)})'
+        return msg
 
-        Returns
-        -------
-        list
-            Registered triggers with all their parameters.
+    @property
+    def name(self):
+        """Name of the trigger."""
+        return self.__name
 
-        """
-        return self._triggers
+    @property
+    def threshold(self):
+        """Trigger threshold value."""
+        return self.__threshold
 
-    def exec_triggers(self, value, ids=[]):
-        """Evaluate and execute all or listed triggers.
+    @threshold.setter
+    def threshold(self, value):
+        """Set trigger threshold value."""
+        try:
+            self.__threshold = abs(float(value))
+        except ValueError:
+            pass
+        
 
-        Arguments
-        ---------
-        value : float
-            Comparison value, which is compared to threshold values of triggers
-            in order to run callback(s) or not.
-            *The argument is mandatory and has no default value.*
-        ids : list
-            List of trigger identifiers that should be evaluated.
+    def _EXECUTE(func):
+        """Decorate evaluation function of the trigger."""
 
-            - If the input value is not a list, e.g., just string with
-              identifier of one trigger or string with tuple of identifiers,
-              it is converted to the list.
-            - If argument is not provided, all triggers are executed against
-              the comparison value.
+        def _decorator(self, value):
+            """Compare value and execute all trigger's callbacks if needed.
 
-        Other Parameters
-        ----------------
-        value : float
-            Comparison value.
-        threshold : float
-            Threshold value taken from definition of respective trigger.
+            Arguments
+            ---------
+            value : float
+                Mandatory comparison value, which is compared to the threshold
+                in order to run callback(s).
+            ids : list
+                List of trigger identifiers that should be evaluated.
 
-        Warning
-        -------
-        The method injects other parameters to each called callback function
-        as keyword arguments in order to inform those callbacks about values,
-        that caused  their invocation.
+                - If the input value is not a list, e.g., just string with
+                identifier of one trigger or string with tuple of identifiers,
+                it is converted to the list.
+                - If argument is not provided, all triggers are executed against
+                the comparison value.
 
-        """
-        # Sanitize arguments
-        if ids is not None and not isinstance(ids, list):
-            ids = list(ids)
-        if len(ids) == 0:
-            ids = None
-        # Evaluate listed or all triggers
-        for trigger in self._triggers:
-            # Detect not listed trigger
-            if ids is not None and trigger['id'] not in ids:
-                continue
-            if (trigger['mode'] == UPPER and value > trigger['value']) \
-               or (trigger['mode'] == LOWER and value < trigger['value']):
-                    callbacks = trigger['callback']
-                    if not isinstance(callbacks, tuple):
-                        callbacks = tuple([callbacks])
-                    for callback in callbacks:
-                        self._logger.debug(
-                            '%s trigger callback %s for threshold value %f'
-                            + ' at current value %f',
-                            'Upper' if trigger['mode'] == UPPER else 'Lower',
-                            callback.__name__,
-                            trigger['value'],
-                            value
-                        )
+            Other Parameters
+            ----------------
+            value : float
+                Comparison value.
+            threshold : float
+                Threshold value taken from definition of respective trigger.
+
+            Warning
+            -------
+            The method injects other parameters to each called callback function
+            as keyword arguments in order to inform those callbacks about values,
+            that caused their invocation.
+
+            """
+            runflag = func(self, value)
+            self._value = value
+            if runflag:
+                for callback in self._callbacks:
+                    msg = \
+                        f"{self._mode} trigger's " \
+                        f'callback {callback.__name__} ' \
+                        f'for threshold {str(self.__threshold)} ' \
+                        f'at value {str(value)}'
+                    self._logger.debug(msg)
+                    try:
                         callback(
-                            *trigger['args'],
+                            *self._args,
                             value=value,
-                            threshold=trigger['value'],
-                            **trigger['kwargs']
+                            threshold=self.__threshold,
+                            **self._kwargs
                         )
+                    except Exception:
+                        self._logger.error(
+                            'Running callback %s failed:',
+                            callback.__name__, exc_info=True)
+            return runflag
+        return _decorator
 
-    def del_triggers(self, ids=[]):
-        """Delete all or listed triggers.
+    @_EXECUTE
+    def _run_upper(self, value):
+        """Evaluate upper trigger."""
+        return value >= self.__threshold
 
-        Arguments
-        ---------
-        ids : list
-            List of trigger identifiers that should be removed from class
-            instance regristration.
+    @_EXECUTE
+    def _run_upper1(self, value):
+        """Evaluate one-time upper trigger."""
+        return (self._value is None or self._value < self.__threshold) \
+            and value >= self.__threshold
 
-        """
-        # Sanitize arguments
-        if ids is not None and not isinstance(ids, list):
-            ids = list(ids)
-        # Remove all triggers
-        if ids is None or len(ids) == 0:
-            self._triggers = []
-            return
-        # Remove listed triggers
-        for i, trigger in enumerate(self._triggers):
-            if trigger['id'] in ids:
-                self._triggers.pop(i)
-                self._logger.debug('Removed trigger %s', trigger['id'])
+    @_EXECUTE
+    def _run_lower(self, value):
+        """Evaluate lower trigger."""
+        return value <= self.__threshold
+
+    @_EXECUTE
+    def _run_lower1(self, value):
+        """Evaluate one-time lower trigger."""
+        return (self._value is None or self._value > self.__threshold) \
+            and value <= self.__threshold
+
+    def run(self, value):
+        """Process trigger with comparison value."""
+        func = eval('self._run_' + self._mode.lower())
+        return func(value)
+
+
+###############################################################################
+# Trigger variants
+###############################################################################
+class TriggerUpper(Trigger):
+    """Creating and registering an upper trigger."""
+
+    def __init__(self, threshold, callback, *args, **kwargs):
+        """Create the class instance - constructor."""
+        kwargs.pop('mode', None)
+        super().__init__(
+            threshold,
+            callback,
+            *args,
+            mode='UPPER',
+            **kwargs,
+        )
+        
+class TriggerUpper1(Trigger):
+    """Creating and registering a one-time upper trigger."""
+
+    def __init__(self, threshold, callback, *args, **kwargs):
+        """Create the class instance - constructor."""
+        kwargs.pop('mode', None)
+        super().__init__(
+            threshold,
+            callback,
+            *args,
+            mode='UPPER1',
+            **kwargs,
+        )
+
+class TriggerLower(Trigger):
+    """Creating and registering a lower trigger."""
+
+    def __init__(self, threshold, callback, *args, **kwargs):
+        """Create the class instance - constructor."""
+        kwargs.pop('mode', None)
+        super().__init__(
+            threshold,
+            callback,
+            *args,
+            mode='LOWER',
+            **kwargs,
+        )
+
+class TriggerLower1(Trigger):
+    """Creating and registering a one-time lower trigger."""
+
+    def __init__(self, threshold, callback, *args, **kwargs):
+        """Create the class instance - constructor."""
+        kwargs.pop('mode', None)
+        super().__init__(
+            threshold,
+            callback,
+            *args,
+            mode='LOWER1',
+            **kwargs,
+        )
