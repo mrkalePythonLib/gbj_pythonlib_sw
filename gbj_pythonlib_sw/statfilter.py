@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Module for statistical filtering and smoothing."""
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 __status__ = 'Beta'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2018-2019, ' + __author__
