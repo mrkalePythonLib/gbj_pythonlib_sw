@@ -74,13 +74,10 @@ class ValueFilter(object):
     @value_min.setter
     def value_min(self, value):
         """Set minimal acceptable value."""
-        if value is None:
-            self._value_min = None
-            return
         try:
             self._value_min = float(value)
         except ValueError:
-            pass
+            self._value_min = None
 
     @property
     def value_max(self):
@@ -90,13 +87,10 @@ class ValueFilter(object):
     @value_max.setter
     def value_max(self, value):
         """Set maximal acceptable value."""
-        if value is None:
-            self._value_max = None
-            return
         try:
             self._value_max = float(value)
         except ValueError:
-            pass
+            self._value_max = None
 
     def filter(self, value):
         """Filter value against acceptable value range.
@@ -195,12 +189,13 @@ class StatFilter(abc.ABC):
         return len(self._buffer)
 
     @buffer_len.setter
-    def buffer_len(self, value=BUFFER_LEN_DEF):
+    def buffer_len(self, value):
         """Adjust data buffer length for statistical smoothing."""
         try:
             # Make odd number and minimum 1
-            buffer_len = abs(int(value)) | 1
-        except ValueError:
+            buffer_len = abs(int(value or BUFFER_LEN_DEF)) | 1
+        except TypeError:
+            buffer_len = BUFFER_LEN_DEF
             return
         if self.buffer_len < buffer_len:
             self._buffer.extend([None] * (buffer_len - self.buffer_len))
@@ -309,11 +304,22 @@ class Exponential(StatFilter):
     def factor(self, value):
         """Set current float smoothing factor."""
         try:
-            self._factor = float(value or self.FACTOR_DEF)
+            self._factor = abs(float(value or self.FACTOR_DEF))
         except TypeError:
             self._factor = self.FACTOR_DEF
         self._factor = max(min(abs(self._factor),
-                               self.FACTOR_MAX), self.FACTOR_MIN)
+            self.FACTOR_MAX), self.FACTOR_MIN)
+
+    @property
+    def buffer_len(self):
+        """Length of the data buffer."""
+        return super().buffer_len
+    
+    @buffer_len.setter
+    def buffer_len(self, value):
+        """Adjust data buffer length to 1 always."""
+        if self.buffer_len == 0:
+            self._buffer.extend([None])
 
     def result(self, value=None):
         """Calculate statistically smoothed value.
@@ -393,7 +399,7 @@ class Running(StatFilter):
         return self._def_stat
 
     @stat_type.setter
-    def stat_type(self, def_stat=STAT_TYPE[0]):
+    def stat_type(self, def_stat):
         """Set default statistic type for general result.
 
         Arguments
