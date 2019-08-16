@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Module for managing a configuration INI file."""
-__version__ = '0.3.0'
-__status__ = 'Testing'
+__version__ = '0.4.0'
+__status__ = 'Beta'
 __author__ = 'Libor Gabaj'
-__copyright__ = 'Copyright 2018, ' + __author__
+__copyright__ = 'Copyright 2018-2019, ' + __author__
 __credits__ = []
 __license__ = 'MIT'
 __maintainer__ = __author__
@@ -25,39 +25,71 @@ class Config(object):
 
     Arguments
     ---------
-    file : string, pointer
+    file : string | pointer
         Full path to a configuration file or file pointer of already opened
         file.
-        *The argument is mandatory and has no default value.*
 
     Notes
     -----
-    A single class instance object manages just one configuration file.
-    If more configuration files are needed to manage, separate instances should
-    be created.
+    - A single class instance object manages just one configuration file.
+    - If more configuration files are needed to manage, separate instances
+      should be created.
 
     """
 
     def __init__(self, file):
         """Create the class instance - constructor."""
-        self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug('Instance of %s created', self.__class__.__name__)
         self._parser = configparser.ConfigParser()
         self._file = None
-
         if isinstance(file, str):
             self._file = file
             self._parser.read(file)
         else:
             self._parser.readfp(file)
             self._file = file.name
+        # Logging
+        self._logger = logging.getLogger(' '.join([__name__, __version__]))
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+            )
 
     def __str__(self):
         """Represent instance object as a string."""
-        if self._file is None:
-            return 'No object of type "{}"'.format(self.__class__.__name__)
-        else:
-            return 'Config file "{}"'.format(self._file)
+        msg = \
+            f'ConfigFile(' \
+            f'{self.configfile})'
+        return msg
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = \
+            f'{self.__class__.__name__}(' \
+            f'file={repr(self.configfile)})'
+        return msg
+
+    @property
+    def configfile(self):
+        """Configuration INI file."""
+        return self._file
+
+    @property
+    def content(self):
+        """String with configuration parameters in form of INI file.
+
+        Notes
+        -----
+        All section and options are listed including from ``DEFAULT`` section.
+
+        """
+        pattern = '\n\n---CONGIGURATION - {}---'
+        content = pattern.format('BOF')
+        for section in self._parser.sections():
+            content += '\n\n[{}]'.format(section)
+            for name, value in self._parser.items(section):
+                content += '\n{} = {}'.format(name, value)
+        content += pattern.format('EOF')
+        return content
 
     def option(self, option, section, default=None):
         """Read configuration option's value.
@@ -151,28 +183,3 @@ class Config(object):
                 continue
             options.append(config_key)
         return options
-
-    # -------------------------------------------------------------------------
-    # Getters
-    # -------------------------------------------------------------------------
-    def get_content(self):
-        """Create string with configuration parameters in form of INI file.
-
-        Returns
-        -------
-        str
-            Content of the configuration file without comments.
-
-        Notes
-        -----
-        All section and options are listed including from ``DEFAULT`` section.
-
-        """
-        pattern = '\n\n---CONGIGURATION - {}---'
-        content = pattern.format('BOF')
-        for section in self._parser.sections():
-            content += '\n\n[{}]'.format(section)
-            for name, value in self._parser.items(section):
-                content += '\n{} = {}'.format(name, value)
-        content += pattern.format('EOF')
-        return content

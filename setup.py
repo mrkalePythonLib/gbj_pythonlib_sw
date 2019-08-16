@@ -12,7 +12,7 @@ setup(
   classifiers=[
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.5 :: 2.7',
+    'Programming Language :: Python :: 3.6',
     'Topic :: System :: Monitoring',
   ],
   keywords='configuration, mqtt, trigger, timer, statistics, filter, utils',

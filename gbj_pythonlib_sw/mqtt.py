@@ -21,7 +21,7 @@ Notes
   sections is recommended.
 
 """
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 __status__ = 'Beta'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2018-2019, ' + __author__
@@ -35,6 +35,7 @@ __email__ = 'libor.gabaj@gmail.com'
 import time
 import socket
 import logging
+import abc
 # Third party modules
 import paho.mqtt.client as mqttclient
 import paho.mqtt.publish as mqttpublish
@@ -66,9 +67,9 @@ RESULTS = [
 
 
 ###############################################################################
-# Classes
+# Abstract class as a base for all MQTT clients
 ###############################################################################
-class MQTT(object):
+class MQTT(abc.ABC):
     """Common MQTT management.
 
     Arguments
@@ -98,30 +99,32 @@ class MQTT(object):
         self._connected = False
         # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug(
-            'Instance of %s created',
-            self.__class__.__name__,
-            )
 
     def __str__(self):
         """Represent instance object as a string."""
-        if self._config is None:
-            return 'Void configuration'
+        msg = \
+            f'ConfigFile(' \
+            f'{self._config.configfile})'
+        return msg
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = f'{self.__class__.__name__}('
+        if self._config:
+            msg += f'config={repr(self._config.configfile)}'
         else:
-            return 'Config file "{}"'.format(self._config._file)
+            msg += f'None'
+        return msg + ')'
 
-    def get_connected(self):
-        """Return connection flag.
-
-        Returns
-        -------
-        bool
-            Flag about successful connection to an MQTT broker.
-
-        """
+    @property
+    def connected(self):
+        """Flag about successful connection to an MQTT broker."""
         return self._connected
 
 
+###############################################################################
+# Client of an MQTT broker
+###############################################################################
 class MqttBroker(MQTT):
     """Managing an MQTT client connection to usually local MQTT broker.
 
@@ -189,7 +192,6 @@ class MqttBroker(MQTT):
         callbacks without prefix ``on_``.
 
         """
-        # super(type(self), self).__init__(config)
         super().__init__(config)
         # Client parameters
         self._clientid = self._config.option(
@@ -198,15 +200,16 @@ class MqttBroker(MQTT):
         )
         self._userdata = self._config.option(
             OPTION_USERDATA, self.GROUP_BROKER)
-        clean_session = bool(kwargs.pop('clean_session', True))
-        protocol = kwargs.pop('protocol', mqttclient.MQTTv311)
-        transport = kwargs.pop('transport', 'tcp')
+        self._userdata = kwargs.pop('userdata', self._userdata)
+        self._clean_session = bool(kwargs.pop('clean_session', True))
+        self._protocol = kwargs.pop('protocol', mqttclient.MQTTv311)
+        self._transport = kwargs.pop('transport', 'tcp')
         self._client = mqttclient.Client(
             self._clientid,
-            clean_session,
+            self._clean_session,
             self._userdata,
-            protocol,
-            transport
+            self._protocol,
+            self._transport
             )
         # Callbacks definition
         self._cb_on_connect = kwargs.pop('connect', None)
@@ -220,13 +223,41 @@ class MqttBroker(MQTT):
             self._client.on_subscribe = self._cb_on_subscribe
         if self._cb_on_message is not None:
             self._client.on_message = self._cb_on_message
+        # Logging
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+        )
 
     def __str__(self):
         """Represent instance object as a string."""
-        if hasattr(self, '_clientid'):
-            return 'MQTT client {}'.format(self._clientid)
+        msg = \
+            f'MQTTclient(' \
+            f'{self._clientid})'
+        return msg
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = f'{self.__class__.__name__}('
+        if self._config:
+            msg += f'config={repr(self._config.configfile)}'
         else:
-            return 'No MQTT client active'
+            msg += f'None'
+        msg += \
+            f', clean_session={repr(self._clean_session)}' \
+            f', userdata={repr(self._userdata)}' \
+            f', protocol={repr(self._protocol)}' \
+            f', transport={repr(self._transport)}'
+        if self._cb_on_connect:
+            msg += f', connect={self._cb_on_connect.__name__}'
+        if self._cb_on_disconnect:
+            msg += f', disconnect={self._cb_on_disconnect.__name__}'
+        if self._cb_on_subscribe:
+            msg += f', subscribe={self._cb_on_subscribe.__name__}'
+        if self._cb_on_message:
+            msg += f', message={self._cb_on_message.__name__}'
+        msg += f')'
+        return msg
 
     def topic_def(self, option, section=GROUP_TOPICS):
         """Return MQTT topic definition parameters.
@@ -524,7 +555,7 @@ class MqttBroker(MQTT):
             General exception with error code.
 
         """
-        if not self.get_connected():
+        if not self.connected:
             return
         for option in self._config.options(self.GROUP_FILTERS):
             topic, qos, _ = self.topic_def(option, self.GROUP_FILTERS)
@@ -559,7 +590,7 @@ class MqttBroker(MQTT):
             General exception with error code.
 
         """
-        if not self.get_connected():
+        if not self.connected:
             return
         topic, qos, _ = self.topic_def(option, self.GROUP_TOPICS)
         result = self._client.subscribe(topic, qos)
@@ -596,7 +627,7 @@ class MqttBroker(MQTT):
             General exception with error code.
 
         """
-        if not self.get_connected():
+        if not self.connected:
             return
         topic, qos, retain = self.topic_def(option, section)
         if topic is not None:
@@ -648,6 +679,9 @@ class MqttBroker(MQTT):
             raise Exception('Unknown option, section, or topic parameters')
 
 
+###############################################################################
+# Client of ThingSpeak cloud
+###############################################################################
 class ThingSpeak(MQTT):
     """Connect and publish to ThingSpeak MQTT broker.
 
@@ -704,7 +738,6 @@ class ThingSpeak(MQTT):
 
     def __init__(self, config):
         """Create the class instance - constructor."""
-        # super(type(self), self).__init__(config)
         super().__init__(config)
         self._timestamp_publish_last = 0.0
         # Defaulted configuration parameters
@@ -714,13 +747,6 @@ class ThingSpeak(MQTT):
             OPTION_PORT, self.GROUP_BROKER, 1883))
         self._host = self._config.option(
             OPTION_HOST, self.GROUP_BROKER, 'mqtt.thingspeak.com')
-        # Logging
-        self._logger.debug(
-            'ThingSpeak connection to broker %s:%s as client %s',
-            self._host,
-            self._port,
-            self._clientid
-        )
         # Configuration parameters without default value
         errtxt = 'Undefined ThingSpeak config option {}'
         #
@@ -747,13 +773,17 @@ class ThingSpeak(MQTT):
         # Initialize data buffer
         self._buffer = {}
         self.reset()
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+        )
 
     def __str__(self):
         """Represent instance object as a string."""
-        if hasattr(self, '_clientid'):
-            return 'ThingSpeak client {}'.format(self._clientid)
-        else:
-            return 'No ThingSpeak client active'
+        msg = \
+            f'ThingSpeakClient(' \
+            f'{self._host}:{self._port}/{self._clientid})'
+        return msg
 
     def _fieldname(self, field_num):
         """Construct field name from field number."""
@@ -763,10 +793,7 @@ class ThingSpeak(MQTT):
             field_name = None
         return field_name
 
-    # -------------------------------------------------------------------------
-    # Setters
-    # -------------------------------------------------------------------------
-    def set_field(self, field_num, field_value=None):
+    def store_field(self, field_num, field_value=None):
         """Store value to a channel field or reset it.
 
         Arguments
@@ -787,7 +814,7 @@ class ThingSpeak(MQTT):
                 'Buffered ThingSpeak field%d with value %s',
                 field_num, field_value)
 
-    def set_status(self, status=None):
+    def store_status(self, status=None):
         """Store status to a channel status or reset it.
 
         Arguments
@@ -802,9 +829,6 @@ class ThingSpeak(MQTT):
             'Buffered ThingSpeak status %s',
             status)
 
-    # -------------------------------------------------------------------------
-    # Core functions
-    # -------------------------------------------------------------------------
     def reset(self):
         """Reset all buffered fields and status."""
         self._buffer['status'] = None

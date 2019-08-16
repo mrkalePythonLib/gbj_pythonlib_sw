@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Module for statistical filtering and smoothing."""
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 __status__ = 'Beta'
 __author__ = 'Libor Gabaj'
 __copyright__ = 'Copyright 2018-2019, ' + __author__
@@ -12,13 +12,6 @@ __email__ = 'libor.gabaj@gmail.com'
 
 import logging
 import abc
-
-
-###############################################################################
-# Constants
-###############################################################################
-BUFFER_LEN_DEF = 5
-"""int: Default buffer length."""
 
 
 ###############################################################################
@@ -48,7 +41,7 @@ class ValueFilter(object):
         self._logger.debug(
             'Instance of %s created: %s',
             self.__class__.__name__, str(self)
-        )
+            )
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -76,7 +69,7 @@ class ValueFilter(object):
         """Set minimal acceptable value."""
         try:
             self._value_min = float(value)
-        except ValueError:
+        except (TypeError, ValueError):            
             self._value_min = None
 
     @property
@@ -89,7 +82,7 @@ class ValueFilter(object):
         """Set maximal acceptable value."""
         try:
             self._value_max = float(value)
-        except ValueError:
+        except (TypeError, ValueError):
             self._value_max = None
 
     def filter(self, value):
@@ -124,84 +117,24 @@ class ValueFilter(object):
 # Abstract class as a base for all statistical filters
 ###############################################################################
 class StatFilter(abc.ABC):
-    """Common statistical smoothing management.
+    """Common statistical smoothing management."""
 
-    Arguments
-    ---------
-    value_max : float
-        Maximal measuring value acceptable for filtering.
-    value_min : float
-        Minimal measuring value acceptable for filtering.
-    buffer_len : int
-        Positive integer number of values held in the data buffer used for
-        statistical smoothing. It should be an odd number, otherwise it is
-        extended to the nearest odd one.
-
-    Notes
-    -----
-    This class should not be instanciated. It servers as a abstract class and
-    a parent class for operational classes with corresponding statictical and
-    smoothing methods.
-
-    """
-
-    def __init__(self, buffer_len=BUFFER_LEN_DEF):
+    def __init__(self):
         """Create the class instance - constructor."""
         self._filter = None
         self._buffer = []
-        self.buffer_len = buffer_len
-        #
-        self.reset()
         # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug(
-            'Instance of %s created: %s',
-            self.__class__.__name__, str(self)
-        )
 
     @abc.abstractmethod
     def __str__(self):
         """Represent instance object as a string."""
-        pass
+        ...
 
+    @abc.abstractmethod
     def __repr__(self):
         """Represent instance object officially."""
-        msg = \
-            f'{self.__class__.__name__}(' \
-            f'buffer_len={repr(self.buffer_len)})'
-        return msg
-
-    @property
-    def buffer_len(self):
-        """Real length of the data buffer.
-
-        Notes
-        -----
-        - Usually the returned value is the same as length put to the
-          constructor.
-        - If class has adjusted or limited the input buffer length, the
-          method returns the actual length.
-        - The method is useful, if the length has been put to the constructor
-          as a numeric literal and there is no variable of the length to use
-          it in other statements.
-
-        """
-        return len(self._buffer)
-
-    @buffer_len.setter
-    def buffer_len(self, value):
-        """Adjust data buffer length for statistical smoothing."""
-        try:
-            # Make odd number and minimum 1
-            buffer_len = abs(int(value or BUFFER_LEN_DEF)) | 1
-        except TypeError:
-            buffer_len = BUFFER_LEN_DEF
-            return
-        if self.buffer_len < buffer_len:
-            self._buffer.extend([None] * (buffer_len - self.buffer_len))
-        elif self.buffer_len > buffer_len:
-            for i in range(self.buffer_len - buffer_len):
-                self._buffer.pop(i)
+        ...
 
     @property
     def filter(self):
@@ -229,9 +162,10 @@ class StatFilter(abc.ABC):
         """
         return len([i for i in self._buffer if i is not None])
 
+    @abc.abstractmethod
     def reset(self):
         """Reset instance object to initial state."""
-        self._buffer = [None] * self.buffer_len
+        ...
 
     @abc.abstractmethod
     def result(self, value):
@@ -278,8 +212,13 @@ class Exponential(StatFilter):
     FACTOR_MAX = 1.0
 
     def __init__(self, factor=FACTOR_DEF):
+        super().__init__()
         self.factor = factor
-        super().__init__(1)
+        self._buffer.append(None)
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+            )
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -310,16 +249,9 @@ class Exponential(StatFilter):
         self._factor = max(min(abs(self._factor),
             self.FACTOR_MAX), self.FACTOR_MIN)
 
-    @property
-    def buffer_len(self):
-        """Length of the data buffer."""
-        return super().buffer_len
-    
-    @buffer_len.setter
-    def buffer_len(self, value):
-        """Adjust data buffer length to 1 always."""
-        if self.buffer_len == 0:
-            self._buffer.extend([None])
+    def reset(self):
+        """Reset instance object to initial state."""
+        self._buffer[0] = None
 
     def result(self, value=None):
         """Calculate statistically smoothed value.
@@ -353,7 +285,7 @@ class Exponential(StatFilter):
             self._logger.debug(
                 'Value %s, Statistic %s',
                 value, self._buffer[0]
-            )
+                )
         return self._buffer[0]
 
 
@@ -375,6 +307,9 @@ class Running(StatFilter):
 
     """
 
+    BUFFER_LEN_DEF = 5
+    """int: Default buffer length."""
+
     STAT_TYPE = ['AVG', 'MED', 'MAX', 'MIN']
     """list of str: Available statistical types."""
 
@@ -382,8 +317,13 @@ class Running(StatFilter):
                  buffer_len=BUFFER_LEN_DEF,
                  def_stat=STAT_TYPE[0],
                  ):
+        super().__init__()
+        self.buffer_len = buffer_len
         self.stat_type = def_stat
-        super().__init__(buffer_len)
+        self._logger.debug(
+            'Instance of %s created: %s',
+            self.__class__.__name__, str(self)
+            )
 
     def __str__(self):
         """Represent instance object as a string."""
@@ -392,6 +332,46 @@ class Running(StatFilter):
             f'{self.stat_type}-' \
             f'{self.buffer_len})'
         return msg
+
+    def __repr__(self):
+        """Represent instance object officially."""
+        msg = \
+            f'{self.__class__.__name__}(' \
+            f'buffer_len={repr(self.buffer_len)}, ' \
+            f'def_stat={repr(self.stat_type)})'
+        return msg
+
+    @property
+    def buffer_len(self):
+        """Real length of the data buffer.
+
+        Notes
+        -----
+        - Usually the returned value is the same as length put to the
+          constructor.
+        - If class has adjusted or limited the input buffer length, the
+          method returns the actual length.
+        - The method is useful, if the length has been put to the constructor
+          as a numeric literal and there is no variable of the length to use
+          it in other statements.
+
+        """
+        return len(self._buffer)
+
+    @buffer_len.setter
+    def buffer_len(self, value):
+        """Adjust data buffer length for statistical smoothing."""
+        try:
+            # Make odd number and minimum 1
+            buffer_len = abs(int(value or self.BUFFER_LEN_DEF)) | 1
+        except TypeError:
+            buffer_len = self.BUFFER_LEN_DEF
+            return
+        if self.buffer_len < buffer_len:
+            self._buffer.extend([None] * (buffer_len - self.buffer_len))
+        elif self.buffer_len > buffer_len:
+            for i in range(self.buffer_len - buffer_len):
+                self._buffer.pop(i)
 
     @property
     def stat_type(self):
@@ -444,6 +424,10 @@ class Running(StatFilter):
             # Storing just real value
             self._buffer[0] = value
         return value
+
+    def reset(self):
+        """Reset instance object to initial state."""
+        self._buffer = [None] * self.buffer_len
 
     def _REGISTER(func):
         """Decorate statistical function by registering its value."""
