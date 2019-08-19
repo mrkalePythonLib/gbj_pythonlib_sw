@@ -193,7 +193,6 @@ class Trigger(object):
             self.__threshold = abs(float(value))
         except ValueError:
             pass
-        
 
     def _EXECUTE(func):
         """Decorate evaluation function of the trigger."""
